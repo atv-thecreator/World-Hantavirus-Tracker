@@ -1,0 +1,370 @@
+<!-- ════════════════════════════════════════════════════════
+     WHAT IS HANTAVIRUS — INFO WIDGET
+     Paste this entire block into hantavirus_premium.html
+     inside <aside id="right-panel"> as a new .rp-section
+     OR anywhere on the page before </body>
+════════════════════════════════════════════════════════ -->
+
+<div class="rp-section" id="hv-widget-section">
+
+  <!-- Trigger button -->
+  <button id="hv-trigger" onclick="toggleHVPanel()" style="
+    display:flex;align-items:center;gap:8px;width:100%;
+    background:rgba(232,80,80,0.08);
+    border:1px solid rgba(232,80,80,0.3);
+    border-radius:6px;padding:10px 14px;cursor:pointer;
+    font-size:12px;font-weight:500;color:#e0f0fb;
+    font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;
+    transition:all 0.15s;text-align:left;
+  ">
+    <span style="font-size:16px">🦠</span>
+    WHAT IS HANTAVIRUS?
+    <span id="hv-caret" style="margin-left:auto;font-size:11px;transition:transform 0.2s;display:inline-block">▼</span>
+  </button>
+
+  <!-- Expandable panel -->
+  <div id="hv-panel" style="display:none;margin-top:12px">
+
+    <p style="font-size:11px;color:#6a8fa8;line-height:1.5;margin-bottom:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.04em">
+      Tap any tile for full detail. Current data: Andes virus · MV Hondius · May 2026.
+    </p>
+
+    <!-- Tile grid -->
+    <div id="hv-tile-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:7px"></div>
+
+    <!-- Close -->
+    <button onclick="toggleHVPanel()" style="
+      margin-top:12px;width:100%;background:none;
+      border:1px solid rgba(60,120,180,0.25);border-radius:5px;
+      padding:7px;font-size:10px;color:#6a8fa8;cursor:pointer;
+      font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;
+      transition:all 0.15s;
+    ">▲ CLOSE</button>
+  </div>
+</div>
+
+<!-- Detail modal overlay -->
+<div id="hv-modal-bg" onclick="closeHVModal()" style="
+  display:none;position:fixed;inset:0;
+  background:rgba(3,6,13,0.85);z-index:9000;
+  align-items:center;justify-content:center;padding:20px;
+"></div>
+<div id="hv-modal" style="
+  display:none;position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:#0b1525;border:1px solid rgba(0,200,255,0.35);
+  border-radius:8px;padding:20px 22px;width:min(520px,92vw);
+  max-height:80vh;overflow-y:auto;z-index:9001;
+  font-family:'JetBrains Mono',monospace;
+">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px">
+    <div>
+      <div id="hv-modal-label" style="font-size:9px;letter-spacing:0.15em;color:#4a9eda;text-transform:uppercase;margin-bottom:4px"></div>
+      <div id="hv-modal-title" style="font-size:14px;font-weight:500;color:#e0f0fb;line-height:1.3"></div>
+    </div>
+    <button onclick="closeHVModal()" style="
+      background:none;border:1px solid rgba(60,120,180,0.25);
+      border-radius:4px;padding:4px 8px;cursor:pointer;
+      color:#6a8fa8;font-size:12px;flex-shrink:0;
+    ">✕</button>
+  </div>
+  <div id="hv-modal-badge" style="margin-bottom:12px"></div>
+  <div id="hv-modal-body" style="font-size:12px;color:#b8d4e8;line-height:1.7"></div>
+</div>
+
+<style>
+.hv-tile {
+  background: #0f1d30;
+  border: 1px solid rgba(60,120,180,0.18);
+  border-radius: 6px;
+  padding: 10px 10px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.hv-tile:hover {
+  background: #162540;
+  border-color: rgba(0,200,255,0.35);
+}
+.hv-tile-icon { font-size: 18px; margin-bottom: 5px; display: block; }
+.hv-tile-label { font-size: 8px; color: #4a6a82; letter-spacing: 0.12em; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 3px; }
+.hv-tile-answer { font-size: 10px; font-weight: 500; color: #e0f0fb; font-family: 'JetBrains Mono', monospace; line-height: 1.3; }
+.hv-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; margin-bottom: 10px; }
+.hv-badge-red    { background: rgba(232,80,80,0.15); color: #ff3b3b; border: 1px solid rgba(232,80,80,0.3); }
+.hv-badge-green  { background: rgba(0,229,160,0.12); color: #00e5a0; border: 1px solid rgba(0,229,160,0.3); }
+.hv-badge-amber  { background: rgba(255,193,7,0.12); color: #ffc107; border: 1px solid rgba(255,193,7,0.3); }
+.hv-badge-blue   { background: rgba(0,200,255,0.1);  color: #00c8ff; border: 1px solid rgba(0,200,255,0.3); }
+.hv-stat-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid rgba(60,120,180,0.1); font-size:11px; }
+.hv-stat-row:last-child { border-bottom: none; }
+.hv-stat-l { color: #6a8fa8; }
+.hv-stat-r { font-weight: 500; }
+.hv-modal-list { padding-left: 16px; margin: 6px 0; }
+.hv-modal-list li { margin-bottom: 4px; }
+#hv-modal::-webkit-scrollbar { width: 3px; }
+#hv-modal::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.3); border-radius: 2px; }
+</style>
+
+<script>
+(function(){
+
+const HV_TILES = [
+  {
+    icon: '🧬',
+    label: 'What is it?',
+    answer: 'RNA virus — Hantaviridae',
+    badge: 'blue', badgeText: 'Hantaviridae family',
+    title: 'What is hantavirus?',
+    body: `Hantavirus is a single-stranded RNA virus in the family <strong style="color:#e0f0fb">Hantaviridae</strong>. Over 50 known species exist. Two major clinical syndromes:<br><br>
+    <ul class="hv-modal-list">
+      <li><strong style="color:#ff3b3b">HPS — Hantavirus Pulmonary Syndrome</strong> (Americas). Caused by Andes, Sin Nombre, and related viruses. CFR 15–40%.</li>
+      <li><strong style="color:#ffc107">HFRS — Haemorrhagic Fever with Renal Syndrome</strong> (Europe, Asia). Hantaan, Seoul, Puumala viruses. CFR 1–15%.</li>
+    </ul>
+    The <strong style="color:#ff3b3b">Andes virus</strong> responsible for the MV Hondius outbreak is the most dangerous known strain — and the only hantavirus confirmed capable of human-to-human transmission.`
+  },
+  {
+    icon: '⚠️',
+    label: 'Transmissible?',
+    answer: 'Yes — via rodents',
+    badge: 'red', badgeText: 'Transmissible',
+    title: 'Is it transmissible?',
+    body: `Hantavirus is transmitted from infected rodents to humans via:<br><br>
+    <ul class="hv-modal-list">
+      <li>Inhaling aerosolised urine, droppings, or saliva from infected rodents</li>
+      <li>Direct contact — rodent bite or handling infected animal</li>
+      <li>Touching contaminated surfaces then touching mouth, nose, or eyes</li>
+    </ul>
+    <strong style="color:#00e5a0">NOT spread by:</strong> food, water, mosquitoes, ticks, or casual outdoor contact.<br><br>
+    High-risk activities: cleaning barns/sheds, camping in endemic areas, entering rarely-used rural buildings, farm work. The MV Hondius index case likely inhaled aerosolised virus during birdwatching near a rodent-heavy habitat in Argentina.`
+  },
+  {
+    icon: '👤',
+    label: 'Human to human?',
+    answer: 'Andes virus only',
+    badge: 'amber', badgeText: 'Rare — Andes only',
+    title: 'Can it spread human to human?',
+    body: `<strong style="color:#00e5a0">Almost all hantavirus species CANNOT spread human-to-human.</strong><br><br>
+    The critical exception is <strong style="color:#ff3b3b">Andes virus</strong> (South America) — the only hantavirus with confirmed human-to-human transmission.<br><br>
+    Spread requires very close, prolonged contact — household-level or intimate partner exposure. It is <em>not</em> airborne like influenza or COVID-19.<br><br>
+    In the MV Hondius cluster, WHO confirmed overall global risk remains low. Close contacts of confirmed cases are being monitored and isolated as a precaution. The Dutch couple (husband → wife) represents the most likely chain in this outbreak.`
+  },
+  {
+    icon: '🌡️',
+    label: 'Symptoms',
+    answer: 'Fever → lung failure',
+    badge: 'red', badgeText: 'Life-threatening',
+    title: 'What are the symptoms?',
+    body: `HPS progresses in 3 distinct phases:<br><br>
+    <strong style="color:#ffc107">Phase 1 — Prodromal (days 1–5)</strong>
+    <ul class="hv-modal-list">
+      <li>Fever 38–40°C, severe fatigue</li>
+      <li>Intense myalgia (muscle pain) — especially back, thighs</li>
+      <li>Headache, dizziness, nausea, abdominal pain</li>
+    </ul>
+    <strong style="color:#ff3b3b">Phase 2 — Cardiopulmonary (days 5–10) — CRITICAL</strong>
+    <ul class="hv-modal-list">
+      <li>Rapid-onset pulmonary oedema (fluid in lungs)</li>
+      <li>Oxygen saturation drops rapidly</li>
+      <li>Cardiac pump failure — can be fatal within hours</li>
+    </ul>
+    <strong style="color:#00e5a0">Phase 3 — Convalescence</strong>
+    <ul class="hv-modal-list">
+      <li>Survivors generally recover fully within weeks</li>
+      <li>No confirmed long-term sequelae</li>
+    </ul>
+    <strong style="color:#4a9eda">Incubation:</strong> 1–8 weeks (typically 2–4 weeks) — this long window allowed MV Hondius passengers to disperse across 23 countries before any symptoms appeared.`
+  },
+  {
+    icon: '💉',
+    label: 'Treatment',
+    answer: 'No approved antiviral',
+    badge: 'amber', badgeText: 'Supportive care only',
+    title: 'How is it treated?',
+    body: `There is <strong style="color:#ff3b3b">no approved specific antiviral treatment</strong> for hantavirus. All management is supportive ICU care:<br><br>
+    <ul class="hv-modal-list">
+      <li>ICU admission — essential as early as possible</li>
+      <li>Mechanical ventilation for respiratory failure</li>
+      <li>ECMO (extracorporeal membrane oxygenation) in severe cases</li>
+      <li>Careful fluid management — excess fluid worsens pulmonary oedema</li>
+      <li>Vasopressors for haemodynamic support</li>
+    </ul>
+    <strong style="color:#ffc107">Ribavirin</strong> has been used experimentally — shows some benefit for HFRS (Asia/Europe) but weak evidence for HPS (Americas). Not standard of care.<br><br>
+    <strong style="color:#00e5a0">Key insight:</strong> Early ICU admission is the single most important factor in survival. Patients who reach ICU care before cardiopulmonary collapse have significantly better outcomes.`
+  },
+  {
+    icon: '🛡️',
+    label: 'Vaccine?',
+    answer: 'None approved (West)',
+    badge: 'red', badgeText: 'No vaccine',
+    title: 'Is there a vaccine?',
+    body: `There is <strong style="color:#ff3b3b">no licensed hantavirus vaccine</strong> available in Western countries.<br><br>
+    <strong style="color:#ffc107">China &amp; Korea:</strong> Inactivated bivalent vaccines (Hantaan/Seoul) are used in high-risk endemic regions — not widely available internationally.<br><br>
+    <strong style="color:#4a9eda">Research pipeline:</strong>
+    <ul class="hv-modal-list">
+      <li>DNA vaccines — in pre-clinical trials</li>
+      <li>Virus-like particle (VLP) vaccines — early clinical phase</li>
+      <li>mRNA-based approaches — early development</li>
+    </ul>
+    <strong style="color:#00e5a0">Prevention</strong> relies entirely on avoiding rodent exposure:<br>
+    Seal buildings · use N95 + gloves when cleaning · wet down contaminated areas with bleach before disturbing · never dry-sweep rodent droppings · use rodent-proof food storage.`
+  },
+  {
+    icon: '💀',
+    label: 'How deadly?',
+    answer: 'CFR 15–40% (HPS)',
+    badge: 'red', badgeText: 'High fatality',
+    title: 'How deadly is hantavirus?',
+    body: `Case fatality rates by strain and syndrome:<br><br>
+    <div class="hv-stat-row"><span class="hv-stat-l">Andes virus (Americas HPS)</span><span class="hv-stat-r" style="color:#ff3b3b">15–35%</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Sin Nombre (USA HPS)</span><span class="hv-stat-r" style="color:#ff3b3b">~36%</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Hantaan (HFRS, Asia)</span><span class="hv-stat-r" style="color:#ffc107">5–15%</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Puumala (HFRS, Europe)</span><span class="hv-stat-r" style="color:#00e5a0">&lt;1%</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Seoul (HFRS, global)</span><span class="hv-stat-r" style="color:#ffc107">1–5%</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">MV Hondius cluster (so far)</span><span class="hv-stat-r" style="color:#ff3b3b">~50% (3/6 confirmed)</span></div>
+    <br>Early ICU admission + ECMO can meaningfully reduce mortality. The high CFR in this cluster may partly reflect delayed diagnosis.`
+  },
+  {
+    icon: '🗺️',
+    label: 'Where does it occur?',
+    answer: 'All continents except Australia',
+    badge: 'blue', badgeText: 'Near-global distribution',
+    title: 'Where does hantavirus occur?',
+    body: `Different strains are maintained by specific rodent reservoir species:<br><br>
+    <div class="hv-stat-row"><span class="hv-stat-l">Americas (HPS)</span><span class="hv-stat-r" style="color:#ff3b3b">Argentina, Chile, Brazil, USA, Canada, Bolivia</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Europe (HFRS)</span><span class="hv-stat-r" style="color:#ffc107">Scandinavia, Russia, Balkans</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Asia (HFRS)</span><span class="hv-stat-r" style="color:#ffc107">China, Korea, Russia, Far East</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Africa</span><span class="hv-stat-r" style="color:#4a9eda">Sangassou — significance unclear</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Global (Seoul via rats)</span><span class="hv-stat-r" style="color:#4a9eda">All continents incl. Australia</span></div>
+    <br>Climate change and deforestation are expanding rodent ranges — increasing spillover risk in previously unaffected areas including parts of Europe and North America.`
+  },
+  {
+    icon: '🔬',
+    label: 'Diagnosis',
+    answer: 'PCR + serology',
+    badge: 'blue', badgeText: 'Lab confirmation required',
+    title: 'How is hantavirus diagnosed?',
+    body: `Diagnosis requires specialised laboratory testing — not detectable on routine blood panels:<br><br>
+    <ul class="hv-modal-list">
+      <li><strong style="color:#4a9eda">RT-PCR:</strong> Detects viral RNA in blood. Most sensitive in first 7–10 days of illness. Used to confirm MV Hondius cases.</li>
+      <li><strong style="color:#4a9eda">Serology (IgM/IgG ELISA):</strong> IgM detectable by symptom onset. Gold standard for most clinical settings.</li>
+      <li><strong style="color:#4a9eda">Immunohistochemistry:</strong> Used post-mortem on lung tissue to confirm HPS in fatal cases.</li>
+      <li><strong style="color:#4a9eda">Neutralisation assay:</strong> Used for strain typing — confirms Andes vs. Sin Nombre etc.</li>
+    </ul>
+    In the MV Hondius cluster, PCR was performed at <strong style="color:#e0f0fb">NICD South Africa</strong>, <strong style="color:#e0f0fb">Robert Koch Institut</strong>, and <strong style="color:#e0f0fb">ANLIS Malbrán (Argentina)</strong>. Turnaround 24–48 hours at reference labs.`
+  },
+  {
+    icon: '🚢',
+    label: 'MV Hondius cluster',
+    answer: '3 deaths · 23+ countries',
+    badge: 'red', badgeText: 'Active outbreak',
+    title: 'The MV Hondius outbreak — 2026',
+    body: `This outbreak is exceptional for several reasons:<br><br>
+    <div class="hv-stat-row"><span class="hv-stat-l">Index case</span><span class="hv-stat-r" style="color:#e0f0fb">Dutch male, 70 — birdwatcher</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Exposure source</span><span class="hv-stat-r" style="color:#ffc107">Argentina/Chile/Uruguay rodents</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Confirmed deaths</span><span class="hv-stat-r" style="color:#ff3b3b">3</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Confirmed cases</span><span class="hv-stat-r" style="color:#4a9eda">6</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Countries involved</span><span class="hv-stat-r" style="color:#ffc107">23+</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Ship current position</span><span class="hv-stat-r" style="color:#00ffcc">→ Tenerife ETA May 10–11</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">WHO global risk</span><span class="hv-stat-r" style="color:#00e5a0">LOW</span></div>
+    <br>This is the <strong style="color:#e0f0fb">first documented hantavirus outbreak linked to maritime travel and international tourist dispersion</strong>. Human-to-human spread within the ship is suspected but not fully confirmed.`
+  },
+  {
+    icon: '📊',
+    label: 'Global burden',
+    answer: '~200,000 cases/yr',
+    badge: 'blue', badgeText: 'Significantly underreported',
+    title: 'What is the global disease burden?',
+    body: `Hantavirus is significantly underreported due to limited diagnostics in endemic regions:<br><br>
+    <div class="hv-stat-row"><span class="hv-stat-l">Estimated global cases/yr</span><span class="hv-stat-r" style="color:#4a9eda">~200,000</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">HFRS (Europe/Asia)</span><span class="hv-stat-r" style="color:#4a9eda">~150,000/yr</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">HPS total (Americas, since 1993)</span><span class="hv-stat-r" style="color:#ffc107">~3,000</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">PAHO reported 2025</span><span class="hv-stat-r" style="color:#ff3b3b">229 cases · 59 deaths</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Argentina 2025</span><span class="hv-stat-r" style="color:#ff3b3b">101 cases · 21 deaths</span></div>
+    <div class="hv-stat-row"><span class="hv-stat-l">Brazil 2025</span><span class="hv-stat-r" style="color:#ff3b3b">20 cases · 11 deaths</span></div>
+    <br>Climate change and land-use change are <strong style="color:#ffc107">expanding rodent ranges</strong> and increasing spillover risk in previously low-risk areas, including parts of Europe not historically endemic.`
+  },
+  {
+    icon: '🏥',
+    label: 'Prevention',
+    answer: 'Avoid rodents + droppings',
+    badge: 'green', badgeText: 'Preventable',
+    title: 'How to prevent hantavirus',
+    body: `Since there is no vaccine, all prevention is behavioural:<br><br>
+    <strong style="color:#ffc107">At home / buildings:</strong>
+    <ul class="hv-modal-list">
+      <li>Seal all entry points — mice fit through 6mm gaps</li>
+      <li>Store food in rodent-proof metal or glass containers</li>
+      <li>Trap and remove rodents promptly</li>
+    </ul>
+    <strong style="color:#ffc107">Cleaning contaminated areas:</strong>
+    <ul class="hv-modal-list">
+      <li>Wear N95 respirator + latex gloves — mandatory</li>
+      <li>Wet down droppings with 10% bleach solution before cleaning</li>
+      <li><strong style="color:#ff3b3b">NEVER dry-sweep</strong> — this aerosolises the virus</li>
+      <li>Double-bag all contaminated material</li>
+    </ul>
+    <strong style="color:#ffc107">Travellers to endemic areas (Argentina, Chile, SW USA):</strong>
+    <ul class="hv-modal-list">
+      <li>Avoid rural barns, woodpiles, old buildings</li>
+      <li>Use sealed tents — do not sleep on bare ground</li>
+      <li>Keep brush away from accommodation</li>
+    </ul>`
+  },
+];
+
+function buildHVTiles(){
+  const grid = document.getElementById('hv-tile-grid');
+  if(grid.children.length > 0) return;
+  HV_TILES.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = 'hv-tile';
+    div.setAttribute('onclick', 'openHVModal(' + i + ')');
+    div.innerHTML = `
+      <span class="hv-tile-icon">${t.icon}</span>
+      <div class="hv-tile-label">${t.label}</div>
+      <div class="hv-tile-answer">${t.answer}</div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+window.toggleHVPanel = function(){
+  const panel = document.getElementById('hv-panel');
+  const caret = document.getElementById('hv-caret');
+  const btn   = document.getElementById('hv-trigger');
+  const open  = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  caret.style.transform = open ? 'rotate(180deg)' : '';
+  btn.style.background = open ? 'rgba(0,200,255,0.08)' : 'rgba(232,80,80,0.08)';
+  btn.style.borderColor = open ? 'rgba(0,200,255,0.35)' : 'rgba(232,80,80,0.3)';
+  if(open) buildHVTiles();
+};
+
+window.openHVModal = function(i){
+  const t = HV_TILES[i];
+  const badgeStyles = {
+    red:   'background:rgba(232,80,80,0.15);color:#ff3b3b;border:1px solid rgba(232,80,80,0.3)',
+    green: 'background:rgba(0,229,160,0.12);color:#00e5a0;border:1px solid rgba(0,229,160,0.3)',
+    amber: 'background:rgba(255,193,7,0.12);color:#ffc107;border:1px solid rgba(255,193,7,0.3)',
+    blue:  'background:rgba(0,200,255,0.10);color:#00c8ff;border:1px solid rgba(0,200,255,0.3)',
+  };
+  document.getElementById('hv-modal-label').textContent = t.label.toUpperCase();
+  document.getElementById('hv-modal-title').textContent = t.title;
+  document.getElementById('hv-modal-badge').innerHTML =
+    `<span style="display:inline-block;font-size:10px;padding:3px 10px;border-radius:3px;font-family:'JetBrains Mono',monospace;${badgeStyles[t.badge]}">${t.badgeText}</span>`;
+  document.getElementById('hv-modal-body').innerHTML = t.body;
+  document.getElementById('hv-modal-bg').style.display = 'flex';
+  document.getElementById('hv-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeHVModal = function(){
+  document.getElementById('hv-modal-bg').style.display = 'none';
+  document.getElementById('hv-modal').style.display = 'none';
+  document.body.style.overflow = '';
+};
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') window.closeHVModal();
+});
+
+})();
+</script>
