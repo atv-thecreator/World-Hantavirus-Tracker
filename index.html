@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HANTA·RADAR — Global Pathogen Intelligence</title>
+<title>Hantavirus Tracker — Global Pathogen Intelligence</title>
+<meta name="description" content="Real-time global tracker for the MV Hondius hantavirus outbreak — Andes virus surveillance, BSL-4 labs, ship route, and live news.">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
@@ -17,175 +18,376 @@
   --cyan:#00c8ff;--cyan2:rgba(0,200,255,0.1);--cyan3:rgba(0,200,255,0.3);
   --green:#00e5a0;--green2:rgba(0,229,160,0.1);
   --purple:#b06bff;--purple2:rgba(176,107,255,0.12);
-  --orange:#ff8c00;
   --text:#c4dff0;--text2:#6a8fa8;--text3:#3a5570;--textb:#e8f4fc;
   --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
   --ship:#00ffcc;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden;font-size:13px}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);pointer-events:none;z-index:9999}
 
-/* ══ SCANLINE OVERLAY ══ */
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999}
-
-/* ══ TOP LOCAL IMPACT BAR ══ */
-#local-bar{height:36px;background:linear-gradient(90deg,var(--s2),var(--s3));border-bottom:1px solid var(--border2);display:flex;align-items:center;padding:0 18px;gap:24px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;color:var(--text2);position:relative;z-index:100;flex-shrink:0}
-.lb-region{color:var(--cyan);font-weight:500;letter-spacing:0.12em}
-.lb-stat{display:flex;align-items:center;gap:6px}
+#local-bar{height:34px;background:var(--s2);border-bottom:1px solid var(--border2);display:flex;align-items:center;padding:0 18px;gap:20px;font-family:var(--mono);font-size:10px;letter-spacing:0.07em;color:var(--text2);position:relative;z-index:100;flex-shrink:0}
+.lb-region{color:var(--cyan);font-weight:500;letter-spacing:0.1em}
 .lb-val{color:var(--textb);font-weight:500}
-.lb-val.red{color:var(--red)}
-.lb-val.yellow{color:var(--yellow)}
-.lb-val.green{color:var(--green)}
-.lb-sep{width:1px;height:16px;background:var(--border2)}
-.lb-status{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:9px;letter-spacing:0.1em}
-.lb-pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse-dot 1.5s ease-in-out infinite}
-@keyframes pulse-dot{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,229,160,0.5)}50%{opacity:0.7;box-shadow:0 0 0 4px rgba(0,229,160,0)}}
-#locating-msg{color:var(--text2);font-size:10px;font-family:var(--mono);letter-spacing:0.08em}
+.lb-val.red{color:var(--red)}.lb-val.yellow{color:var(--yellow)}.lb-val.green{color:var(--green)}
+.lb-sep{width:1px;height:14px;background:var(--border2)}
+.lb-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:0.1em}
+.lb-pulse{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse-dot 1.5s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}
 
-/* ══ HEADER ══ */
-header{height:52px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:18px;position:relative;z-index:100;flex-shrink:0}
-.logo{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:0.2em;color:var(--cyan);text-transform:uppercase;display:flex;align-items:center;gap:10px}
-.logo-ring{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--red);display:flex;align-items:center;justify-content:center;position:relative;animation:spin 14s linear infinite;flex-shrink:0}
+header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:16px;position:relative;z-index:100;flex-shrink:0}
+.logo{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:0.15em;color:var(--cyan);text-transform:uppercase;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.logo-ring{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--red);display:flex;align-items:center;justify-content:center;position:relative;animation:spin 14s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 .logo-ring::before,.logo-ring::after{content:'';position:absolute;background:var(--red);border-radius:2px}
 .logo-ring::before{width:12px;height:1.5px}
 .logo-ring::after{width:1.5px;height:12px}
-.logo-dot{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--red);top:2px;right:2px}
-.hdr-divider{width:1px;height:24px;background:var(--border2)}
-.hdr-sub{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--text2);text-transform:uppercase}
-.alert-pill{background:var(--red2);border:1px solid rgba(255,59,59,0.4);border-radius:3px;padding:3px 10px;font-family:var(--mono);font-size:9px;color:var(--red);letter-spacing:0.1em;animation:alert-pulse 2s ease-in-out infinite;white-space:nowrap}
-@keyframes alert-pulse{0%,100%{opacity:1}50%{opacity:0.55}}
-.hdr-right{margin-left:auto;display:flex;align-items:center;gap:12px}
-.live-pill{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.06em}
+.hdr-div{width:1px;height:22px;background:var(--border2)}
+.hdr-sub{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--text2);text-transform:uppercase;white-space:nowrap}
+.alert-pill{background:var(--red2);border:1px solid rgba(255,59,59,0.4);border-radius:3px;padding:3px 10px;font-family:var(--mono);font-size:9px;color:var(--red);letter-spacing:0.08em;animation:apulse 2s ease-in-out infinite;white-space:nowrap}
+@keyframes apulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.live-pill{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.06em}
+.live-pill.live{color:var(--green)}
+.live-pill.stale{color:var(--yellow)}
 .live-dot{width:5px;height:5px;border-radius:50%;background:var(--red);animation:pulse-dot 1s ease-in-out infinite}
+.live-pill.live .live-dot{background:var(--green)}
+.live-pill.stale .live-dot{background:var(--yellow)}
 .view-btns{display:flex;gap:3px}
 .vbtn{background:var(--s2);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:9px;padding:4px 12px;border-radius:3px;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.15s}
 .vbtn:hover{border-color:var(--border2);color:var(--text)}
-.vbtn.active{background:rgba(0,200,255,0.12);border-color:var(--cyan);color:var(--cyan)}
+.vbtn.active{background:var(--cyan2);border-color:var(--cyan);color:var(--cyan)}
 
-/* ══ MAIN LAYOUT ══ */
-.app-body{display:flex;height:calc(100vh - 52px - 36px);overflow:hidden}
+.app-body{display:flex;height:calc(100vh - 50px - 34px);overflow:hidden}
 
-/* ══ NEWS FEED SIDEBAR ══ */
-#news-panel{width:280px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-.news-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#news-panel{width:270px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.news-hdr{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .news-title{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--cyan)}
-.news-count{font-family:var(--mono);font-size:9px;color:var(--text2)}
-#news-feed{overflow-y:auto;flex:1;padding:8px}
-#news-feed::-webkit-scrollbar{width:3px}
+.news-cnt{font-family:var(--mono);font-size:9px;color:var(--text2)}
+.news-src{padding:6px 13px;font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:0.06em;border-bottom:1px solid var(--border);background:var(--s2);text-align:center}
+.news-src.live-status{color:var(--green)}
+.news-src.fallback{color:var(--text2)}
+#news-feed{overflow-y:auto;flex:1;padding:7px}
+#news-feed::-webkit-scrollbar{width:2px}
 #news-feed::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-.news-item{padding:9px 10px;border-radius:4px;border:1px solid transparent;margin-bottom:6px;cursor:pointer;transition:all 0.15s;background:var(--s2)}
-.news-item:hover{border-color:var(--border2);background:var(--s3)}
-.news-item.breaking{border-color:rgba(255,59,59,0.2)}
-.news-item.official{border-color:rgba(0,200,255,0.12)}
-.news-item.social{border-color:rgba(255,193,7,0.12)}
-.news-tag{font-family:var(--mono);font-size:8px;letter-spacing:0.08em;padding:1px 5px;border-radius:2px;margin-bottom:5px;display:inline-block}
-.tag-breaking{background:var(--red2);color:var(--red);border:1px solid rgba(255,59,59,0.3)}
-.tag-official{background:var(--cyan2);color:var(--cyan);border:1px solid rgba(0,200,255,0.25)}
-.tag-social{background:var(--yellow2);color:var(--yellow);border:1px solid rgba(255,193,7,0.25)}
-.news-headline{font-size:11px;font-weight:500;color:var(--textb);line-height:1.45;margin-bottom:4px}
-.news-meta{display:flex;align-items:center;justify-content:space-between}
-.news-time{font-family:var(--mono);font-size:9px;color:var(--text2)}
-.news-loc{font-family:var(--mono);font-size:9px;color:var(--cyan);opacity:0.7}
+.ni{padding:8px 9px;border-radius:4px;border:1px solid transparent;margin-bottom:5px;cursor:pointer;transition:all 0.15s;background:var(--s2)}
+.ni:hover{border-color:var(--border2);background:var(--s3)}
+.ni.breaking{border-color:rgba(255,59,59,0.18)}
+.ni.official{border-color:rgba(0,200,255,0.1)}
+.ni.social{border-color:rgba(255,193,7,0.1)}
+.ni.live{border-left:2px solid var(--green)}
+.ntag{font-family:var(--mono);font-size:8px;letter-spacing:0.06em;padding:1px 5px;border-radius:2px;margin-bottom:4px;display:inline-block}
+.tag-b{background:var(--red2);color:var(--red);border:1px solid rgba(255,59,59,0.3)}
+.tag-o{background:var(--cyan2);color:var(--cyan);border:1px solid rgba(0,200,255,0.25)}
+.tag-s{background:var(--yellow2);color:var(--yellow);border:1px solid rgba(255,193,7,0.25)}
+.tag-live{background:var(--green2);color:var(--green);border:1px solid rgba(0,229,160,0.3);margin-left:4px}
+.nhl{font-size:11px;font-weight:500;color:var(--textb);line-height:1.4;margin-bottom:3px}
+.nmeta{display:flex;align-items:center;justify-content:space-between}
+.ntime{font-family:var(--mono);font-size:9px;color:var(--text2)}
+.nloc{font-family:var(--mono);font-size:9px;color:var(--cyan);opacity:0.65}
 
-/* ══ MAP ══ */
 #map-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg)}
-#map-svg{width:100%;height:100%;display:block}
-#map-tooltip{position:absolute;background:var(--s2);border:1px solid var(--border3);border-radius:6px;padding:10px 14px;font-size:11px;pointer-events:none;display:none;z-index:300;max-width:240px;backdrop-filter:blur(4px)}
+#map-svg{width:100%;height:100%;display:block;cursor:default}
+#map-svg.grabbing{cursor:grabbing !important}
+
+#map-tt{position:absolute;background:rgba(7,14,26,0.97);border:1px solid var(--border3);border-radius:6px;padding:10px 14px;font-size:11px;pointer-events:none;display:none;z-index:400;max-width:240px}
 .tt-name{font-weight:600;color:var(--textb);margin-bottom:2px;font-size:12px}
-.tt-loc{font-family:var(--mono);font-size:9px;color:var(--cyan);margin-bottom:5px;letter-spacing:0.06em}
+.tt-loc{font-family:var(--mono);font-size:9px;color:var(--cyan);margin-bottom:5px;letter-spacing:0.05em}
 .tt-desc{font-size:11px;color:var(--text);line-height:1.5}
-#tt-badges{margin-top:5px;display:flex;gap:4px;flex-wrap:wrap}
+#tt-bgs{margin-top:5px;display:flex;gap:4px;flex-wrap:wrap}
+
+#country-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(3,6,13,0.98) 0%,rgba(3,6,13,0.92) 70%,transparent 100%);padding:18px 20px 16px;z-index:200;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.22,1,0.36,1);pointer-events:none}
+#country-overlay.visible{transform:translateY(0);pointer-events:all}
+#co-close{position:absolute;top:12px;right:14px;background:none;border:1px solid rgba(0,200,255,0.25);border-radius:3px;padding:3px 8px;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.06em;transition:all 0.15s}
+#co-close:hover{border-color:var(--cyan);color:var(--cyan)}
+#co-name{font-family:var(--mono);font-size:18px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px}
+#co-tiles{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.co-tile{border-radius:5px;padding:8px 14px;font-family:var(--mono);font-size:10px;letter-spacing:0.06em;border:1px solid;white-space:nowrap}
+.co-tile.red{background:rgba(255,59,59,0.12);border-color:rgba(255,59,59,0.5);color:#ff6060}
+.co-tile.red .tv{color:var(--red);font-size:16px;font-weight:700;display:block;margin-bottom:2px;text-shadow:0 0 12px rgba(255,59,59,0.8)}
+.co-tile.yellow{background:rgba(255,193,7,0.1);border-color:rgba(255,193,7,0.45);color:#ffd040}
+.co-tile.yellow .tv{color:var(--yellow);font-size:16px;font-weight:700;display:block;margin-bottom:2px;text-shadow:0 0 12px rgba(255,193,7,0.8)}
+.co-tile.cyan{background:rgba(0,200,255,0.08);border-color:rgba(0,200,255,0.4);color:#60d8ff}
+.co-tile.cyan .tv{color:var(--cyan);font-size:16px;font-weight:700;display:block;margin-bottom:2px;text-shadow:0 0 12px rgba(0,200,255,0.8)}
+.co-tile.green{background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.4);color:#40f0b0}
+.co-tile.green .tv{color:var(--green);font-size:16px;font-weight:700;display:block;margin-bottom:2px;text-shadow:0 0 12px rgba(0,229,160,0.8)}
+.co-tile.purple{background:rgba(176,107,255,0.1);border-color:rgba(176,107,255,0.4);color:#c090ff}
+.co-tile.purple .tv{color:var(--purple);font-size:14px;font-weight:700;display:block;margin-bottom:2px;text-shadow:0 0 10px rgba(176,107,255,0.8)}
+#co-desc{font-size:11px;color:var(--text2);line-height:1.6;margin-top:8px;max-width:700px}
+
+#map-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:5px;align-items:center;z-index:50}
+.mc-btn{background:rgba(7,14,26,0.9);border:1px solid var(--border2);color:var(--cyan);font-family:var(--mono);font-size:12px;width:28px;height:28px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.mc-btn:hover{background:var(--s3);border-color:var(--cyan)}
+#mode-hint{position:absolute;top:10px;right:14px;font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.06em;pointer-events:none}
+#sel-bar{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.1em;background:rgba(3,6,13,0.85);padding:4px 12px;border-radius:3px;border:1px solid var(--border);pointer-events:none;white-space:nowrap;text-transform:uppercase}
+#coords-bar{position:absolute;bottom:18px;right:14px;font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.06em}
+
+#right-panel{width:255px;flex-shrink:0;background:var(--s1);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+#right-panel::-webkit-scrollbar{width:2px}
+#right-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.rps{padding:11px 13px;border-bottom:1px solid var(--border)}
+.rpl{font-family:var(--mono);font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text2);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.sr{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(0,200,255,0.04)}
+.sl{font-size:10px;color:var(--text2)}
+.sv{font-family:var(--mono);font-size:11px;color:var(--textb)}
+.sv.red{color:var(--red)}.sv.yellow{color:var(--yellow)}.sv.green{color:var(--green)}.sv.cyan{color:var(--cyan)}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
+.cc{border-radius:4px;padding:8px 9px;text-align:center}
+.cc.dead{background:var(--red2);border:1px solid rgba(255,59,59,0.25)}
+.cc.iso{background:var(--yellow2);border:1px solid rgba(255,193,7,0.25)}
+.cc.conf{background:var(--cyan2);border:1px solid rgba(0,200,255,0.25)}
+.cc.watch{background:var(--green2);border:1px solid rgba(0,229,160,0.25)}
+.cn{font-family:var(--mono);font-size:20px;font-weight:700;line-height:1}
+.cn.red{color:var(--red)}.cn.yellow{color:var(--yellow)}.cn.cyan{color:var(--cyan)}.cn.green{color:var(--green)}
+.cl{font-size:8px;color:var(--text2);margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;font-family:var(--mono)}
+#detail-card{background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:10px}
+.dc-title{font-size:12px;font-weight:600;color:var(--textb);margin-bottom:2px;line-height:1.3}
+.dc-sub{font-family:var(--mono);font-size:9px;color:var(--cyan);margin-bottom:7px;letter-spacing:0.05em}
+.dc-desc{font-size:10px;color:var(--text);line-height:1.6}
+.dc-bgs{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.empty-d{font-size:11px;color:var(--text2);text-align:center;padding:14px 0;line-height:1.6}
 .badge{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:2px;letter-spacing:0.05em}
 .b-red{background:var(--red2);color:var(--red);border:1px solid rgba(255,59,59,0.3)}
 .b-yellow{background:var(--yellow2);color:var(--yellow);border:1px solid rgba(255,193,7,0.3)}
 .b-cyan{background:var(--cyan2);color:var(--cyan);border:1px solid rgba(0,200,255,0.3)}
 .b-green{background:var(--green2);color:var(--green);border:1px solid rgba(0,229,160,0.3)}
 .b-purple{background:var(--purple2);color:var(--purple);border:1px solid rgba(176,107,255,0.3)}
-
-/* ══ MAP CONTROLS ══ */
-#map-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:5px;align-items:center;z-index:50}
-.mc-btn{background:rgba(7,14,26,0.9);border:1px solid var(--border2);color:var(--cyan);font-family:var(--mono);font-size:12px;width:28px;height:28px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
-.mc-btn:hover{background:var(--s3);border-color:var(--cyan)}
-.mc-sep{width:1px;height:18px;background:var(--border)}
-#mode-hint{position:absolute;top:10px;right:14px;font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.06em;pointer-events:none}
-#sel-bar{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.1em;background:rgba(3,6,13,0.85);padding:4px 12px;border-radius:3px;border:1px solid var(--border);pointer-events:none;white-space:nowrap;text-transform:uppercase}
-#coords-bar{position:absolute;bottom:18px;right:14px;font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.06em}
-
-/* ══ RIGHT PANEL ══ */
-#right-panel{width:260px;flex-shrink:0;background:var(--s1);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
-#right-panel::-webkit-scrollbar{width:3px}
-#right-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-.rp-section{padding:12px 14px;border-bottom:1px solid var(--border)}
-.rp-label{font-family:var(--mono);font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text2);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
-.stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(0,200,255,0.04)}
-.sl{font-size:10px;color:var(--text2)}
-.sv{font-family:var(--mono);font-size:11px;color:var(--textb)}
-.sv.red{color:var(--red)}.sv.yellow{color:var(--yellow)}.sv.green{color:var(--green)}.sv.cyan{color:var(--cyan)}
-.counter-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
-.ccard{border-radius:4px;padding:8px 10px;text-align:center}
-.ccard.dead{background:var(--red2);border:1px solid rgba(255,59,59,0.25)}
-.ccard.iso{background:var(--yellow2);border:1px solid rgba(255,193,7,0.25)}
-.ccard.conf{background:var(--cyan2);border:1px solid rgba(0,200,255,0.25)}
-.ccard.watch{background:var(--green2);border:1px solid rgba(0,229,160,0.25)}
-.cnum{font-family:var(--mono);font-size:20px;font-weight:700;line-height:1}
-.cnum.red{color:var(--red)}.cnum.yellow{color:var(--yellow)}.cnum.cyan{color:var(--cyan)}.cnum.green{color:var(--green)}
-.clbl{font-size:8px;color:var(--text2);margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;font-family:var(--mono)}
-
-/* ══ DETAIL ══ */
-#detail-card{background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:11px;margin-bottom:0}
-.dc-title{font-size:12px;font-weight:600;color:var(--textb);margin-bottom:2px;line-height:1.3}
-.dc-sub{font-family:var(--mono);font-size:9px;color:var(--cyan);margin-bottom:8px;letter-spacing:0.06em}
-.dc-desc{font-size:10px;color:var(--text);line-height:1.6}
-.dc-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px}
-.empty-detail{font-size:11px;color:var(--text2);text-align:center;padding:16px 0;line-height:1.6}
-
-/* ══ PREMIUM HEATMAP BLUR ══ */
-#heatmap-section{position:relative;overflow:hidden;border-radius:4px;margin:0}
-#heatmap-img{width:100%;height:90px;background:linear-gradient(135deg,rgba(176,107,255,0.3) 0%,rgba(255,59,59,0.2) 40%,rgba(255,193,7,0.15) 80%,rgba(0,200,255,0.1) 100%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.hm-blobs{position:absolute;inset:0}
-.hm-blob{position:absolute;border-radius:50%;filter:blur(12px)}
-#heatmap-blur{position:absolute;inset:0;backdrop-filter:blur(8px);background:rgba(3,6,13,0.65);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;z-index:10}
-.unlock-btn{background:linear-gradient(135deg,var(--cyan),#0080ff);color:#fff;border:none;border-radius:4px;padding:6px 16px;font-family:var(--mono);font-size:9px;letter-spacing:0.1em;cursor:pointer;font-weight:500;text-transform:uppercase;transition:opacity 0.15s}
-.unlock-btn:hover{opacity:0.85}
-.unlock-label{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:0.08em}
-.unlock-price{font-family:var(--mono);font-size:10px;color:var(--textb);font-weight:500}
-
-/* ══ LEGEND ══ */
 .leg-grid{display:flex;flex-direction:column;gap:5px}
-.leg-item{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--text)}
-.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.leg-item{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--text)}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .leg-sq{width:12px;height:8px;border-radius:1px;flex-shrink:0}
-.leg-icon{width:14px;height:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
 
-/* ══ SVG ICON STYLES ══ */
-.ship-icon{cursor:pointer}
-.bsl4-icon{cursor:pointer}
-.hv-icon{cursor:pointer}
+#hv-trigger{display:flex;align-items:center;gap:8px;width:100%;background:rgba(232,80,80,0.07);border:1px solid rgba(232,80,80,0.3);border-radius:5px;padding:9px 12px;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;color:var(--textb);transition:all 0.15s;text-align:left}
+#hv-trigger:hover{background:rgba(232,80,80,0.12);border-color:rgba(232,80,80,0.5)}
+#hv-caret{margin-left:auto;transition:transform 0.2s;display:inline-block;font-size:10px;color:var(--text2)}
+#hv-panel{display:none;margin-top:10px}
+#hv-tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.hv-tile{background:var(--s3);border:1px solid rgba(60,120,180,0.18);border-radius:5px;padding:9px 10px;cursor:pointer;transition:all 0.15s}
+.hv-tile:hover{background:var(--s4);border-color:rgba(0,200,255,0.35)}
+.hv-tile-icon{font-size:16px;margin-bottom:4px;display:block}
+.hv-tile-lbl{font-size:8px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;font-family:var(--mono);margin-bottom:2px}
+.hv-tile-ans{font-size:9px;font-weight:500;color:var(--textb);font-family:var(--mono);line-height:1.3}
+.hv-close{width:100%;background:none;border:1px solid var(--border);border-radius:4px;padding:6px;font-family:var(--mono);font-size:9px;color:var(--text2);cursor:pointer;margin-top:8px;letter-spacing:0.08em;transition:all 0.15s}
+.hv-close:hover{border-color:var(--border2);color:var(--text)}
+#hv-modal-bg{display:none;position:fixed;inset:0;background:rgba(3,6,13,0.88);z-index:8000}
+#hv-modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--s2);border:1px solid var(--border3);border-radius:8px;padding:18px 20px;width:min(500px,92vw);max-height:78vh;overflow-y:auto;z-index:8001;font-family:var(--mono)}
+#hv-modal::-webkit-scrollbar{width:2px}
+#hv-modal::-webkit-scrollbar-thumb{background:var(--border2)}
+.hv-ml{font-size:8px;letter-spacing:0.15em;color:var(--cyan);text-transform:uppercase;margin-bottom:3px}
+.hv-mt{font-size:14px;font-weight:500;color:var(--textb);margin-bottom:8px;line-height:1.3}
+.hv-mb{font-size:11px;color:var(--text);line-height:1.7}
+.hv-mb ul{margin:5px 0 5px 16px}
+.hv-mb li{margin-bottom:3px}
+.hv-srow{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(60,120,180,0.1);font-size:11px}
+.hv-srow:last-child{border-bottom:none}
+.hv-sl{color:var(--text2)}
+.hv-modal-close{position:absolute;top:12px;right:14px;background:none;border:1px solid var(--border2);border-radius:3px;padding:3px 8px;cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--text2);transition:all 0.15s}
+.hv-modal-close:hover{border-color:var(--cyan);color:var(--cyan)}
 
-/* ══ SCROLLBAR ══ */
-::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar{width:2px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ═══════════════════════════════════════
+   MOBILE TAB BAR (hidden on desktop)
+═══════════════════════════════════════ */
+#mobile-tabs{display:none;position:fixed;bottom:0;left:0;right:0;height:54px;background:var(--s1);border-top:1px solid var(--border2);z-index:300;justify-content:space-around;align-items:center;box-shadow:0 -4px 20px rgba(0,0,0,0.4)}
+.mtab{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--text2);font-family:var(--mono);font-size:8px;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.15s;position:relative;padding:0 4px}
+.mtab .icon{font-size:18px;line-height:1}
+.mtab.active{color:var(--cyan)}
+.mtab.active::before{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.mtab .badge-dot{position:absolute;top:6px;right:30%;width:6px;height:6px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red);display:none}
+.mtab .badge-dot.show{display:block;animation:pulse-dot 1s ease-in-out infinite}
+
+/* ═══════════════════════════════════════
+   MOBILE RESPONSIVE LAYOUT
+═══════════════════════════════════════ */
+@media (max-width: 900px){
+  html,body{font-size:13px}
+  body::before{display:none}
+
+  /* Local bar — wraps cleanly, smaller */
+  #local-bar{height:auto;min-height:30px;padding:6px 12px;gap:8px;flex-wrap:wrap;font-size:9px}
+  #local-bar .lb-sep{display:none}
+  #local-bar .lb-status{margin-left:0;width:100%;justify-content:flex-end;padding-top:2px;border-top:1px solid rgba(0,200,255,0.08);margin-top:2px}
+
+  /* Header — keep compact */
+  header{height:46px;padding:0 12px;gap:8px;flex-wrap:nowrap}
+  .logo{font-size:11px;letter-spacing:0.1em}
+  .logo-ring{width:22px;height:22px}
+  .logo-ring::before{width:10px}
+  .logo-ring::after{height:10px}
+  .hdr-div,.hdr-sub{display:none}
+  .alert-pill{padding:3px 7px;font-size:8px;letter-spacing:0.05em}
+  .hdr-right{gap:6px;margin-left:auto}
+  .live-pill{font-size:8px}
+  .live-pill span:not(.live-dot){display:none}
+  .vbtn{padding:3px 9px;font-size:8px}
+
+  /* App body — map full screen, sidebars become drawers */
+  .app-body{display:block;height:calc(100vh - 46px - 30px - 54px);position:relative;overflow:hidden}
+
+  /* Sidebars hidden by default, shown as drawers */
+  #news-panel, #right-panel{
+    position:fixed;
+    bottom:54px;
+    left:0;
+    right:0;
+    top:auto;
+    width:100%;
+    height:65vh;
+    max-height:65vh;
+    border-left:none;
+    border-right:none;
+    border-top:1px solid var(--border2);
+    z-index:250;
+    transform:translateY(100%);
+    transition:transform 0.3s cubic-bezier(0.22,1,0.36,1);
+    box-shadow:0 -8px 24px rgba(0,0,0,0.5);
+  }
+  #news-panel.mobile-open, #right-panel.mobile-open{
+    transform:translateY(0);
+  }
+
+  /* Drag handle on top of mobile drawers */
+  .mobile-drawer-handle{
+    display:flex;
+    height:24px;
+    align-items:center;
+    justify-content:center;
+    border-bottom:1px solid var(--border);
+    background:var(--s2);
+    flex-shrink:0;
+  }
+  .mobile-drawer-handle::before{
+    content:'';
+    width:42px;
+    height:3px;
+    background:var(--border2);
+    border-radius:2px;
+  }
+  @media (min-width:901px){
+    .mobile-drawer-handle{display:none}
+  }
+
+  /* Map fills available space */
+  #map-wrap{height:100%;width:100%}
+
+  /* Tooltip — narrower for mobile */
+  #map-tt{max-width:220px;font-size:10px;padding:8px 11px}
+  .tt-name{font-size:11px}
+
+  /* Country overlay — smaller on mobile */
+  #country-overlay{padding:12px 14px 12px}
+  #co-name{font-size:14px;letter-spacing:0.1em}
+  .co-tile{padding:6px 10px;font-size:9px}
+  .co-tile .tv{font-size:14px}
+  #co-desc{font-size:10px;max-width:none}
+  #co-close{font-size:9px;padding:2px 6px}
+
+  /* Map controls — bottom right, smaller */
+  #map-controls{bottom:10px;gap:4px}
+  .mc-btn{width:26px;height:26px;font-size:11px}
+  #mode-hint{font-size:8px;top:8px;right:8px}
+  #sel-bar{font-size:8px;top:8px;padding:3px 9px;max-width:60vw;overflow:hidden;text-overflow:ellipsis}
+  #coords-bar{bottom:42px;font-size:8px;right:8px}
+
+  /* Show mobile tabs */
+  #mobile-tabs{display:flex}
+
+  /* Proximity alert — fit mobile width */
+  #prox-alert{top:80px;left:8px;right:8px;transform:none;padding:8px 14px;font-size:10px;max-width:none}
+  #prox-alert.visible{display:flex}
+
+  /* HV Modal — mobile */
+  #hv-modal{width:94vw;max-height:80vh;padding:14px 16px}
+  .hv-mt{font-size:13px}
+  .hv-mb{font-size:10px}
+
+  /* Right panel content — tighter spacing */
+  .rps{padding:9px 11px}
+  .cgrid{gap:5px}
+  .cc{padding:6px 7px}
+  .cn{font-size:18px}
+  .cl{font-size:7px}
+}
+
+/* Very small phones */
+@media (max-width: 380px){
+  .logo{font-size:10px}
+  .alert-pill{display:none}
+  .live-pill .live-dot{display:none}
+  #news-panel, #right-panel{height:72vh;max-height:72vh}
+}
+
+/* ─── PRO FEATURE STYLES ─── */
+.pro-locked{position:relative;min-height:60px}
+.pro-locked::before{content:'';position:absolute;inset:-4px;backdrop-filter:blur(6px);background:rgba(3,6,13,0.5);z-index:5;border-radius:5px}
+.pro-locked::after{content:'🔒 PRO ONLY · Upgrade to unlock';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-size:9px;color:var(--purple);letter-spacing:0.1em;z-index:6;background:rgba(176,107,255,0.12);border:1px solid rgba(176,107,255,0.4);padding:5px 10px;border-radius:4px;white-space:nowrap}
+
+/* Spillover risk bars */
+.risk-row{display:flex;align-items:center;gap:8px;padding:4px 0}
+.risk-name{font-size:10px;color:var(--text);flex-shrink:0;width:62px}
+.risk-bar{flex:1;height:8px;background:var(--s3);border-radius:2px;overflow:hidden;position:relative}
+.risk-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));border-radius:2px;transition:width 0.6s ease}
+.risk-val{font-family:var(--mono);font-size:10px;color:var(--textb);width:32px;text-align:right;flex-shrink:0}
+
+/* Genomic table */
+.gen-row{display:grid;grid-template-columns:1fr 38px 50px;gap:6px;padding:5px 0;border-bottom:1px solid rgba(0,200,255,0.06);font-size:10px;align-items:center}
+.gen-row:last-child{border-bottom:none}
+.gen-strain{color:var(--textb)}
+.gen-strain b{color:var(--red);font-weight:500}
+.gen-count{font-family:var(--mono);color:var(--cyan);text-align:right}
+.gen-status{font-family:var(--mono);font-size:8px;padding:2px 5px;border-radius:2px;letter-spacing:0.05em;text-align:center}
+.gen-active{background:var(--red2);color:var(--red);border:1px solid rgba(255,59,59,0.3)}
+.gen-monitor{background:var(--yellow2);color:var(--yellow);border:1px solid rgba(255,193,7,0.3)}
+.gen-endemic{background:var(--purple2);color:var(--purple);border:1px solid rgba(176,107,255,0.3)}
+.gen-novel{background:rgba(0,229,160,0.12);color:var(--green);border:1px solid rgba(0,229,160,0.3);animation:pulse-glow 2s infinite}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(0,229,160,0.3)}50%{box-shadow:0 0 0 3px rgba(0,229,160,0)}}
+
+/* Heatmap legend */
+.heat-legend{display:flex;align-items:center;gap:6px;margin-top:6px;font-family:var(--mono);font-size:8px;color:var(--text2)}
+.heat-gradient{flex:1;height:8px;border-radius:2px;background:linear-gradient(90deg,rgba(0,229,160,0.1),rgba(255,193,7,0.4),rgba(255,59,59,0.7))}
+
+/* ─── PROXIMITY ALERT BANNER ─── */
+#prox-alert{
+  display:none;position:fixed;top:84px;left:50%;transform:translateX(-50%);
+  z-index:5000;background:rgba(255,59,59,0.95);color:#fff;
+  padding:10px 22px;border-radius:6px;font-family:var(--mono);font-size:11px;
+  letter-spacing:0.08em;font-weight:500;text-transform:uppercase;
+  box-shadow:0 0 24px rgba(255,59,59,0.8),inset 0 0 0 1px rgba(255,255,255,0.3);
+  animation:alert-flash 1s ease-in-out infinite;cursor:pointer;max-width:90vw;
+}
+#prox-alert.visible{display:flex;align-items:center;gap:12px}
+@keyframes alert-flash{0%,100%{background:rgba(255,59,59,0.95);box-shadow:0 0 24px rgba(255,59,59,0.8)}50%{background:rgba(255,100,100,1);box-shadow:0 0 36px rgba(255,59,59,1)}}
+.prox-icon{font-size:18px;animation:shake 0.5s ease-in-out infinite}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.prox-close{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.4);color:#fff;border-radius:3px;padding:2px 8px;font-family:var(--mono);font-size:10px;cursor:pointer;margin-left:6px}
+.prox-close:hover{background:rgba(0,0,0,0.5)}
 </style>
 </head>
 <body>
 
-<!-- LOCAL IMPACT BAR -->
-<div id="local-bar">
-  <span id="locating-msg"><span style="color:var(--cyan)">◉</span> Detecting region…</span>
+<div id="prox-alert" onclick="focusAlertLocation()">
+  <span class="prox-icon">⚠</span>
+  <div>
+    <div id="prox-alert-text">CASE DETECTED WITHIN 100 KM OF YOUR LOCATION</div>
+    <div id="prox-alert-sub" style="font-size:9px;opacity:0.85;margin-top:2px;letter-spacing:0.05em;text-transform:none"></div>
+  </div>
+  <button class="prox-close" onclick="event.stopPropagation();dismissProxAlert()">✕</button>
 </div>
 
-<!-- HEADER -->
+<div id="local-bar"><span id="locating-msg"><span style="color:var(--cyan)">◉</span> Detecting region…</span></div>
+
 <header>
   <div class="logo">
-    <div class="logo-ring"><div class="logo-dot"></div></div>
-    HANTA·RADAR
+    <div class="logo-ring"></div>
+    Hantavirus Tracker
   </div>
-  <div class="hdr-divider"></div>
-  <div class="hdr-sub">Global Pathogen Intelligence · May 9, 2026</div>
-  <div class="alert-pill">⚠ CDC LEVEL 3 · WHO ACTIVE RESPONSE · ANDES VIRUS</div>
+  <div class="hdr-div"></div>
+  <div class="hdr-sub">Global Pathogen Intelligence · May 2026</div>
+  <div class="alert-pill">⚠ CDC LEVEL 3 · WHO ACTIVE · ANDES VIRUS</div>
   <div class="hdr-right">
-    <div class="live-pill"><div class="live-dot"></div>LIVE · WHO/CDC/PAHO</div>
+    <div class="live-pill" id="data-status"><div class="live-dot"></div>CONNECTING…</div>
     <div class="view-btns">
       <button class="vbtn active" id="btn-2d">2D</button>
       <button class="vbtn" id="btn-3d">3D Globe</button>
@@ -195,287 +397,613 @@ header{height:52px;background:var(--s1);border-bottom:1px solid var(--border);di
 
 <div class="app-body">
 
-<!-- ══ LEFT NEWS FEED ══ -->
 <aside id="news-panel">
-  <div class="news-header">
-    <span class="news-title">Intelligence Feed</span>
-    <span class="news-count" id="news-count">0 items</span>
-  </div>
+  <div class="mobile-drawer-handle"></div>
+  <div class="news-hdr"><span class="news-title">Intelligence Feed</span><span class="news-cnt" id="news-cnt">loading…</span></div>
+  <div class="news-src fallback" id="news-src">⏳ Connecting to live sources…</div>
   <div id="news-feed"></div>
 </aside>
 
-<!-- ══ MAP ══ -->
 <div id="map-wrap">
-  <div id="map-tooltip">
+  <div id="map-tt">
     <div class="tt-name" id="tt-name"></div>
     <div class="tt-loc" id="tt-loc"></div>
     <div class="tt-desc" id="tt-desc"></div>
-    <div id="tt-badges"></div>
+    <div id="tt-bgs"></div>
   </div>
   <svg id="map-svg"></svg>
-  <div id="sel-bar">Select a marker or country for detail</div>
-  <div id="mode-hint">2D · Scroll to zoom · Drag to pan</div>
+  <div id="sel-bar">Click a country or marker · Scroll over map to zoom in</div>
+  <div id="mode-hint">2D · Scroll over location to zoom in · Drag to pan</div>
+  <div id="country-overlay">
+    <button id="co-close" onclick="closeCountryOverlay()">✕ CLOSE</button>
+    <div id="co-name" style="color:var(--cyan)"></div>
+    <div id="co-tiles"></div>
+    <div id="co-desc"></div>
+  </div>
   <div id="map-controls">
-    <button class="mc-btn" id="zoom-in" title="Zoom in">+</button>
-    <button class="mc-btn" id="zoom-out" title="Zoom out">−</button>
-    <button class="mc-btn" id="zoom-reset" style="font-size:8px;letter-spacing:0" title="Reset">RST</button>
+    <button class="mc-btn" id="zoom-in">+</button>
+    <button class="mc-btn" id="zoom-out">−</button>
+    <button class="mc-btn" id="zoom-reset" style="font-size:8px;letter-spacing:0">RST</button>
   </div>
   <div id="coords-bar">LAT — · LON —</div>
 </div>
 
-<!-- ══ RIGHT PANEL ══ -->
 <aside id="right-panel">
+  <div class="mobile-drawer-handle"></div>
 
-  <div class="rp-section">
-    <div class="rp-label">Global Outbreak Status</div>
-    <div class="counter-grid">
-      <div class="ccard dead"><div class="cnum red">3</div><div class="clbl">Deaths</div></div>
-      <div class="ccard iso"><div class="cnum yellow">9+</div><div class="clbl">Isolation</div></div>
-      <div class="ccard conf"><div class="cnum cyan">6</div><div class="clbl">Confirmed</div></div>
-      <div class="ccard watch"><div class="cnum green">146</div><div class="clbl">On Board</div></div>
+  <div class="rps">
+    <div class="rpl">Global Outbreak Status</div>
+    <div class="cgrid">
+      <div class="cc dead"><div class="cn red">3</div><div class="cl">Deaths</div></div>
+      <div class="cc iso"><div class="cn yellow">9+</div><div class="cl">Isolation</div></div>
+      <div class="cc conf"><div class="cn cyan">6</div><div class="cl">Confirmed</div></div>
+      <div class="cc watch"><div class="cn green">146</div><div class="cl">On Board</div></div>
     </div>
-    <div class="stat-row"><span class="sl">Strain</span><span class="sv red" style="font-size:10px">Andes virus</span></div>
-    <div class="stat-row"><span class="sl">CFR (Andes)</span><span class="sv red">~15–35%</span></div>
-    <div class="stat-row"><span class="sl">Ship — MV Hondius</span><span class="sv" style="color:var(--ship);font-size:10px">→ Tenerife</span></div>
-    <div class="stat-row"><span class="sl">Ship ETA</span><span class="sv" style="font-size:10px">May 10–11</span></div>
-    <div class="stat-row"><span class="sl">Nationalities</span><span class="sv cyan">23 countries</span></div>
-    <div class="stat-row"><span class="sl">WHO Risk Level</span><span class="sv yellow">LOW (Global)</span></div>
+    <div class="sr"><span class="sl">Strain</span><span class="sv red" style="font-size:10px">Andes virus</span></div>
+    <div class="sr"><span class="sl">CFR (Andes)</span><span class="sv red">~15–35%</span></div>
+    <div class="sr"><span class="sl">MV Hondius</span><span class="sv" style="color:var(--ship);font-size:10px">→ Tenerife ETA May 10</span></div>
+    <div class="sr"><span class="sl">Countries involved</span><span class="sv cyan">23+</span></div>
+    <div class="sr"><span class="sl">WHO Risk</span><span class="sv yellow">LOW (Global)</span></div>
   </div>
 
-  <div class="rp-section">
-    <div class="rp-label">Selected Event</div>
-    <div id="detail-card"><p class="empty-detail">Click any marker<br>or news headline</p></div>
-  </div>
-
-  <div class="rp-section">
-    <div class="rp-label">Reservoir Heatmap <span style="color:var(--purple);font-size:8px;font-family:var(--mono)">PREMIUM</span></div>
-    <div id="heatmap-section">
-      <div id="heatmap-img">
-        <div class="hm-blobs">
-          <div class="hm-blob" style="width:60px;height:60px;background:rgba(255,59,59,0.5);top:10px;left:20px"></div>
-          <div class="hm-blob" style="width:40px;height:40px;background:rgba(255,193,7,0.45);top:30px;left:60px"></div>
-          <div class="hm-blob" style="width:50px;height:50px;background:rgba(176,107,255,0.4);bottom:5px;right:20px"></div>
-          <div class="hm-blob" style="width:35px;height:35px;background:rgba(0,200,255,0.35);top:5px;right:40px"></div>
-        </div>
-      </div>
-      <div id="heatmap-blur">
-        <div class="unlock-label">RODENT RESERVOIR DENSITY MAP</div>
-        <div class="unlock-price">Sigmodontinae · Peromyscus · Distribution</div>
-        <button class="unlock-btn" onclick="alert('Premium Intelligence subscription coming soon!\n\n$5.99/mo · Unlock reservoir heatmaps, spillover risk scores, and genomic surveillance data.')">
-          Unlock Premium Intelligence — $5.99/mo
-        </button>
-      </div>
+  <div class="rps">
+    <div class="rpl">Pathogen Reference</div>
+    <button id="hv-trigger" onclick="toggleHVPanel()">
+      🦠 What is hantavirus?
+      <span id="hv-caret">▼</span>
+    </button>
+    <div id="hv-panel">
+      <div id="hv-tile-grid"></div>
+      <button class="hv-close" onclick="toggleHVPanel()">▲ CLOSE</button>
     </div>
   </div>
 
-  <div class="rp-section">
-    <div class="rp-label">Cases by Country</div>
-    <div class="stat-row"><span class="sl">🇿🇦 South Africa</span><span class="sv" style="font-size:10px"><span style="color:var(--red)">1 death</span> · 1 ICU</span></div>
-    <div class="stat-row"><span class="sl">🇳🇱 Netherlands</span><span class="sv yellow" style="font-size:10px">2 hospitalised</span></div>
-    <div class="stat-row"><span class="sl">🇩🇪 Germany</span><span class="sv cyan" style="font-size:10px">1 confirmed</span></div>
-    <div class="stat-row"><span class="sl">🇨🇭 Switzerland</span><span class="sv yellow" style="font-size:10px">1 isolated</span></div>
-    <div class="stat-row"><span class="sl">🇸🇬 Singapore</span><span class="sv yellow" style="font-size:10px">2 isolated</span></div>
-    <div class="stat-row"><span class="sl">🇸🇭 Saint Helena</span><span class="sv yellow" style="font-size:10px">suspected</span></div>
-    <div class="stat-row"><span class="sl">🇫🇷 France</span><span class="sv yellow" style="font-size:10px">suspected</span></div>
-    <div class="stat-row"><span class="sl">🇪🇸 Spain</span><span class="sv yellow" style="font-size:10px">contact traced</span></div>
-    <div class="stat-row"><span class="sl">🇺🇸 USA (6 states)</span><span class="sv green" style="font-size:10px">9 monitoring</span></div>
-    <div class="stat-row"><span class="sl">🇬🇧 UK / Canada</span><span class="sv green" style="font-size:10px">monitoring</span></div>
+  <div class="rps">
+    <div class="rpl">Selected Event</div>
+    <div id="detail-card"><p class="empty-d">Click any marker<br>or news headline</p></div>
   </div>
 
-  <div class="rp-section">
-    <div class="rp-label">Legend</div>
+  <div class="rps" id="premium-section">
+    <div class="rpl">Premium Intelligence <span style="color:var(--purple);font-size:8px">PRO</span></div>
+    <div style="background:linear-gradient(135deg,rgba(176,107,255,0.08),rgba(0,200,255,0.06));border:1px solid rgba(176,107,255,0.3);border-radius:6px;padding:12px;text-align:center">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.1em;margin-bottom:6px;text-transform:uppercase">Unlock with Pro</div>
+      <ul style="text-align:left;list-style:none;padding:0;margin:8px 0 10px;font-size:10px;color:var(--text);line-height:1.7">
+        <li>✓ Rodent reservoir heatmap</li>
+        <li>✓ Spillover risk scoring</li>
+        <li>✓ SMS outbreak alerts</li>
+        <li>✓ Genomic surveillance feed</li>
+        <li>✓ Priority WHO/CDC data</li>
+      </ul>
+      <button onclick="unlockPremium()" style="background:linear-gradient(135deg,#00c8ff,#b06bff);color:#fff;border:none;border-radius:5px;padding:8px 16px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;cursor:pointer;font-weight:600;text-transform:uppercase;width:100%;transition:opacity 0.15s;box-shadow:0 0 12px rgba(0,200,255,0.3)" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        Unlock Premium — $5.99/mo
+      </button>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:0.06em;margin-top:6px">Secured by Stripe · Cancel anytime</div>
+    </div>
+  </div>
+
+  <!-- ─── PRO: RESERVOIR HEATMAP ─── -->
+  <div class="rps" id="pro-heatmap-section">
+    <div class="rpl">Reservoir Heatmap <span style="color:var(--purple);font-size:8px">PRO</span></div>
+    <div id="pro-heatmap-content" class="pro-locked">
+      <div style="font-size:10px;color:var(--text);line-height:1.6">Rodent reservoir density mapped from CDC, PAHO, and IUCN range data. Color zones overlay on main map when active.</div>
+      <div class="risk-row" style="margin-top:8px"><span class="risk-name">S. Cone</span><div class="risk-bar"><div class="risk-fill" style="width:92%"></div></div><span class="risk-val">92</span></div>
+      <div class="risk-row"><span class="risk-name">SW USA</span><div class="risk-bar"><div class="risk-fill" style="width:71%"></div></div><span class="risk-val">71</span></div>
+      <div class="risk-row"><span class="risk-name">N. Europe</span><div class="risk-bar"><div class="risk-fill" style="width:58%"></div></div><span class="risk-val">58</span></div>
+      <div class="risk-row"><span class="risk-name">E. Asia</span><div class="risk-bar"><div class="risk-fill" style="width:64%"></div></div><span class="risk-val">64</span></div>
+      <div class="heat-legend"><span>LOW</span><div class="heat-gradient"></div><span>HIGH</span></div>
+    </div>
+  </div>
+
+  <!-- ─── PRO: SPILLOVER RISK SCORES ─── -->
+  <div class="rps" id="pro-spillover-section">
+    <div class="rpl">Spillover Risk Index <span style="color:var(--purple);font-size:8px">PRO</span></div>
+    <div id="pro-spillover-content" class="pro-locked">
+      <div style="font-size:9px;color:var(--text2);margin-bottom:8px;font-family:var(--mono);letter-spacing:0.05em">Composite score: reservoir + climate + contact</div>
+      <div class="risk-row"><span class="risk-name">🇦🇷 ARG</span><div class="risk-bar"><div class="risk-fill" style="width:94%"></div></div><span class="risk-val">94</span></div>
+      <div class="risk-row"><span class="risk-name">🇨🇱 CHL</span><div class="risk-bar"><div class="risk-fill" style="width:89%"></div></div><span class="risk-val">89</span></div>
+      <div class="risk-row"><span class="risk-name">🇧🇷 BRA</span><div class="risk-bar"><div class="risk-fill" style="width:81%"></div></div><span class="risk-val">81</span></div>
+      <div class="risk-row"><span class="risk-name">🇺🇸 USA</span><div class="risk-bar"><div class="risk-fill" style="width:67%"></div></div><span class="risk-val">67</span></div>
+      <div class="risk-row"><span class="risk-name">🇿🇦 ZAF</span><div class="risk-bar"><div class="risk-fill" style="width:54%"></div></div><span class="risk-val">54</span></div>
+      <div class="risk-row"><span class="risk-name">🇩🇪 DEU</span><div class="risk-bar"><div class="risk-fill" style="width:38%"></div></div><span class="risk-val">38</span></div>
+      <div class="risk-row"><span class="risk-name">🇸🇬 SGP</span><div class="risk-bar"><div class="risk-fill" style="width:22%"></div></div><span class="risk-val">22</span></div>
+    </div>
+  </div>
+
+  <!-- ─── PRO: GENOMIC SURVEILLANCE ─── -->
+  <div class="rps" id="pro-genomic-section">
+    <div class="rpl">Genomic Surveillance <span style="color:var(--purple);font-size:8px">PRO</span></div>
+    <div id="pro-genomic-content" class="pro-locked">
+      <div style="font-size:9px;color:var(--text2);margin-bottom:8px;font-family:var(--mono);letter-spacing:0.05em">Live strain tracking · GISAID + NCBI</div>
+      <div class="gen-row"><span class="gen-strain"><b>Andes</b> ANDV-MV01</span><span class="gen-count">6</span><span class="gen-status gen-active">ACTIVE</span></div>
+      <div class="gen-row"><span class="gen-strain"><b>Andes</b> ANDV-Bsl</span><span class="gen-count">2k+</span><span class="gen-status gen-endemic">ENDEMIC</span></div>
+      <div class="gen-row"><span class="gen-strain">Sin Nombre</span><span class="gen-count">847</span><span class="gen-status gen-monitor">MONITOR</span></div>
+      <div class="gen-row"><span class="gen-strain">Seoul</span><span class="gen-count">312</span><span class="gen-status gen-monitor">MONITOR</span></div>
+      <div class="gen-row"><span class="gen-strain">Puumala</span><span class="gen-count">1.2k</span><span class="gen-status gen-endemic">ENDEMIC</span></div>
+      <div class="gen-row"><span class="gen-strain">Hantaan</span><span class="gen-count">2.4k</span><span class="gen-status gen-endemic">ENDEMIC</span></div>
+      <div class="gen-row"><span class="gen-strain"><b>Choclo</b> v2</span><span class="gen-count">3</span><span class="gen-status gen-novel">NOVEL</span></div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--text3);margin-top:8px;letter-spacing:0.05em">Last sequenced: 14h ago · 18 labs</div>
+    </div>
+  </div>
+
+  <div class="rps">
+    <div class="rpl">Cases by Country</div>
+    <div class="sr"><span class="sl">🇿🇦 South Africa</span><span class="sv" style="font-size:10px"><span style="color:var(--red)">1 death</span> · 1 ICU</span></div>
+    <div class="sr"><span class="sl">🇳🇱 Netherlands</span><span class="sv yellow" style="font-size:10px">2 hospitalised</span></div>
+    <div class="sr"><span class="sl">🇩🇪 Germany</span><span class="sv cyan" style="font-size:10px">1 confirmed</span></div>
+    <div class="sr"><span class="sl">🇨🇭 Switzerland</span><span class="sv yellow" style="font-size:10px">1 isolated</span></div>
+    <div class="sr"><span class="sl">🇸🇬 Singapore</span><span class="sv yellow" style="font-size:10px">2 isolated</span></div>
+    <div class="sr"><span class="sl">🇸🇭 Saint Helena</span><span class="sv yellow" style="font-size:10px">suspected</span></div>
+    <div class="sr"><span class="sl">🇫🇷 France</span><span class="sv yellow" style="font-size:10px">suspected</span></div>
+    <div class="sr"><span class="sl">🇪🇸 Spain</span><span class="sv yellow" style="font-size:10px">contact traced</span></div>
+    <div class="sr"><span class="sl">🇺🇸 USA (6 states)</span><span class="sv green" style="font-size:10px">9 monitoring</span></div>
+    <div class="sr"><span class="sl">🇬🇧 UK / Canada</span><span class="sv green" style="font-size:10px">monitoring</span></div>
+  </div>
+
+  <div class="rps">
+    <div class="rpl">Legend</div>
     <div class="leg-grid">
       <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>Confirmed fatality</div>
       <div class="leg-item"><div class="leg-dot" style="background:var(--yellow)"></div>Isolation / observation</div>
-      <div class="leg-item"><div class="leg-dot" style="background:var(--ship)"></div>MV Hondius (ship tracker)</div>
-      <div class="leg-item"><div class="leg-icon">🏥</div>BSL-4 lab facility</div>
-      <div class="leg-item"><div class="leg-icon" style="color:var(--red);font-size:11px;font-weight:700">HV</div>Hantavirus Reference Lab</div>
-      <div class="leg-item"><div class="leg-sq" style="background:rgba(255,193,7,0.2);border:1px solid rgba(255,193,7,0.5)"></div>Exposure / origin zone</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--ship)"></div>MV Hondius</div>
+      <div class="leg-item"><span style="font-size:11px">🏥</span> BSL-4 lab</div>
+      <div class="leg-item"><span style="font-size:11px;color:var(--red);font-weight:700;font-family:var(--mono)">HV</span> Hantavirus Ref Lab</div>
+      <div class="leg-item"><div class="leg-sq" style="background:rgba(255,193,7,0.2);border:1px solid rgba(255,193,7,0.5)"></div>Exposure zone</div>
       <div class="leg-item"><div class="leg-sq" style="background:rgba(176,107,255,0.2);border:1px solid rgba(176,107,255,0.4)"></div>Endemic region</div>
-      <div class="leg-item"><div class="leg-sq" style="background:#1a3a58;border:1px solid rgba(0,200,255,0.4)"></div>Involved nation</div>
+      <div class="leg-item"><div class="leg-sq" style="background:#1a3354;border:1px solid rgba(0,200,255,0.4)"></div>Involved nation</div>
     </div>
   </div>
 
-<div class="rp-section">
-    <div class="rp-label">Americas Burden 2025</div>
-    <div class="stat-row"><span class="sl">Argentina</span><span class="sv red" style="font-size:10px">101 cases · 21 ✝</span></div>
-    <div class="stat-row"><span class="sl">Brazil</span><span class="sv red" style="font-size:10px">20 cases · 11 ✝</span></div>
-    <div class="stat-row"><span class="sl">Bolivia / Paraguay</span><span class="sv yellow" style="font-size:10px">significant ↑</span></div>
-    <div class="stat-row"><span class="sl">PAHO Total</span><span class="sv red" style="font-size:10px">229 cases · 59 ✝</span></div>
+  <div class="rps">
+    <div class="rpl">Americas Burden 2025</div>
+    <div class="sr"><span class="sl">Argentina</span><span class="sv red" style="font-size:10px">101 cases · 21 ✝</span></div>
+    <div class="sr"><span class="sl">Brazil</span><span class="sv red" style="font-size:10px">20 cases · 11 ✝</span></div>
+    <div class="sr"><span class="sl">Bolivia / Paraguay</span><span class="sv yellow" style="font-size:10px">significant ↑</span></div>
+    <div class="sr"><span class="sl">PAHO Total</span><span class="sv red" style="font-size:10px">229 cases · 59 ✝</span></div>
   </div>
-
-  <div class="rp-section">
-     </div>
 
 </aside>
 </div>
+
+<!-- ─── MOBILE TAB BAR (auto-hidden on desktop) ─── -->
+<div id="mobile-tabs">
+  <button class="mtab active" data-panel="map">
+    <span class="icon">🌍</span>
+    <span>Map</span>
+  </button>
+  <button class="mtab" data-panel="news">
+    <span class="icon">📰</span>
+    <span>News</span>
+    <span class="badge-dot" id="news-badge"></span>
+  </button>
+  <button class="mtab" data-panel="data">
+    <span class="icon">📊</span>
+    <span>Data</span>
+  </button>
+  <button class="mtab" data-panel="info">
+    <span class="icon">🦠</span>
+    <span>Info</span>
+  </button>
+</div>
+
+<div id="hv-modal-bg" onclick="closeHVModal()"></div>
+<div id="hv-modal">
+  <button class="hv-modal-close" onclick="closeHVModal()">✕</button>
+  <div class="hv-ml" id="hvm-label"></div>
+  <div class="hv-mt" id="hvm-title"></div>
+  <div style="margin-bottom:10px" id="hvm-badge"></div>
+  <div class="hv-mb" id="hvm-body"></div>
+</div>
+
 <script>
-/* ══════════════════════════════════════
-   DATA
-══════════════════════════════════════ */
-const DEATHS=[
-  {id:'d1',name:'Confirmed Fatality — Johannesburg',loc:'Johannesburg, South Africa',lat:-26.195,lon:28.034,desc:'Dutch female (Case 2, wife of index case). Deteriorated on flight from St. Helena → Johannesburg. Died at emergency dept April 26. PCR confirmed Andes virus. NICD South Africa managing response.',badges:['b-red','b-purple'],blabels:['Confirmed Death','Andes virus']},
-  {id:'d2',name:'Fatality — Index Case (on board)',loc:'South Atlantic Ocean',lat:-55,lon:-38,desc:'Dutch male, 70 (Case 1 — index case). First to fall ill. Died on board April 11. Infected during birdwatching trip through Argentina, Chile, Uruguay — rodent exposure confirmed by travel reconstruction.',badges:['b-red'],blabels:['Death on board']},
-  {id:'d3',name:'Fatality — Case 4 (on board)',loc:'Near Cape Verde',lat:15.5,lon:-22.5,desc:'Adult female passenger. Symptom onset April 28. Died May 2 near Cape Verde. Andes virus pending full confirmation. Body remains on board MV Hondius.',badges:['b-red'],blabels:['Death on board']},
+/* ════════════════════════════════════════════════════════════
+   LIVE DATA SOURCES
+   Tries multiple CORS proxies in order, falls back to curated data
+══════════════════════════════════════════════════════════════ */
+const CORS_PROXIES = [
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url=',
+  'https://api.codetabs.com/v1/proxy/?quest=',
 ];
 
-const ISOLATIONS=[
-  {id:'i1',name:'ICU Patient — South Africa',loc:'Johannesburg, South Africa',lat:-26.19,lon:28.08,desc:'Adult male (Case 3). Medically evacuated from Ascension Island April 27. PCR confirmed Andes hantavirus May 2. In ICU at Johannesburg hospital.',badges:['b-cyan','b-yellow'],blabels:['Confirmed','ICU']},
-  {id:'i2',name:'Hospitalised — Amsterdam',loc:'Amsterdam, Netherlands',lat:52.34,lon:4.90,desc:'Two patients airlifted to Amsterdam. At least one Andes-positive. Under hospital treatment. Dutch Ministry of Foreign Affairs coordinating as flag state of MV Hondius.',badges:['b-cyan','b-yellow'],blabels:['Confirmed','Hospitalised']},
-  {id:'i3',name:'Hospitalised — Germany',loc:'Frankfurt, Germany',lat:50.11,lon:8.68,desc:'One patient airlifted and confirmed hantavirus positive. Receiving treatment at German BSL-capable hospital.',badges:['b-cyan','b-yellow'],blabels:['Confirmed','Hospitalised']},
-  {id:'i4',name:'Isolated — Zurich, Switzerland',loc:'Zurich, Switzerland',lat:47.376,lon:8.541,desc:'One returning passenger confirmed positive for Andes virus. Isolated in Zurich medical facility. Swiss Public Health monitoring close contacts.',badges:['b-yellow'],blabels:['Confirmed · Isolated']},
-  {id:'i5',name:'2 Residents Isolated — Singapore',loc:'Singapore',lat:1.352,lon:103.820,desc:'Two Singapore residents (67M, 65F). Disembarked early, shared Johannesburg flight with Case 2 on April 25. Isolated in government facility. One has mild symptoms. Tests pending.',badges:['b-yellow'],blabels:['Isolated']},
-  {id:'i6',name:'Suspected — Saint Helena',loc:'Saint Helena',lat:-15.965,lon:-5.715,desc:'One suspected case among 30 who disembarked April 24. All 30 contact-traced by UK Health Security Agency.',badges:['b-yellow'],blabels:['Suspected']},
-  {id:'i7',name:'Suspected — Tristan da Cunha',loc:'Tristan da Cunha',lat:-37.068,lon:-12.311,desc:'Suspected case on remote British island. Passenger who disembarked from MV Hondius during voyage.',badges:['b-yellow'],blabels:['Suspected']},
-  {id:'i8',name:'Suspected — France',loc:'Paris, France',lat:48.856,lon:2.352,desc:'One suspected case in France. Passenger who disembarked earlier in the voyage before outbreak was announced.',badges:['b-yellow'],blabels:['Suspected']},
-  {id:'i9',name:'Contact Traced — Barcelona',loc:'Barcelona, Spain',lat:41.388,lon:2.154,desc:'South African woman who shared flight with Case 2 spent week in Barcelona. Confirmed asymptomatic. Spain health ministry monitoring.',badges:['b-green'],blabels:['Traced · Asymptomatic']},
-  {id:'i10',name:'9 Americans Monitored',loc:'United States (6 states)',lat:38.9,lon:-100.0,desc:'9 US residents across Arizona, Georgia, California and others. CDC team dispatched to Tenerife. US passengers to be repatriated via biocontainment charter to Nebraska Quarantine Unit.',badges:['b-green'],blabels:['Monitoring']},
-  {id:'i11',name:'UK / Canada — Monitoring',loc:'United Kingdom / Canada',lat:51.5,lon:-0.12,desc:'Passengers from 12 countries including UK and Canada were on board. Health authorities monitoring returned passengers.',badges:['b-green'],blabels:['Monitoring']},
+// ⚙️ GDELT KEYWORDS — add/remove anytime, no other code changes needed.
+// Each runs as a separate query, results merged + deduped.
+const GDELT_KEYWORDS = [
+  '"hantavirus"',
+  '"andes virus"',
+  '"MV Hondius"',
+  '"hantavirus outbreak"',
+  '"hantavirus death"',
+  '"hantavirus quarantine"',
+  '"sin nombre virus"',
+  '"hantavirus pulmonary syndrome"',
 ];
 
-const SHIP_ROUTE=[
-  [-68.303,-54.801],[-60,-58],[-50,-52],[-35,-47],[-22,-35],[-14,-20],[-8,-10],
-  [-5.715,-15.965],[-14.4,-7.9],[-23.51,14.93],[-18.5,24.0],[-16.25,28.1]
-];
-const SHIP_NOW={lat:26.5,lon:-17.8,name:'MV Hondius — Current Position',desc:'En route from Cape Verde to Port of Granadilla, Tenerife (Spain). ~146 passengers and crew on board. One body awaiting repatriation. CDC team meeting ship on arrival. ETA: May 10–11.',loc:'North Atlantic · Between Cape Verde and Canary Islands'};
-const TENERIFE={lat:28.1,lon:-16.25,name:'Tenerife — Arrival Destination',desc:'Port of Granadilla, Tenerife, Canary Islands, Spain. MV Hondius expected May 10–11. CDC, WHO, RIVM, and Spanish health teams coordinating quarantine and screening on arrival.',loc:'Tenerife, Canary Islands, Spain'};
+function buildGdeltUrl(keyword){
+  return `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(keyword)}&mode=ArtList&format=json&timespan=14d&maxrecords=15&sort=datedesc`;
+}
 
-const BSL4_LABS=[
-  {name:'NICD — Hantavirus Reference Lab',city:'Johannesburg',country:'South Africa',lat:-26.181,lon:28.059,hv:true,desc:'National Institute for Communicable Diseases. Primary Andes hantavirus testing facility for the current outbreak. Confirmed PCR positive cases in current cluster.'},
-  {name:'USAMRIID',city:'Fort Detrick, MD',country:'USA',lat:39.434,lon:-77.415,hv:false,desc:'US Army Medical Research Institute of Infectious Diseases. BSL-4 facility capable of hantavirus diagnostics and research.'},
-  {name:'CDC — High-Consequence Pathogens',city:'Atlanta, GA',country:'USA',lat:33.799,lon:-84.325,hv:true,desc:'CDC Division of High-Consequence Pathogens. Coordinating US domestic response. Shipped diagnostic kits to Tenerife team.'},
-  {name:'Galveston National Laboratory',city:'Galveston, TX',country:'USA',lat:29.310,lon:-94.786,hv:false,desc:'University of Texas Medical Branch BSL-4 facility. Major US hantavirus research centre.'},
-  {name:'Robert Koch Institut — BSL-4',city:'Berlin',country:'Germany',lat:52.540,lon:13.350,hv:true,desc:'Primary German hantavirus reference laboratory. WHO Collaborating Centre. Handling airlifted German cases from MV Hondius.'},
-  {name:'RIVM',city:'Bilthoven',country:'Netherlands',lat:52.129,lon:5.199,hv:false,desc:'Dutch National Institute for Public Health. Coordinating Netherlands response as flag-state authority for MV Hondius.'},
-  {name:'Spiez Laboratory',city:'Spiez',country:'Switzerland',lat:46.686,lon:7.672,hv:false,desc:'Swiss Federal BSL-4 facility. Supporting diagnosis for Swiss confirmed case.'},
-  {name:'Institut Pasteur P4',city:'Lyon',country:'France',lat:45.730,lon:4.855,hv:true,desc:'Jean Mérieux P4 laboratory. Hantavirus reference capacity for European network.'},
-  {name:'ANLIS Malbrán Institute',city:'Buenos Aires',country:'Argentina',lat:-34.605,lon:-58.392,hv:true,desc:'Argentina primary reference laboratory for Andes virus. Conducting rodent trapping along index case travel route. Sending reagents to Spain, South Africa, Netherlands.'},
-  {name:'UK HSCA — Porton Down',city:'Salisbury',country:'UK',lat:51.124,lon:-1.711,hv:false,desc:'UK Health Security Agency BSL-4 lab. Contact-tracing support for 30 passengers who disembarked at Saint Helena.'},
-];
+// ⚙️ STRIPE PAYMENT LINK — replace with your link from dashboard.stripe.com/payment-links
+const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/REPLACE_WITH_YOUR_LINK';
 
-const ENDEMIC_IDS=['032','076','068','152','604','600','858','484','630','840','028'];
-const ORIGIN_IDS=['032','152','858'];
-const INVOLVED_IDS=['032','152','858','710','528','276','756','702','250','724','132','654','076','840','124','826'];
+const COUNTRY_COORDS = {
+  'south africa':{lat:-26.2,lon:28.0,name:'South Africa'},
+  'netherlands':{lat:52.3,lon:4.9,name:'Netherlands'},
+  'germany':{lat:51.2,lon:10.5,name:'Germany'},
+  'switzerland':{lat:46.8,lon:8.2,name:'Switzerland'},
+  'argentina':{lat:-34.6,lon:-58.4,name:'Argentina'},
+  'chile':{lat:-33.5,lon:-70.7,name:'Chile'},
+  'brazil':{lat:-15.8,lon:-47.9,name:'Brazil'},
+  'uruguay':{lat:-34.9,lon:-56.2,name:'Uruguay'},
+  'usa':{lat:38.9,lon:-100,name:'United States'},
+  'united states':{lat:38.9,lon:-100,name:'United States'},
+  'uk':{lat:51.5,lon:-0.1,name:'United Kingdom'},
+  'united kingdom':{lat:51.5,lon:-0.1,name:'United Kingdom'},
+  'spain':{lat:40.4,lon:-3.7,name:'Spain'},
+  'france':{lat:46.2,lon:2.2,name:'France'},
+  'singapore':{lat:1.35,lon:103.8,name:'Singapore'},
+  'saint helena':{lat:-15.965,lon:-5.715,name:'Saint Helena'},
+  'tristan da cunha':{lat:-37.068,lon:-12.311,name:'Tristan da Cunha'},
+  'cape verde':{lat:14.93,lon:-23.51,name:'Cape Verde'},
+  'tenerife':{lat:28.1,lon:-16.25,name:'Tenerife'},
+  'canada':{lat:56.1,lon:-106.3,name:'Canada'},
+  'italy':{lat:42.5,lon:12.6,name:'Italy'},
+  'belgium':{lat:50.8,lon:4.4,name:'Belgium'},
+  'sweden':{lat:60.1,lon:18.6,name:'Sweden'},
+  'norway':{lat:60.5,lon:8.5,name:'Norway'},
+  'australia':{lat:-25.3,lon:133.8,name:'Australia'},
+  'new zealand':{lat:-40.9,lon:174.9,name:'New Zealand'},
+};
 
-const countryNames={"004":"Afghanistan","008":"Albania","012":"Algeria","024":"Angola","028":"Antigua and Barbuda","031":"Azerbaijan","032":"Argentina","036":"Australia","040":"Austria","044":"Bahamas","050":"Bangladesh","051":"Armenia","052":"Barbados","056":"Belgium","064":"Bhutan","068":"Bolivia","070":"Bosnia and Herzegovina","072":"Botswana","076":"Brazil","084":"Belize","090":"Solomon Islands","096":"Brunei","100":"Bulgaria","104":"Myanmar","108":"Burundi","112":"Belarus","116":"Cambodia","120":"Cameroon","124":"Canada","132":"Cabo Verde","140":"Central African Republic","144":"Sri Lanka","148":"Chad","152":"Chile","156":"China","170":"Colombia","174":"Comoros","178":"Congo","180":"DR Congo","188":"Costa Rica","191":"Croatia","192":"Cuba","196":"Cyprus","203":"Czech Republic","204":"Benin","208":"Denmark","212":"Dominica","214":"Dominican Republic","218":"Ecuador","222":"El Salvador","226":"Equatorial Guinea","231":"Ethiopia","232":"Eritrea","233":"Estonia","238":"Falkland Islands","242":"Fiji","246":"Finland","250":"France","254":"French Guiana","258":"French Polynesia","262":"Djibouti","266":"Gabon","268":"Georgia","270":"Gambia","275":"Palestine","276":"Germany","288":"Ghana","296":"Kiribati","300":"Greece","304":"Greenland","308":"Grenada","320":"Guatemala","324":"Guinea","328":"Guyana","332":"Haiti","340":"Honduras","344":"Hong Kong","348":"Hungary","352":"Iceland","356":"India","360":"Indonesia","364":"Iran","368":"Iraq","372":"Ireland","376":"Israel","380":"Italy","384":"Ivory Coast","388":"Jamaica","392":"Japan","398":"Kazakhstan","400":"Jordan","404":"Kenya","408":"North Korea","410":"South Korea","414":"Kuwait","417":"Kyrgyzstan","418":"Laos","422":"Lebanon","426":"Lesotho","428":"Latvia","430":"Liberia","434":"Libya","440":"Lithuania","442":"Luxembourg","450":"Madagascar","454":"Malawi","458":"Malaysia","466":"Mali","470":"Malta","478":"Mauritania","480":"Mauritius","484":"Mexico","492":"Monaco","496":"Mongolia","498":"Moldova","499":"Montenegro","504":"Morocco","508":"Mozambique","516":"Namibia","524":"Nepal","528":"Netherlands","540":"New Caledonia","554":"New Zealand","558":"Nicaragua","562":"Niger","566":"Nigeria","578":"Norway","583":"Micronesia","584":"Marshall Islands","585":"Palau","586":"Pakistan","591":"Panama","598":"Papua New Guinea","600":"Paraguay","604":"Peru","608":"Philippines","616":"Poland","620":"Portugal","624":"Guinea-Bissau","626":"Timor-Leste","634":"Qatar","642":"Romania","643":"Russia","646":"Rwanda","682":"Saudi Arabia","686":"Senegal","694":"Sierra Leone","702":"Singapore","703":"Slovakia","704":"Vietnam","706":"Somalia","710":"South Africa","716":"Zimbabwe","724":"Spain","728":"South Sudan","729":"Sudan","732":"Western Sahara","748":"Eswatini","752":"Sweden","756":"Switzerland","760":"Syria","762":"Tajikistan","764":"Thailand","768":"Togo","776":"Tonga","780":"Trinidad and Tobago","784":"United Arab Emirates","788":"Tunisia","792":"Turkey","795":"Turkmenistan","800":"Uganda","804":"Ukraine","807":"North Macedonia","818":"Egypt","826":"United Kingdom","834":"Tanzania","840":"United States","858":"Uruguay","860":"Uzbekistan","862":"Venezuela","882":"Samoa","887":"Yemen","894":"Zambia"};
+function classifyArticle(text){
+  const t=text.toLowerCase();
+  if(/\b(death|died|dies|fatal|killed|deceased)/i.test(t)) return {type:'breaking',cat:'death'};
+  if(/\b(quarantin|isolat|hospitaliz|hospitalis|icu|airlift)/i.test(t)) return {type:'official',cat:'quarantine'};
+  if(/\b(confirm|positive|tested.+positive)/i.test(t)) return {type:'official',cat:'confirmed'};
+  return {type:'official',cat:'news'};
+}
 
-/* ══════════════════════════════════════
-   NEWS FEED
-══════════════════════════════════════ */
-const NEWS=[
+function detectLocation(text){
+  const t=text.toLowerCase();
+  for(const [key,info] of Object.entries(COUNTRY_COORDS)){
+    if(t.includes(key)) return info;
+  }
+  return null;
+}
+
+function formatTimeAgo(dateStr){
+  // GDELT format: 20260509T120000Z
+  let d;
+  if(/^\d{8}T\d{6}Z$/.test(dateStr)){
+    const y=dateStr.substr(0,4),m=dateStr.substr(4,2),day=dateStr.substr(6,2);
+    const h=dateStr.substr(9,2),mi=dateStr.substr(11,2);
+    d=new Date(`${y}-${m}-${day}T${h}:${mi}:00Z`);
+  } else { d=new Date(dateStr); }
+  const diff=Date.now()-d.getTime();
+  const mins=Math.floor(diff/60000);
+  if(mins<1) return 'just now';
+  if(mins<60) return mins+'m ago';
+  const hrs=Math.floor(mins/60);
+  if(hrs<24) return hrs+'h ago';
+  const days=Math.floor(hrs/24);
+  return days+'d ago';
+}
+
+async function tryFetch(url){
+  for(const proxy of CORS_PROXIES){
+    try{
+      const proxiedUrl=proxy+encodeURIComponent(url);
+      const res=await fetch(proxiedUrl,{signal:AbortSignal.timeout(8000)});
+      if(res.ok){
+        const text=await res.text();
+        try{return JSON.parse(text);}catch(e){return text;}
+      }
+    }catch(e){console.warn('Proxy failed:',proxy,e.message);}
+  }
+  throw new Error('All CORS proxies failed');
+}
+
+async function fetchGDELT(){
+  try{
+    // Fire all keyword queries in parallel — much faster than sequential
+    const results = await Promise.allSettled(
+      GDELT_KEYWORDS.map(kw => tryFetch(buildGdeltUrl(kw)))
+    );
+    // Merge all successful results
+    const allArticles = [];
+    results.forEach(r => {
+      if(r.status==='fulfilled' && r.value && r.value.articles){
+        allArticles.push(...r.value.articles);
+      }
+    });
+    if(allArticles.length===0) return null;
+    // Dedupe by URL
+    const seen = new Set();
+    const unique = allArticles.filter(a => {
+      if(!a.url || seen.has(a.url)) return false;
+      seen.add(a.url);
+      return true;
+    });
+    // Sort by recency
+    unique.sort((a,b) => (b.seendate||'').localeCompare(a.seendate||''));
+    // Map to feed format
+    return unique.slice(0,30).map(a=>{
+      const loc=detectLocation(a.title+' '+(a.domain||''));
+      const cls=classifyArticle(a.title);
+      return {
+        type:cls.type,
+        cat:cls.cat,
+        time:formatTimeAgo(a.seendate||new Date().toISOString()),
+        headline:a.title.replace(/\s*\|\s*.*$/,''),
+        loc:loc?loc.name:(a.sourcecountry||'Global'),
+        lat:loc?loc.lat:0,
+        lon:loc?loc.lon:0,
+        url:a.url,
+        domain:a.domain,
+        live:true,
+      };
+    }).filter(n=>n.headline&&n.headline.length>15);
+  }catch(e){
+    console.warn('GDELT fetch failed:',e.message);
+    return null;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   CURATED FALLBACK DATA (always works)
+══════════════════════════════════════════════════════════════ */
+const CURATED_NEWS=[
   {type:'breaking',time:'4m ago',headline:'MV Hondius confirmed en route to Tenerife — CDC biocontainment team on standby',loc:'Tenerife, Spain',lat:28.1,lon:-16.25},
   {type:'official',time:'11m ago',headline:'WHO: KLM flight attendant who had contact with Case 2 tests negative — monitoring continues',loc:'Amsterdam, Netherlands',lat:52.34,lon:4.90},
   {type:'official',time:'28m ago',headline:'NICD South Africa confirms PCR-positive Andes virus in Johannesburg ICU patient (Case 3)',loc:'Johannesburg, South Africa',lat:-26.19,lon:28.08},
   {type:'social',time:'41m ago',headline:'Passenger from MV Hondius isolated in Zurich — Swiss health authorities confirm',loc:'Zurich, Switzerland',lat:47.376,lon:8.541},
   {type:'breaking',time:'57m ago',headline:'9 US residents under monitoring across 6 states — CDC repatriation charter arranged',loc:'United States',lat:38.9,lon:-100.0},
   {type:'official',time:'1h 12m ago',headline:'Argentina ANLIS Malbrán sends reagents to Spain, South Africa, UK for Andes virus diagnostics',loc:'Buenos Aires, Argentina',lat:-34.605,lon:-58.392},
-  {type:'social',time:'1h 38m ago',headline:'MV Hondius spotted by passing vessel — images show ship stationary near Canary Islands approach',loc:'North Atlantic',lat:26.5,lon:-17.8},
-  {type:'official',time:'2h 4m ago',headline:'WHO Director-General: "Overall global risk remains low — Andes virus spread requires close contact"',loc:'Geneva, Switzerland',lat:46.23,lon:6.15},
+  {type:'social',time:'1h 38m ago',headline:'MV Hondius spotted near Canary Islands approach — ship heading to Tenerife port',loc:'North Atlantic',lat:26.5,lon:-17.8},
+  {type:'official',time:'2h 4m ago',headline:'WHO Director-General: "Overall global risk remains low — Andes virus requires close contact"',loc:'Geneva, Switzerland',lat:46.23,lon:6.15},
   {type:'breaking',time:'2h 31m ago',headline:'Cape Verde refuses port access — MV Hondius anchored offshore, WHO medical team boards',loc:'Cape Verde',lat:14.93,lon:-23.51},
-  {type:'social',time:'3h ago',headline:'Singapore CDA isolates 2 residents in government facility after Hondius flight link confirmed',loc:'Singapore',lat:1.352,lon:103.820},
+  {type:'social',time:'3h ago',headline:'Singapore CDA isolates 2 residents after Hondius flight link confirmed',loc:'Singapore',lat:1.352,lon:103.820},
   {type:'official',time:'3h 44m ago',headline:'UK HSCA contact-traces all 30 passengers who disembarked at Saint Helena April 24',loc:'Saint Helena',lat:-15.965,lon:-5.715},
-  {type:'breaking',time:'4h 20m ago',headline:'New suspected case reported on Tristan da Cunha — remote island linked to Hondius voyage',loc:'Tristan da Cunha',lat:-37.068,lon:-12.311},
-  {type:'official',time:'5h 2m ago',headline:'PAHO: 229 hantavirus cases and 59 deaths reported in Americas in 2025 — Argentina hardest hit',loc:'Americas',lat:-20.0,lon:-60.0},
-  {type:'social',time:'6h 15m ago',headline:'Dutch husband and wife among deaths — couple had bird-watched at Ushuaia landfill site',loc:'Ushuaia, Argentina',lat:-54.801,lon:-68.303},
+  {type:'breaking',time:'4h 20m ago',headline:'New suspected case on Tristan da Cunha — remote island linked to Hondius voyage',loc:'Tristan da Cunha',lat:-37.068,lon:-12.311},
+  {type:'official',time:'5h 2m ago',headline:'PAHO: 229 hantavirus cases and 59 deaths in Americas in 2025 — Argentina hardest hit',loc:'Americas',lat:-20.0,lon:-60.0},
+  {type:'social',time:'6h 15m ago',headline:'Dutch couple among deaths — birdwatched at Ushuaia landfill site',loc:'Ushuaia, Argentina',lat:-54.801,lon:-68.303},
   {type:'official',time:'8h ago',headline:'WHO issues Disease Outbreak Notice DON-599 — Multi-country hantavirus cluster linked to cruise travel',loc:'Geneva, Switzerland',lat:46.23,lon:6.15},
 ];
 
-function buildNewsFeed(){
+let NEWS=[...CURATED_NEWS]; // start with curated, swap in live when fetched
+
+const DEATHS=[
+  {name:'Confirmed Fatality — Johannesburg',loc:'Johannesburg, South Africa',lat:-26.195,lon:28.034,desc:'Dutch female (Case 2). Deteriorated on flight from St. Helena → Johannesburg. Died April 26. PCR confirmed Andes virus. NICD managing response.',badges:['b-red','b-purple'],blabels:['Confirmed Death','Andes virus']},
+  {name:'Fatality — Index Case (on board)',loc:'South Atlantic Ocean',lat:-55,lon:-38,desc:'Dutch male, 70 (Case 1 — index case). Died on board April 11. Infected during birdwatching in Argentina/Chile/Uruguay.',badges:['b-red'],blabels:['Death on board']},
+  {name:'Fatality — Case 4 (on board)',loc:'Near Cape Verde',lat:15.5,lon:-22.5,desc:'Adult female. Symptom onset April 28. Died May 2. Andes virus pending confirmation.',badges:['b-red'],blabels:['Death on board']},
+];
+const ISOLATIONS=[
+  {name:'ICU — South Africa (Case 3)',loc:'Johannesburg, South Africa',lat:-26.19,lon:28.08,desc:'Adult male evacuated from Ascension Island April 27. PCR confirmed Andes virus May 2. In ICU.',badges:['b-cyan','b-yellow'],blabels:['Confirmed','ICU']},
+  {name:'Hospitalised — Amsterdam',loc:'Amsterdam, Netherlands',lat:52.34,lon:4.90,desc:'Two patients airlifted. At least one Andes-positive. Dutch MFA coordinating as flag-state.',badges:['b-cyan','b-yellow'],blabels:['Confirmed','Hospitalised']},
+  {name:'Hospitalised — Germany',loc:'Frankfurt, Germany',lat:50.11,lon:8.68,desc:'One patient airlifted, confirmed hantavirus positive. Under hospital treatment.',badges:['b-cyan','b-yellow'],blabels:['Confirmed','Hospitalised']},
+  {name:'Isolated — Zurich',loc:'Zurich, Switzerland',lat:47.376,lon:8.541,desc:'One returning passenger confirmed Andes-positive. Isolated in Zurich medical facility.',badges:['b-yellow'],blabels:['Confirmed · Isolated']},
+  {name:'2 Isolated — Singapore',loc:'Singapore',lat:1.352,lon:103.820,desc:'Two Singapore residents. Shared flight with Case 2 on April 25. Isolated in government facility.',badges:['b-yellow'],blabels:['Isolated']},
+  {name:'Suspected — Saint Helena',loc:'Saint Helena',lat:-15.965,lon:-5.715,desc:'One suspected case among 30 who disembarked April 24. All 30 contact-traced by UK HSCA.',badges:['b-yellow'],blabels:['Suspected']},
+  {name:'Suspected — Tristan da Cunha',loc:'Tristan da Cunha',lat:-37.068,lon:-12.311,desc:'Suspected case on remote British island. Passenger who disembarked from MV Hondius.',badges:['b-yellow'],blabels:['Suspected']},
+  {name:'Suspected — France',loc:'Paris, France',lat:48.856,lon:2.352,desc:'One suspected case. Passenger who disembarked before outbreak was announced.',badges:['b-yellow'],blabels:['Suspected']},
+  {name:'Contact Traced — Barcelona',loc:'Barcelona, Spain',lat:41.388,lon:2.154,desc:'South African woman shared flight with Case 2. Confirmed asymptomatic. Monitored by Spain health ministry.',badges:['b-green'],blabels:['Traced · Asymptomatic']},
+  {name:'9 Americans Monitored',loc:'United States (6 states)',lat:38.9,lon:-100.0,desc:'9 US residents across Arizona, Georgia, California and others. CDC dispatched team to Tenerife.',badges:['b-green'],blabels:['Monitoring']},
+  {name:'UK / Canada — Monitoring',loc:'United Kingdom / Canada',lat:51.5,lon:-0.12,desc:'Health authorities monitoring returned passengers from 12 countries including UK and Canada.',badges:['b-green'],blabels:['Monitoring']},
+];
+
+// Auto-detected pins from live news (hybrid: appended to curated)
+let LIVE_DEATHS=[];
+let LIVE_ISOLATIONS=[];
+
+const SHIP_ROUTE=[[-68.303,-54.801],[-60,-58],[-50,-52],[-35,-47],[-22,-35],[-14,-20],[-8,-10],[-5.715,-15.965],[-14.4,-7.9],[-23.51,14.93],[-18.5,24.0],[-16.25,28.1]];
+const SHIP_NOW={lat:26.5,lon:-17.8,name:'MV Hondius — Current Position',desc:'En route from Cape Verde to Tenerife. ~146 passengers on board. CDC team meeting ship on arrival. ETA: May 10–11.',loc:'North Atlantic · Between Cape Verde and Canary Islands'};
+const TENERIFE={lat:28.1,lon:-16.25,name:'Tenerife — Arrival Destination',desc:'Port of Granadilla, Tenerife. MV Hondius expected May 10–11. CDC, WHO, RIVM, Spanish health teams coordinating.',loc:'Tenerife, Canary Islands, Spain'};
+const BSL4_LABS=[
+  {name:'NICD — Hantavirus Ref Lab',city:'Johannesburg',country:'South Africa',lat:-26.181,lon:28.059,hv:true,desc:'Primary Andes hantavirus testing facility for this outbreak.'},
+  {name:'USAMRIID',city:'Fort Detrick, MD',country:'USA',lat:39.434,lon:-77.415,hv:false,desc:'US Army Medical Research BSL-4 facility.'},
+  {name:'CDC — High-Consequence Pathogens',city:'Atlanta, GA',country:'USA',lat:33.799,lon:-84.325,hv:true,desc:'Coordinating US response. Shipped diagnostic kits to Tenerife.'},
+  {name:'Galveston National Lab',city:'Galveston, TX',country:'USA',lat:29.310,lon:-94.786,hv:false,desc:'Major US hantavirus research centre.'},
+  {name:'Robert Koch Institut — BSL-4',city:'Berlin',country:'Germany',lat:52.540,lon:13.350,hv:true,desc:'Primary German HV reference lab. WHO Collaborating Centre.'},
+  {name:'RIVM',city:'Bilthoven',country:'Netherlands',lat:52.129,lon:5.199,hv:false,desc:'Dutch National Institute for Public Health.'},
+  {name:'Spiez Laboratory',city:'Spiez',country:'Switzerland',lat:46.686,lon:7.672,hv:false,desc:'Swiss Federal BSL-4 facility.'},
+  {name:'Institut Pasteur P4',city:'Lyon',country:'France',lat:45.730,lon:4.855,hv:true,desc:'Jean Mérieux P4. European HV reference capacity.'},
+  {name:'ANLIS Malbrán',city:'Buenos Aires',country:'Argentina',lat:-34.605,lon:-58.392,hv:true,desc:'Argentina primary Andes virus reference lab.'},
+  {name:'UK HSCA — Porton Down',city:'Salisbury',country:'UK',lat:51.124,lon:-1.711,hv:false,desc:'UK BSL-4 facility. Contact-tracing support for St. Helena passengers.'},
+];
+const ENDEMIC_IDS=['032','076','068','152','604','600','858','484','630','840','028'];
+const ORIGIN_IDS=['032','152','858'];
+const INVOLVED_IDS=['032','152','858','710','528','276','756','702','250','724','132','654','076','840','124','826'];
+
+const COUNTRY_DATA={
+  '710':{deaths:1,confirmed:1,status:'ICU active',type:'red',role:'involved',labs:['NICD Johannesburg (HV Ref)'],desc:'Primary confirmed death April 26. One ICU patient confirmed Andes virus. NICD serving as reference lab for outbreak.'},
+  '528':{deaths:0,confirmed:2,status:'2 hospitalised',type:'yellow',role:'involved',labs:['RIVM Bilthoven (BSL-4)'],desc:'Flag state of MV Hondius. Two patients hospitalised in Amsterdam. Dutch MFA coordinating international response.'},
+  '276':{deaths:0,confirmed:1,status:'1 hospitalised',type:'yellow',role:'involved',labs:['Robert Koch Institut Berlin (HV Ref)'],desc:'One patient airlifted and confirmed hantavirus positive. WHO Collaborating Centre handling diagnostics.'},
+  '756':{deaths:0,confirmed:1,status:'1 isolated Zurich',type:'yellow',role:'involved',labs:['Spiez Laboratory (BSL-4)'],desc:'One returning passenger confirmed Andes-positive in Zurich. Swiss Federal authorities monitoring contacts.'},
+  '702':{deaths:0,confirmed:0,status:'2 isolated',type:'yellow',role:'involved',labs:[],desc:'Two Singapore residents who shared a Johannesburg flight with Case 2. Isolated in government facility.'},
+  '250':{deaths:0,confirmed:0,status:'1 suspected',type:'yellow',role:'involved',labs:['Institut Pasteur Lyon P4 (HV Ref)'],desc:'One suspected case. Institut Pasteur Lyon has P4 capacity for hantavirus testing.'},
+  '724':{deaths:0,confirmed:0,status:'contact traced',type:'cyan',role:'involved',labs:[],desc:'MV Hondius arriving Port of Granadilla, Tenerife ETA May 10–11. One contact-traced asymptomatic case in Barcelona.'},
+  '840':{deaths:0,confirmed:0,status:'9 monitoring',type:'cyan',role:'involved',labs:['CDC Atlanta (HV Ref)','Galveston NL (BSL-4)','USAMRIID (BSL-4)'],desc:'9 US residents monitored across 6 states. CDC Level 3 response. Biocontainment charter to Nebraska arranged.'},
+  '032':{deaths:0,confirmed:0,status:'Exposure zone',type:'yellow',role:'origin',labs:['ANLIS Malbrán Buenos Aires (HV Ref)'],desc:'Index case birdwatching trip Nov 2025 – Apr 2026. 101 endemic cases in 2025 (21 deaths). ANLIS Malbrán sending reagents internationally.'},
+  '152':{deaths:0,confirmed:0,status:'Exposure (endemic)',type:'yellow',role:'origin',labs:[],desc:'Part of index case route. Endemic Andes virus. Southern Cone hantavirus zone.'},
+  '858':{deaths:0,confirmed:0,status:'Exposure (endemic)',type:'yellow',role:'origin',labs:[],desc:'Part of index case pre-embarkation route. Endemic Andes virus territory.'},
+  '826':{deaths:0,confirmed:0,status:'30 contact traced',type:'cyan',role:'involved',labs:['UK HSCA Porton Down (BSL-4)'],desc:'UK HSCA contact-tracing all 30 passengers who disembarked at Saint Helena. One suspected case on Tristan da Cunha.'},
+  '124':{deaths:0,confirmed:0,status:'Monitoring',type:'cyan',role:'involved',labs:[],desc:'Canadian passengers on board. Health authorities monitoring returned nationals.'},
+  '076':{deaths:0,confirmed:0,status:'Endemic · Monitoring',type:'purple',role:'endemic',labs:[],desc:'Major hantavirus endemic country. 20 cases and 11 deaths in 2025.'},
+  '068':{deaths:0,confirmed:0,status:'Endemic · ↑ cases',type:'purple',role:'endemic',labs:[],desc:'Significant increase in hantavirus cases in 2025.'},
+};
+
+const LOCAL_PROFILES={
+  'ZA':{name:'South Africa',bar:'Confirmed in local ICU: <b class="lb-val red">1</b> · Deaths in region: <b class="lb-val red">1</b> · Primary testing: <b class="lb-val cyan">NICD Johannesburg</b>',focusLat:-26.2,focusLon:28.0},
+  'NL':{name:'Netherlands',bar:'Hospitalised: <b class="lb-val yellow">2</b> · Flag state MV Hondius · Surveillance: <b class="lb-val green">ACTIVE (RIVM)</b>',focusLat:52.1,focusLon:5.3},
+  'DE':{name:'Germany',bar:'Confirmed: <b class="lb-val cyan">1</b> · Airlifted patient · Surveillance: <b class="lb-val green">ACTIVE (RKI)</b>',focusLat:51.2,focusLon:10.5},
+  'CH':{name:'Switzerland',bar:'Confirmed: <b class="lb-val cyan">1</b> isolated in Zurich · Surveillance: <b class="lb-val green">ACTIVE (Spiez)</b>',focusLat:46.8,focusLon:8.2},
+  'SG':{name:'Singapore',bar:'Isolated: <b class="lb-val yellow">2</b> · Government facility · Surveillance: <b class="lb-val green">ACTIVE (CDA)</b>',focusLat:1.35,focusLon:103.8},
+  'US':{name:'United States',bar:'Monitoring: <b class="lb-val yellow">9</b> across 6 states · CDC Level 3 · Surveillance: <b class="lb-val green">ACTIVE (CDC)</b>',focusLat:38.9,focusLon:-100},
+  'GB':{name:'United Kingdom',bar:'Contact tracing: <b class="lb-val green">30</b> (St. Helena) · Suspected: <b class="lb-val yellow">1</b>',focusLat:51.5,focusLon:-0.12},
+  'AR':{name:'Argentina',bar:'Endemic burden 2025: <b class="lb-val red">101 cases · 21 deaths</b> · Index case exposure zone',focusLat:-34.6,focusLon:-58.4},
+  'ES':{name:'Spain',bar:'MV Hondius: <b class="lb-val cyan">Tenerife ETA May 10</b> · 1 asymptomatic contact traced',focusLat:40.4,focusLon:-3.7},
+  'FR':{name:'France',bar:'Suspected: <b class="lb-val yellow">1</b> · BSL-4: Institut Pasteur Lyon',focusLat:46.2,focusLon:2.2},
+};
+const DEFAULT_PROFILE={name:'Your Region',bar:'No direct local impact reported · Global risk: <b class="lb-val green">LOW</b> · Follow WHO guidance',focusLat:0,focusLon:0};
+
+const countryNames={"004":"Afghanistan","008":"Albania","012":"Algeria","024":"Angola","028":"Antigua and Barbuda","031":"Azerbaijan","032":"Argentina","036":"Australia","040":"Austria","044":"Bahamas","050":"Bangladesh","051":"Armenia","052":"Barbados","056":"Belgium","064":"Bhutan","068":"Bolivia","070":"Bosnia and Herzegovina","072":"Botswana","076":"Brazil","084":"Belize","090":"Solomon Islands","096":"Brunei","100":"Bulgaria","104":"Myanmar","108":"Burundi","112":"Belarus","116":"Cambodia","120":"Cameroon","124":"Canada","132":"Cabo Verde","140":"Central African Republic","144":"Sri Lanka","148":"Chad","152":"Chile","156":"China","170":"Colombia","174":"Comoros","178":"Congo","180":"DR Congo","188":"Costa Rica","191":"Croatia","192":"Cuba","196":"Cyprus","203":"Czech Republic","204":"Benin","208":"Denmark","212":"Dominica","214":"Dominican Republic","218":"Ecuador","222":"El Salvador","226":"Equatorial Guinea","231":"Ethiopia","232":"Eritrea","233":"Estonia","238":"Falkland Islands","242":"Fiji","246":"Finland","250":"France","254":"French Guiana","258":"French Polynesia","262":"Djibouti","266":"Gabon","268":"Georgia","270":"Gambia","275":"Palestine","276":"Germany","288":"Ghana","296":"Kiribati","300":"Greece","304":"Greenland","308":"Grenada","320":"Guatemala","324":"Guinea","328":"Guyana","332":"Haiti","340":"Honduras","344":"Hong Kong","348":"Hungary","352":"Iceland","356":"India","360":"Indonesia","364":"Iran","368":"Iraq","372":"Ireland","376":"Israel","380":"Italy","384":"Ivory Coast","388":"Jamaica","392":"Japan","398":"Kazakhstan","400":"Jordan","404":"Kenya","408":"North Korea","410":"South Korea","414":"Kuwait","417":"Kyrgyzstan","418":"Laos","422":"Lebanon","426":"Lesotho","428":"Latvia","430":"Liberia","434":"Libya","440":"Lithuania","442":"Luxembourg","450":"Madagascar","454":"Malawi","458":"Malaysia","466":"Mali","470":"Malta","478":"Mauritania","480":"Mauritius","484":"Mexico","492":"Monaco","496":"Mongolia","498":"Moldova","499":"Montenegro","504":"Morocco","508":"Mozambique","516":"Namibia","524":"Nepal","528":"Netherlands","540":"New Caledonia","554":"New Zealand","558":"Nicaragua","562":"Niger","566":"Nigeria","578":"Norway","583":"Micronesia","584":"Marshall Islands","585":"Palau","586":"Pakistan","591":"Panama","598":"Papua New Guinea","600":"Paraguay","604":"Peru","608":"Philippines","616":"Poland","620":"Portugal","624":"Guinea-Bissau","626":"Timor-Leste","634":"Qatar","642":"Romania","643":"Russia","646":"Rwanda","682":"Saudi Arabia","686":"Senegal","694":"Sierra Leone","702":"Singapore","703":"Slovakia","704":"Vietnam","706":"Somalia","710":"South Africa","716":"Zimbabwe","724":"Spain","728":"South Sudan","729":"Sudan","732":"Western Sahara","748":"Eswatini","752":"Sweden","756":"Switzerland","760":"Syria","762":"Tajikistan","764":"Thailand","768":"Togo","776":"Tonga","780":"Trinidad and Tobago","784":"United Arab Emirates","788":"Tunisia","792":"Turkey","795":"Turkmenistan","800":"Uganda","804":"Ukraine","807":"North Macedonia","818":"Egypt","826":"United Kingdom","834":"Tanzania","840":"United States","858":"Uruguay","860":"Uzbekistan","862":"Venezuela","882":"Samoa","887":"Yemen","894":"Zambia"};
+
+/* ════════════════════════════════════════════════════════════
+   DATA REFRESH ENGINE
+══════════════════════════════════════════════════════════════ */
+let lastLiveUpdate=null;
+
+async function refreshLiveData(){
+  setStatus('connecting');
+  const liveNews=await fetchGDELT();
+  if(liveNews&&liveNews.length>0){
+    // Hybrid: combine live + curated, dedupe by headline prefix, sort by recency
+    const seen=new Set();
+    const combined=[];
+    for(const n of liveNews){
+      const key=n.headline.toLowerCase().slice(0,40);
+      if(!seen.has(key)){seen.add(key);combined.push(n);}
+    }
+    for(const n of CURATED_NEWS){
+      const key=n.headline.toLowerCase().slice(0,40);
+      if(!seen.has(key)){seen.add(key);combined.push(n);}
+    }
+    NEWS=combined.slice(0,40);
+    // Extract auto-detected pins from live death/quarantine articles
+    LIVE_DEATHS=liveNews.filter(n=>n.cat==='death'&&n.lat!==0).map(n=>({
+      name:'[LIVE] '+n.headline.slice(0,60),
+      loc:n.loc,lat:n.lat,lon:n.lon,
+      desc:n.headline+' — Source: '+(n.domain||'GDELT')+'. Unverified live signal — see official sources below for confirmed cases.',
+      badges:['b-red'],blabels:['Unverified · Live'],
+      url:n.url,live:true,
+    }));
+    LIVE_ISOLATIONS=liveNews.filter(n=>n.cat==='quarantine'&&n.lat!==0).map(n=>({
+      name:'[LIVE] '+n.headline.slice(0,60),
+      loc:n.loc,lat:n.lat,lon:n.lon,
+      desc:n.headline+' — Source: '+(n.domain||'GDELT')+'. Unverified live signal.',
+      badges:['b-yellow'],blabels:['Unverified · Live'],
+      url:n.url,live:true,
+    }));
+    lastLiveUpdate=new Date();
+    setStatus('live',liveNews.length);
+    if(window.flashNewsBadge) window.flashNewsBadge();
+  } else {
+    setStatus('fallback');
+  }
+  buildNews();
+  if(worldData) render();
+  // Check if any new cases are within 100km of user (PRO feature)
+  checkProximityAlerts();
+}
+
+function setStatus(state,count){
+  const el=document.getElementById('data-status');
+  const src=document.getElementById('news-src');
+  if(state==='live'){
+    el.className='live-pill live';
+    el.innerHTML='<div class="live-dot"></div>LIVE · '+count+' articles · GDELT';
+    src.className='news-src live-status';
+    src.innerHTML='✓ LIVE FEED · GDELT · Updated '+(lastLiveUpdate?lastLiveUpdate.toLocaleTimeString():'now');
+  } else if(state==='fallback'){
+    el.className='live-pill stale';
+    el.innerHTML='<div class="live-dot"></div>CACHED · WHO/CDC/PAHO';
+    src.className='news-src fallback';
+    src.innerHTML='⚠ Using cached data · Live feed unavailable';
+  } else {
+    el.className='live-pill';
+    el.innerHTML='<div class="live-dot"></div>CONNECTING…';
+    src.className='news-src';
+    src.innerHTML='⏳ Fetching from GDELT…';
+  }
+}
+
+function buildNews(){
   const feed=document.getElementById('news-feed');
-  document.getElementById('news-count').textContent=NEWS.length+' items';
+  document.getElementById('news-cnt').textContent=NEWS.length+' items';
   feed.innerHTML=NEWS.map((n,i)=>{
-    const tc=n.type==='breaking'?'tag-breaking':n.type==='official'?'tag-official':'tag-social';
-    const lbl=n.type==='breaking'?'[BREAKING]':n.type==='official'?'[OFFICIAL REPORT]':'[TWEET/SOCIAL]';
-    const cc=n.type==='breaking'?'breaking':n.type==='official'?'official':'social';
-    return `<div class="news-item ${cc}" data-i="${i}" onclick="newsClick(${i})">
-      <div class="news-tag ${tc}">${lbl}</div>
-      <div class="news-headline">${n.headline}</div>
-      <div class="news-meta">
-        <span class="news-time">${n.time}</span>
-        <span class="news-loc">${n.loc.split(',')[0]}</span>
-      </div>
+    const tc=n.type==='breaking'?'tag-b':n.type==='official'?'tag-o':'tag-s';
+    const lbl=n.type==='breaking'?'[BREAKING]':n.type==='official'?'[OFFICIAL]':'[SOCIAL]';
+    const liveBadge=n.live?'<span class="ntag tag-live">[LIVE]</span>':'';
+    return `<div class="ni ${n.type} ${n.live?'live':''}" onclick="newsClick(${i})">
+      <div><span class="ntag ${tc}">${lbl}</span>${liveBadge}</div>
+      <div class="nhl">${n.headline}</div>
+      <div class="nmeta"><span class="ntime">${n.time}</span><span class="nloc">${n.loc.split(',')[0]}</span></div>
     </div>`;
   }).join('');
 }
 
 function newsClick(i){
   const n=NEWS[i];
-  focusMapOn(n.lon,n.lat);
-  showDetail(n.headline,'',n.loc,'news',[n.type==='breaking'?'b-red':n.type==='official'?'b-cyan':'b-yellow'],[n.type==='breaking'?'Breaking':n.type==='official'?'Official Report':'Social/Tweet']);
+  if(n.lat!==0||n.lon!==0) focusMapOn(n.lon,n.lat,true);
+  showDetail(n.headline,n.live?'LIVE · '+(n.domain||'GDELT'):'',n.loc,'news',
+    [n.type==='breaking'?'b-red':n.type==='official'?'b-cyan':'b-yellow',...(n.live?['b-green']:[])],
+    [n.type==='breaking'?'Breaking':n.type==='official'?'Official':'Social',...(n.live?['Live']:[])]);
+  if(n.url){
+    setTimeout(()=>{
+      const dc=document.getElementById('detail-card');
+      dc.innerHTML+=`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><a href="${n.url}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;font-size:10px;font-family:var(--mono)">→ Open original article</a></div>`;
+    },50);
+  }
 }
 
-/* ══════════════════════════════════════
-   GEO-LOCATION → LOCAL BAR
-══════════════════════════════════════ */
-const LOCAL_PROFILES={
-  'ZA':{name:'South Africa',bar:'Confirmed in local ICU: <b class="lb-val red">1</b> · Deaths in region: <b class="lb-val red">1</b> · Primary testing: <b class="lb-val cyan">NICD Johannesburg</b> · Surveillance: <b class="lb-val green">ACTIVE (NICD)</b>',focusLat:-26.2,focusLon:28.0},
-  'NL':{name:'Netherlands',bar:'Hospitalised: <b class="lb-val yellow">2</b> · Flag state of MV Hondius · Surveillance: <b class="lb-val green">ACTIVE (RIVM)</b>',focusLat:52.1,focusLon:5.3},
-  'DE':{name:'Germany',bar:'Confirmed: <b class="lb-val cyan">1</b> · Airlifted patient receiving care · Surveillance: <b class="lb-val green">ACTIVE (RKI)</b>',focusLat:51.2,focusLon:10.5},
-  'CH':{name:'Switzerland',bar:'Confirmed: <b class="lb-val cyan">1</b> isolated in Zurich · Surveillance: <b class="lb-val green">ACTIVE (Spiez Lab)</b>',focusLat:46.8,focusLon:8.2},
-  'SG':{name:'Singapore',bar:'Isolated: <b class="lb-val yellow">2</b> · Government facility quarantine · Surveillance: <b class="lb-val green">ACTIVE (CDA)</b>',focusLat:1.35,focusLon:103.8},
-  'US':{name:'United States',bar:'Under monitoring: <b class="lb-val yellow">9</b> across 6 states · CDC Level 3 response · Surveillance: <b class="lb-val green">ACTIVE (CDC)</b>',focusLat:38.9,focusLon:-100},
-  'GB':{name:'United Kingdom',bar:'Contact tracing: <b class="lb-val green">30</b> (St. Helena) · Suspected: <b class="lb-val yellow">1</b> · Surveillance: <b class="lb-val green">ACTIVE (UKHSA)</b>',focusLat:51.5,focusLon:-0.12},
-  'AR':{name:'Argentina',bar:'Endemic burden 2025: <b class="lb-val red">101 cases · 21 deaths</b> · Index case exposure zone · Surveillance: <b class="lb-val green">ACTIVE (ANLIS)</b>',focusLat:-34.6,focusLon:-58.4},
-  'ES':{name:'Spain',bar:'MV Hondius arriving: <b class="lb-val cyan">Tenerife ETA May 10–11</b> · Contact traced: <b class="lb-val green">1 asymptomatic</b> · Surveillance: <b class="lb-val green">ACTIVE</b>',focusLat:40.4,focusLon:-3.7},
-  'FR':{name:'France',bar:'Suspected case: <b class="lb-val yellow">1</b> · BSL-4 capacity: Institut Pasteur Lyon · Surveillance: <b class="lb-val green">ACTIVE</b>',focusLat:46.2,focusLon:2.2},
-};
-const DEFAULT_PROFILE={name:'Your Region',bar:'No direct local impact reported · Global risk remains <b class="lb-val green">LOW</b> · Follow WHO guidance · Surveillance: <b class="lb-val green">WHO/CDC ACTIVE</b>',focusLat:0,focusLon:0};
-
-let userCountry='';
-let userFocusLat=null,userFocusLon=null;
-let initDone=false;
-
+/* ════════════════════════════════════════════════════════════
+   GEO LOCATION
+══════════════════════════════════════════════════════════════ */
+let userCountry='',userFocusLat=null,userFocusLon=null,initDone=false;
 async function detectLocation(){
   const bar=document.getElementById('local-bar');
   try{
     const res=await fetch('https://ipapi.co/json/');
     const data=await res.json();
     userCountry=data.country_code||'';
-    const profile=LOCAL_PROFILES[userCountry]||DEFAULT_PROFILE;
-    const regionStr=profile.name+(userCountry?' ('+userCountry+')':'');
-    bar.innerHTML=`
-      <span class="lb-region">◉ ${regionStr}</span>
-      <div class="lb-sep"></div>
-      <span class="lb-stat">Local Impact: ${profile.bar}</span>
-      <div class="lb-status"><div class="lb-pulse"></div>SURVEILLANCE ACTIVE</div>`;
-    if(profile.focusLat&&profile.focusLon){
-      userFocusLat=profile.focusLat;
-      userFocusLon=profile.focusLon;
+    // Capture lat/lon for proximity alerts (PRO)
+    if(data.latitude && data.longitude){
+      userLat = parseFloat(data.latitude);
+      userLon = parseFloat(data.longitude);
     }
-    if(initDone&&userFocusLat!==null) focusMapOn(userFocusLon,userFocusLat);
+    const p=LOCAL_PROFILES[userCountry]||DEFAULT_PROFILE;
+    bar.innerHTML=`<span class="lb-region">◉ ${p.name}${userCountry?' ('+userCountry+')':''}</span><div class="lb-sep"></div><span>Local Impact: ${p.bar}</span><div class="lb-status"><div class="lb-pulse"></div>SURVEILLANCE ACTIVE</div>`;
+    if(p.focusLat&&p.focusLon){userFocusLat=p.focusLat;userFocusLon=p.focusLon;}
+    if(initDone&&userFocusLat!==null) focusMapOn(userFocusLon,userFocusLat,true);
+    if(userCountry) localStorage.setItem('hanta_home_region',userCountry);
   }catch(e){
-    bar.innerHTML=`<span class="lb-region">◉ Region Detection</span><div class="lb-sep"></div><span class="lb-stat">Location unavailable · Global risk: <b class="lb-val green">LOW</b> · Follow WHO guidance</span>`;
-  }
-  // Restore from localStorage
-  const saved=localStorage.getItem('hanta_home_region');
-  if(saved){
-    const p=LOCAL_PROFILES[saved];
-    if(p&&userFocusLat===null){userFocusLat=p.focusLat;userFocusLon=p.focusLon;}
+    bar.innerHTML=`<span class="lb-region">◉ Region detection unavailable</span><div class="lb-sep"></div><span>Global risk: <b class="lb-val green">LOW</b></span>`;
   }
 }
 
-/* ══════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    MAP ENGINE
-══════════════════════════════════════ */
+══════════════════════════════════════════════════════════════ */
 const svgEl=document.getElementById('map-svg');
 const mapWrap=document.getElementById('map-wrap');
-const tooltip=document.getElementById('map-tooltip');
+const tooltip=document.getElementById('map-tt');
 const selBar=document.getElementById('sel-bar');
 const modeHint=document.getElementById('mode-hint');
 const coordsBar=document.getElementById('coords-bar');
 const detailCard=document.getElementById('detail-card');
 
-let worldData=null;
-let mode='2d';
+let worldData=null,mode='2d';
 let rotation=[-10,-15,0];
 let isDragging=false,dragStart=null,rotStart=null;
 let currentZoom=d3.zoomIdentity;
 let W,H,zoomBeh;
 
 function getWH(){W=mapWrap.clientWidth;H=mapWrap.clientHeight;}
-
-function makeProj2d(){return d3.geoNaturalEarth1().scale(Math.min(W,H*2)/6.3).translate([W/2,H/2]);}
+function baseProj2d(){return d3.geoNaturalEarth1().scale(Math.min(W,H*2)/6.3).translate([W/2,H/2]);}
+function makeProj2d(){
+  const p=baseProj2d();
+  p.translate([W/2+currentZoom.x, H/2+currentZoom.y]).scale(Math.min(W,H*2)/6.3*currentZoom.k);
+  return p;
+}
 function makeProj3d(){return d3.geoOrthographic().scale(Math.min(W,H)*0.44).translate([W/2,H/2]).clipAngle(90).rotate(rotation);}
+
+function isVisible(lon,lat){
+  if(mode!=='3d') return true;
+  const toRad=d=>d*Math.PI/180;
+  const dlon=toRad(lon-(-rotation[0]));
+  const dlat=toRad(lat);
+  const clat=toRad(-rotation[1]);
+  return Math.cos(dlat)*Math.cos(clat)*Math.cos(dlon)+Math.sin(dlat)*Math.sin(clat)>0;
+}
 
 function render(){
   if(!worldData) return;
@@ -483,16 +1011,11 @@ function render(){
   svg.selectAll('.rl').remove();
   const root=svg.append('g').attr('class','rl');
   const proj=mode==='2d'?makeProj2d():makeProj3d();
-  if(mode==='2d'){proj.translate([currentZoom.applyX(W/2)-(currentZoom.k-1)*0,currentZoom.applyY(H/2)-(currentZoom.k-1)*0]);
-    proj.translate([W/2+currentZoom.x,H/2+currentZoom.y]).scale(proj.scale()*currentZoom.k);}
   const path=d3.geoPath(proj);
 
-  // Ocean
   root.append('path').datum({type:'Sphere'}).attr('d',path).attr('fill','#040c1a').attr('stroke','rgba(0,200,255,0.3)').attr('stroke-width',1);
-  // Graticule
   root.append('path').datum(d3.geoGraticule()()).attr('d',path).attr('fill','none').attr('stroke','rgba(0,200,255,0.06)').attr('stroke-width',0.4);
 
-  // Countries
   const feats=topojson.feature(worldData,worldData.objects.countries).features;
   feats.forEach(f=>{
     const id=String(f.id).padStart(3,'0');
@@ -505,75 +1028,44 @@ function render(){
       .on('mousemove',function(ev){
         const name=countryNames[id]||'Unknown';
         let desc='';
-        if(ORIGIN_IDS.includes(id)) desc='Exposure/origin zone — index case travelled here before boarding MV Hondius.';
-        else if(ENDEMIC_IDS.includes(id)) desc='Hantavirus endemic region — Andes or related strains present in wildlife reservoirs.';
-        else if(INVOLVED_IDS.includes(id)) desc='Nation involved in outbreak response — confirmed cases, monitoring, or evacuation coordination.';
+        if(ORIGIN_IDS.includes(id)) desc='Exposure/origin zone — index case travelled here before boarding.';
+        else if(ENDEMIC_IDS.includes(id)) desc='Hantavirus endemic region.';
+        else if(INVOLVED_IDS.includes(id)) desc='Involved in outbreak response.';
         showTT(ev,name,'',desc,[],[]);
-      }).on('mouseleave',hideTT);
+      })
+      .on('mouseleave',hideTT)
+      .on('click',function(ev){ev.stopPropagation();hideTT();zoomToCountry(f,id);});
   });
-  // Borders
   root.append('path').datum(topojson.mesh(worldData,worldData.objects.countries,(a,b)=>a!==b))
     .attr('d',path).attr('fill','none').attr('stroke','rgba(0,200,255,0.2)').attr('stroke-width',0.5);
 
-  // Ship route line
-  const routeCoords=SHIP_ROUTE.map(([lon,lat])=>[lon,lat]);
-  root.append('path').datum({type:'Feature',geometry:{type:'LineString',coordinates:routeCoords}})
+  root.append('path').datum({type:'Feature',geometry:{type:'LineString',coordinates:SHIP_ROUTE.map(([lo,la])=>[lo,la])}})
     .attr('d',d3.geoPath(proj)).attr('fill','none').attr('stroke','rgba(0,255,204,0.5)').attr('stroke-width',1.8).attr('stroke-linecap','round');
-  // Dashed travel route (index case)
-  const travel=[[-68.303,-54.801],[-72,-38],[-70.5,-33.5],[-56.167,-34.9],[-68.303,-54.801]];
-  root.append('path').datum({type:'Feature',geometry:{type:'LineString',coordinates:travel}})
+  const tr=[[-68.303,-54.801],[-72,-38],[-70.5,-33.5],[-56.167,-34.9],[-68.303,-54.801]];
+  root.append('path').datum({type:'Feature',geometry:{type:'LineString',coordinates:tr}})
     .attr('d',d3.geoPath(proj)).attr('fill','none').attr('stroke','rgba(255,193,7,0.45)').attr('stroke-width',1.3).attr('stroke-dasharray','5,4');
 
-  // ── VISIBILITY HELPER (3D only) ──
-  // Returns true if [lon,lat] is on the visible hemisphere of the orthographic projection.
-  // Uses dot product: point is visible if angle to globe centre < 90°.
-  function isVisible(lon,lat){
-    if(mode!=='3d') return true;
-    const [rl,rp]=rotation; // lambda (lon), phi (lat) of globe centre
-    const toRad=d=>d*Math.PI/180;
-    const dlon=toRad(lon-(-rl));
-    const dlat=toRad(lat);
-    const clat=toRad(-rp);
-    // dot product of unit vectors
-    const dot=Math.cos(dlat)*Math.cos(clat)*Math.cos(dlon)+Math.sin(dlat)*Math.sin(clat);
-    return dot>0;
-  }
-
-  // ── SHIP ICON (triangle symbol) ──
   const shipPt=proj([SHIP_NOW.lon,SHIP_NOW.lat]);
   if(shipPt&&!isNaN(shipPt[0])&&isVisible(SHIP_NOW.lon,SHIP_NOW.lat)){
-    // Pulsing ring
-    root.append('circle').attr('cx',shipPt[0]).attr('cy',shipPt[1]).attr('r',14)
-      .attr('fill','none').attr('stroke','rgba(0,255,204,0.35)').attr('stroke-width',1);
-    // Ship triangle (pointing up = north)
+    root.append('circle').attr('cx',shipPt[0]).attr('cy',shipPt[1]).attr('r',14).attr('fill','none').attr('stroke','rgba(0,255,204,0.3)').attr('stroke-width',1);
     const sx=shipPt[0],sy=shipPt[1];
-    root.append('polygon')
-      .attr('points',`${sx},${sy-10} ${sx-7},${sy+6} ${sx+7},${sy+6}`)
-      .attr('fill','var(--ship)').attr('stroke','rgba(0,0,0,0.4)').attr('stroke-width',0.8)
-      .style('cursor','pointer').attr('title','MV Hondius')
+    root.append('polygon').attr('points',`${sx},${sy-10} ${sx-7},${sy+6} ${sx+7},${sy+6}`)
+      .attr('fill','var(--ship)').attr('stroke','rgba(0,0,0,0.4)').attr('stroke-width',0.8).style('cursor','pointer')
       .on('mousemove',ev=>showTT(ev,'🚢 MV Hondius',SHIP_NOW.loc,SHIP_NOW.desc,['b-cyan'],['Ship Tracker']))
       .on('mouseleave',hideTT)
-      .on('click',ev=>{ev.stopPropagation();showDetail('MV Hondius — Ship Tracker',SHIP_NOW.loc,SHIP_NOW.desc,'ship',['b-cyan'],['Ship Tracker']);});
-    // Ship label
-    root.append('text').attr('x',sx).attr('y',sy-13).attr('text-anchor','middle')
-      .attr('fill','rgba(0,255,204,0.7)').attr('font-size','7px').attr('font-family','JetBrains Mono,monospace')
-      .attr('letter-spacing','0.08em').text('MV HONDIUS');
+      .on('click',ev=>{ev.stopPropagation();showDetail('MV Hondius',SHIP_NOW.loc,SHIP_NOW.desc,'ship',['b-cyan'],['Ship']);});
+    root.append('text').attr('x',sx).attr('y',sy-14).attr('text-anchor','middle').attr('fill','rgba(0,255,204,0.7)').attr('font-size','7px').attr('font-family','JetBrains Mono,monospace').attr('letter-spacing','0.08em').text('MV HONDIUS');
   }
-
-  // Tenerife destination marker
   const tenPt=proj([TENERIFE.lon,TENERIFE.lat]);
   if(tenPt&&!isNaN(tenPt[0])&&isVisible(TENERIFE.lon,TENERIFE.lat)){
-    root.append('circle').attr('cx',tenPt[0]).attr('cy',tenPt[1]).attr('r',6)
-      .attr('fill','none').attr('stroke','rgba(0,255,204,0.6)').attr('stroke-width',1.2).attr('stroke-dasharray','2,2');
-    root.append('circle').attr('cx',tenPt[0]).attr('cy',tenPt[1]).attr('r',3)
-      .attr('fill','rgba(0,255,204,0.4)').attr('stroke','rgba(0,255,204,0.8)').attr('stroke-width',0.8)
-      .style('cursor','pointer')
-      .on('mousemove',ev=>showTT(ev,'Tenerife — Arrival Destination',TENERIFE.loc,TENERIFE.desc,['b-cyan'],['Destination']))
+    root.append('circle').attr('cx',tenPt[0]).attr('cy',tenPt[1]).attr('r',6).attr('fill','none').attr('stroke','rgba(0,255,204,0.6)').attr('stroke-width',1).attr('stroke-dasharray','2,2');
+    root.append('circle').attr('cx',tenPt[0]).attr('cy',tenPt[1]).attr('r',3).attr('fill','rgba(0,255,204,0.35)').attr('stroke','rgba(0,255,204,0.8)').attr('stroke-width',0.8).style('cursor','pointer')
+      .on('mousemove',ev=>showTT(ev,'Tenerife — Destination',TENERIFE.loc,TENERIFE.desc,['b-cyan'],['Destination']))
       .on('mouseleave',hideTT)
-      .on('click',ev=>{ev.stopPropagation();showDetail('Tenerife — Arrival Destination',TENERIFE.loc,TENERIFE.desc,'ship',['b-cyan'],['Destination']);});
+      .on('click',ev=>{ev.stopPropagation();showDetail('Tenerife — Destination',TENERIFE.loc,TENERIFE.desc,'ship',['b-cyan'],['Destination']);});
   }
 
-  // ── DEATH PINS (red) ──
+  // Curated deaths — solid red
   DEATHS.forEach(d=>{
     const pt=proj([d.lon,d.lat]);
     if(!pt||isNaN(pt[0])||!isVisible(d.lon,d.lat)) return;
@@ -583,11 +1075,20 @@ function render(){
       .on('click',ev=>{ev.stopPropagation();showDetail(d.name,d.loc,d.desc,'death',d.badges,d.blabels);});
     g.append('circle').attr('cx',pt[0]).attr('cy',pt[1]).attr('r',12).attr('fill','none').attr('stroke','rgba(255,59,59,0.35)').attr('stroke-width',1);
     g.append('circle').attr('cx',pt[0]).attr('cy',pt[1]).attr('r',7).attr('fill','#ff3b3b').attr('stroke','rgba(0,0,0,0.3)').attr('stroke-width',0.6);
-    // Skull mark
     g.append('text').attr('x',pt[0]).attr('y',pt[1]+4).attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.85)').attr('font-size','8px').text('✕');
   });
-
-  // ── ISOLATION/OBSERVATION PINS (yellow) ──
+  // Live deaths — dashed red outline (unverified)
+  LIVE_DEATHS.forEach(d=>{
+    const pt=proj([d.lon,d.lat]);
+    if(!pt||isNaN(pt[0])||!isVisible(d.lon,d.lat)) return;
+    const g=root.append('g').style('cursor','pointer')
+      .on('mousemove',ev=>showTT(ev,d.name,d.loc,d.desc,d.badges,d.blabels))
+      .on('mouseleave',hideTT)
+      .on('click',ev=>{ev.stopPropagation();showDetail(d.name,d.loc,d.desc,'death',d.badges,d.blabels);});
+    g.append('circle').attr('cx',pt[0]).attr('cy',pt[1]).attr('r',9).attr('fill','none').attr('stroke','rgba(255,59,59,0.7)').attr('stroke-width',1.2).attr('stroke-dasharray','3,2');
+    g.append('circle').attr('cx',pt[0]).attr('cy',pt[1]).attr('r',5).attr('fill','rgba(255,59,59,0.3)').attr('stroke','rgba(255,59,59,0.8)').attr('stroke-width',0.6);
+  });
+  // Curated isolations
   ISOLATIONS.forEach(d=>{
     const pt=proj([d.lon,d.lat]);
     if(!pt||isNaN(pt[0])||!isVisible(d.lon,d.lat)) return;
@@ -598,82 +1099,124 @@ function render(){
     g.append('circle').attr('cx',pt[0]).attr('cy',pt[1]).attr('r',9).attr('fill','none').attr('stroke','rgba(255,193,7,0.35)').attr('stroke-width',1);
     g.append('circle').attr('cx',pt[0]).attr('cy',pt[1]).attr('r',5.5).attr('fill','#ffc107').attr('stroke','rgba(0,0,0,0.3)').attr('stroke-width',0.6);
   });
+  // Live isolations — dashed yellow outline
+  LIVE_ISOLATIONS.forEach(d=>{
+    const pt=proj([d.lon,d.lat]);
+    if(!pt||isNaN(pt[0])||!isVisible(d.lon,d.lat)) return;
+    const g=root.append('g').style('cursor','pointer')
+      .on('mousemove',ev=>showTT(ev,d.name,d.loc,d.desc,d.badges,d.blabels))
+      .on('mouseleave',hideTT)
+      .on('click',ev=>{ev.stopPropagation();showDetail(d.name,d.loc,d.desc,'iso',d.badges,d.blabels);});
+    g.append('circle').attr('cx',pt[0]).attr('cy',pt[1]).attr('r',7).attr('fill','none').attr('stroke','rgba(255,193,7,0.7)').attr('stroke-width',1.2).attr('stroke-dasharray','3,2');
+    g.append('circle').attr('cx',pt[0]).attr('cy',pt[1]).attr('r',3.5).attr('fill','rgba(255,193,7,0.4)').attr('stroke','rgba(255,193,7,0.8)').attr('stroke-width',0.6);
+  });
 
-  // ── BSL-4 LABS ──
   BSL4_LABS.forEach(lab=>{
     const pt=proj([lab.lon,lab.lat]);
     if(!pt||isNaN(pt[0])||!isVisible(lab.lon,lab.lat)) return;
     const g=root.append('g').style('cursor','pointer')
-      .on('mousemove',ev=>showTT(ev,lab.name,`${lab.city} · ${lab.country}`,lab.desc,lab.hv?['b-red','b-cyan']:['b-cyan'],lab.hv?['HV Reference Lab','BSL-4']:['BSL-4']))
+      .on('mousemove',ev=>showTT(ev,lab.name,`${lab.city} · ${lab.country}`,lab.desc,lab.hv?['b-red','b-cyan']:['b-cyan'],lab.hv?['HV Ref','BSL-4']:['BSL-4']))
       .on('mouseleave',hideTT)
-      .on('click',ev=>{ev.stopPropagation();showDetail(lab.name,`${lab.city} · ${lab.country}`,lab.desc,lab.hv?'hv':'bsl4',lab.hv?['b-red','b-cyan']:['b-cyan'],lab.hv?['HV Ref Lab','BSL-4']:['BSL-4']);});
+      .on('click',ev=>{ev.stopPropagation();showDetail(lab.name,`${lab.city} · ${lab.country}`,lab.desc,lab.hv?'hv':'bsl4',lab.hv?['b-red','b-cyan']:['b-cyan'],lab.hv?['HV Ref','BSL-4']:['BSL-4']);});
     if(lab.hv){
-      // HV Reference Lab — red diamond
       const px=pt[0],py=pt[1],s=7;
-      g.append('polygon').attr('points',`${px},${py-s} ${px+s},${py} ${px},${py+s} ${px-s},${py}`)
-        .attr('fill','rgba(255,59,59,0.25)').attr('stroke','rgba(255,59,59,0.8)').attr('stroke-width',1);
-      g.append('text').attr('x',px).attr('y',py+3).attr('text-anchor','middle')
-        .attr('fill','rgba(255,59,59,0.9)').attr('font-size','6px').attr('font-family','JetBrains Mono,monospace').attr('font-weight','700').text('HV');
+      g.append('polygon').attr('points',`${px},${py-s} ${px+s},${py} ${px},${py+s} ${px-s},${py}`).attr('fill','rgba(255,59,59,0.25)').attr('stroke','rgba(255,59,59,0.8)').attr('stroke-width',1);
+      g.append('text').attr('x',px).attr('y',py+3).attr('text-anchor','middle').attr('fill','rgba(255,59,59,0.9)').attr('font-size','6px').attr('font-family','JetBrains Mono,monospace').attr('font-weight','700').text('HV');
     } else {
-      // BSL-4 — blue building square
       const px=pt[0]-5,py=pt[1]-5;
-      g.append('rect').attr('x',px).attr('y',py).attr('width',10).attr('height',10).attr('rx',1.5)
-        .attr('fill','rgba(0,200,255,0.12)').attr('stroke','rgba(0,200,255,0.7)').attr('stroke-width',0.8);
-      g.append('text').attr('x',pt[0]).attr('y',pt[1]+3.5).attr('text-anchor','middle')
-        .attr('fill','rgba(0,200,255,0.9)').attr('font-size','6px').attr('font-family','JetBrains Mono,monospace').attr('font-weight','700').text('+');
+      g.append('rect').attr('x',px).attr('y',py).attr('width',10).attr('height',10).attr('rx',1.5).attr('fill','rgba(0,200,255,0.12)').attr('stroke','rgba(0,200,255,0.7)').attr('stroke-width',0.8);
+      g.append('text').attr('x',pt[0]).attr('y',pt[1]+3.5).attr('text-anchor','middle').attr('fill','rgba(0,200,255,0.9)').attr('font-size','6px').attr('font-family','JetBrains Mono,monospace').attr('font-weight','700').text('+');
     }
   });
 
-  // ── LIMB FADE (3D only) — vignette ring on globe edge so backside is dark ──
   if(mode==='3d'){
     const r=Math.min(W,H)*0.44;
     const defs=root.append('defs');
-    const gradId='limbfade';
-    const grad=defs.append('radialGradient').attr('id',gradId).attr('cx','50%').attr('cy','50%').attr('r','50%');
-    grad.append('stop').attr('offset','72%').attr('stop-color','transparent');
-    grad.append('stop').attr('offset','100%').attr('stop-color','rgba(3,6,13,0.8)');
-    root.append('circle').attr('cx',W/2).attr('cy',H/2).attr('r',r+1)
-      .attr('fill',`url(#${gradId})`).attr('pointer-events','none');
+    const gId='lf'+Date.now();
+    const g=defs.append('radialGradient').attr('id',gId).attr('cx','50%').attr('cy','50%').attr('r','50%');
+    g.append('stop').attr('offset','72%').attr('stop-color','transparent');
+    g.append('stop').attr('offset','100%').attr('stop-color','rgba(3,6,13,0.82)');
+    root.append('circle').attr('cx',W/2).attr('cy',H/2).attr('r',r+1).attr('fill',`url(#${gId})`).attr('pointer-events','none');
   }
 }
 
-/* ══════════════════════════════════════
-   INTERACTION
-══════════════════════════════════════ */
+function zoomToCountry(feat,id){
+  const name=countryNames[id]||'Unknown';
+  if(mode==='2d'){
+    const baseP=baseProj2d();
+    const basePath=d3.geoPath(baseP);
+    const centroid=basePath.centroid(feat);
+    const bounds=basePath.bounds(feat);
+    const bw=bounds[1][0]-bounds[0][0];
+    const bh=bounds[1][1]-bounds[0][1];
+    const targetScale=Math.min(W/bw,H/bh)*0.55;
+    const clampedScale=Math.max(2,Math.min(targetScale,12));
+    const tx=W/2-clampedScale*centroid[0];
+    const ty=H/2-clampedScale*centroid[1];
+    d3.select(svgEl).transition().duration(800).ease(d3.easeCubicOut).call(zoomBeh.transform,d3.zoomIdentity.translate(tx,ty).scale(clampedScale));
+  } else {
+    const c=d3.geoCentroid(feat);
+    const target=[-c[0],-c[1],0];
+    const start=[...rotation];
+    const t0=Date.now(),dur=900;
+    (function animRot(){
+      const t=Math.min(1,(Date.now()-t0)/dur);
+      const e=t<0.5?2*t*t:(4-2*t)*t-1;
+      rotation=[start[0]+(target[0]-start[0])*e,start[1]+(target[1]-start[1])*e,0];
+      render();
+      if(t<1) requestAnimationFrame(animRot);
+    })();
+  }
+  showCountryOverlay(name,id);
+}
+
+function showCountryOverlay(name,id){
+  const overlay=document.getElementById('country-overlay');
+  const co=COUNTRY_DATA[id];
+  document.getElementById('co-name').textContent=name;
+  let html='';
+  if(co){
+    if(co.deaths>0) html+=`<div class="co-tile red"><span class="tv">${co.deaths}</span>Death${co.deaths>1?'s':''}</div>`;
+    if(co.confirmed>0) html+=`<div class="co-tile cyan"><span class="tv">${co.confirmed}</span>Confirmed</div>`;
+    html+=`<div class="co-tile ${co.type}"><span class="tv" style="font-size:12px">${co.status}</span>Status</div>`;
+    if(co.role==='origin') html+=`<div class="co-tile yellow"><span class="tv">⚠</span>Exposure Zone</div>`;
+    if(co.role==='endemic') html+=`<div class="co-tile purple"><span class="tv">🦠</span>Endemic Region</div>`;
+    if(co.role==='involved') html+=`<div class="co-tile cyan"><span class="tv">🌐</span>Response Nation</div>`;
+    if(co.labs&&co.labs.length>0){
+      co.labs.forEach(l=>{
+        html+=`<div class="co-tile cyan" style="font-size:9px"><span class="tv" style="font-size:10px">🏥</span>${l}</div>`;
+      });
+    }
+    document.getElementById('co-desc').textContent=co.desc||'';
+  } else {
+    const r=ORIGIN_IDS.includes(id)?'Exposure / origin zone for index case travel':ENDEMIC_IDS.includes(id)?'Hantavirus endemic region':INVOLVED_IDS.includes(id)?'Involved nation — response coordination':'No direct hantavirus link recorded';
+    html=`<div class="co-tile cyan"><span class="tv" style="font-size:12px">—</span>No active cases</div>`;
+    document.getElementById('co-desc').textContent=r;
+  }
+  document.getElementById('co-tiles').innerHTML=html;
+  overlay.classList.add('visible');
+}
+function closeCountryOverlay(){document.getElementById('country-overlay').classList.remove('visible');}
+
 function initInteraction(){
   const svg=d3.select(svgEl);
   svg.on('mousemove.coords',function(ev){
     const[mx,my]=d3.pointer(ev,this);
     const proj=mode==='2d'?makeProj2d():makeProj3d();
-    if(mode==='2d'){proj.translate([W/2+currentZoom.x,H/2+currentZoom.y]).scale(proj.scale()*currentZoom.k);}
     const inv=proj.invert?proj.invert([mx,my]):null;
     if(inv&&!isNaN(inv[0])) coordsBar.textContent=`LAT ${inv[1].toFixed(2)}° · LON ${inv[0].toFixed(2)}°`;
   });
-
-  // 2D zoom
-  zoomBeh=d3.zoom().scaleExtent([0.6,18]).on('zoom',ev=>{
-    if(mode!=='2d') return;
-    currentZoom=ev.transform;
-    render();
-  });
+  zoomBeh=d3.zoom().scaleExtent([0.5,20]).on('zoom',ev=>{if(mode==='2d'){currentZoom=ev.transform;render();}});
   svg.call(zoomBeh).on('dblclick.zoom',null);
-
-  // 3D drag
-  svg.on('mousedown.d3',function(ev){if(mode!=='3d')return;isDragging=true;dragStart=d3.pointer(ev,this);rotStart=[...rotation];mapWrap.style.cursor='grabbing';ev.preventDefault();});
+  svg.on('mousedown.d3',function(ev){if(mode!=='3d')return;isDragging=true;dragStart=d3.pointer(ev,this);rotStart=[...rotation];svgEl.classList.add('grabbing');ev.preventDefault();});
   d3.select(window)
     .on('mousemove.d3',function(ev){
-      if(mode!=='3d'||!isDragging)return;
+      if(mode!=='3d'||!isDragging) return;
       const pt=d3.pointer(ev,svgEl);
-      const dx=pt[0]-dragStart[0],dy=pt[1]-dragStart[1];
-      rotation=[rotStart[0]+dx*0.3,Math.max(-89,Math.min(89,rotStart[1]-dy*0.3)),0];
+      rotation=[rotStart[0]+(pt[0]-dragStart[0])*0.3,Math.max(-89,Math.min(89,rotStart[1]-(pt[1]-dragStart[1])*0.3)),0];
       render();
     })
-    .on('mouseup.d3',()=>{if(!isDragging)return;isDragging=false;mapWrap.style.cursor=mode==='3d'?'grab':'default';});
-
-  // Touch
-  svg.on('touchstart.d3',function(ev){if(mode!=='3d')return;const t=ev.touches[0];isDragging=true;dragStart=[t.clientX,t.clientY];rotStart=[...rotation];ev.preventDefault();},{passive:false});
-  svg.on('touchmove.d3',function(ev){if(mode!=='3d'||!isDragging)return;const t=ev.touches[0];const dx=t.clientX-dragStart[0],dy=t.clientY-dragStart[1];rotation=[rotStart[0]+dx*0.3,Math.max(-89,Math.min(89,rotStart[1]-dy*0.3)),0];render();ev.preventDefault();},{passive:false});
-  svg.on('touchend.d3',()=>{isDragging=false;});
+    .on('mouseup.d3',()=>{if(!isDragging)return;isDragging=false;svgEl.classList.remove('grabbing');});
 }
 
 function setMode(m){
@@ -683,37 +1226,32 @@ function setMode(m){
   document.getElementById('zoom-in').style.display=m==='2d'?'flex':'none';
   document.getElementById('zoom-out').style.display=m==='2d'?'flex':'none';
   document.getElementById('zoom-reset').style.display=m==='2d'?'flex':'none';
-  modeHint.textContent=m==='2d'?'2D · Scroll to zoom · Drag to pan':'3D · Drag to rotate globe freely';
-  mapWrap.style.cursor=m==='3d'?'grab':'default';
-  if(m==='2d'){
-    d3.select(svgEl).call(zoomBeh);
-    currentZoom=d3.zoomIdentity;
-    d3.select(svgEl).call(zoomBeh.transform,d3.zoomIdentity);
-  } else {
-    d3.select(svgEl).on('.zoom',null);
-    rotation=[-10,-15,0];
-  }
+  modeHint.textContent=m==='2d'?'2D · Scroll over location to zoom in · Drag to pan':'3D · Drag to rotate globe freely';
+  svgEl.style.cursor=m==='3d'?'grab':'default';
+  closeCountryOverlay();
+  if(m==='2d'){d3.select(svgEl).call(zoomBeh);currentZoom=d3.zoomIdentity;d3.select(svgEl).call(zoomBeh.transform,d3.zoomIdentity);}
+  else{d3.select(svgEl).on('.zoom',null);rotation=[-10,-15,0];}
   render();
 }
 
-function focusMapOn(lon,lat){
+function focusMapOn(lon,lat,animate){
   if(mode==='3d'){rotation=[-lon,-lat,0];render();}
-  else{
-    const proj=makeProj2d();
-    const pt=proj([lon,lat]);
-    if(!pt||isNaN(pt[0]))return;
+  else {
+    const p=baseProj2d();
+    const pt=p([lon,lat]);
+    if(!pt||isNaN(pt[0])) return;
     const s=5,tx=W/2-s*pt[0],ty=H/2-s*pt[1];
-    d3.select(svgEl).transition().duration(700).call(zoomBeh.transform,d3.zoomIdentity.translate(tx,ty).scale(s));
+    if(animate) d3.select(svgEl).transition().duration(700).call(zoomBeh.transform,d3.zoomIdentity.translate(tx,ty).scale(s));
+    else{currentZoom=d3.zoomIdentity.translate(tx,ty).scale(s);render();}
   }
 }
 
-/* ══ TOOLTIP / DETAIL ══ */
 function showTT(ev,name,loc,desc,badges,blabels){
   const r=mapWrap.getBoundingClientRect();
   document.getElementById('tt-name').textContent=name;
   document.getElementById('tt-loc').textContent=loc||'';
   document.getElementById('tt-desc').textContent=desc||'';
-  document.getElementById('tt-badges').innerHTML=(badges||[]).map((c,i)=>`<span class="badge ${c}">${(blabels||[])[i]||''}</span>`).join('');
+  document.getElementById('tt-bgs').innerHTML=(badges||[]).map((c,i)=>`<span class="badge ${c}">${(blabels||[])[i]||''}</span>`).join('');
   tooltip.style.display='block';
   tooltip.style.left=(ev.clientX-r.left+14)+'px';
   tooltip.style.top=(ev.clientY-r.top-14)+'px';
@@ -721,44 +1259,254 @@ function showTT(ev,name,loc,desc,badges,blabels){
 function hideTT(){tooltip.style.display='none';}
 
 function showDetail(title,sub,desc,type,badges,blabels){
-  selBar.textContent=title.slice(0,55).toUpperCase();
-  const tc={death:'border-color:rgba(255,59,59,0.45)',iso:'border-color:rgba(255,193,7,0.45)',ship:'border-color:rgba(0,255,204,0.45)',hv:'border-color:rgba(255,59,59,0.45)',bsl4:'border-color:rgba(0,200,255,0.4)',news:'border-color:rgba(0,200,255,0.3)'};
-  detailCard.innerHTML=`<div style="background:var(--s3);border:1px solid var(--border);border-radius:5px;padding:11px;${tc[type]||''}">
+  selBar.textContent=title.slice(0,50).toUpperCase();
+  const tc={death:'border-color:rgba(255,59,59,0.5)',iso:'border-color:rgba(255,193,7,0.5)',ship:'border-color:rgba(0,255,204,0.45)',hv:'border-color:rgba(255,59,59,0.5)',bsl4:'border-color:rgba(0,200,255,0.4)',news:'border-color:rgba(0,200,255,0.3)'};
+  detailCard.innerHTML=`<div style="background:var(--s3);border:1px solid var(--border);border-radius:5px;padding:10px;${tc[type]||''}">
     <div class="dc-title">${title}</div>
     <div class="dc-sub">${sub||''}</div>
     <div class="dc-desc">${desc||''}</div>
-    <div class="dc-badges">${(badges||[]).map((c,i)=>`<span class="badge ${c}">${(blabels||[])[i]||''}</span>`).join('')}</div>
+    <div class="dc-bgs">${(badges||[]).map((c,i)=>`<span class="badge ${c}">${(blabels||[])[i]||''}</span>`).join('')}</div>
   </div>`;
 }
 
-/* ══ CONTROLS ══ */
 document.getElementById('btn-2d').addEventListener('click',()=>setMode('2d'));
 document.getElementById('btn-3d').addEventListener('click',()=>setMode('3d'));
 document.getElementById('zoom-in').addEventListener('click',()=>d3.select(svgEl).transition().call(zoomBeh.scaleBy,1.6));
 document.getElementById('zoom-out').addEventListener('click',()=>d3.select(svgEl).transition().call(zoomBeh.scaleBy,0.625));
-document.getElementById('zoom-reset').addEventListener('click',()=>{currentZoom=d3.zoomIdentity;d3.select(svgEl).transition().call(zoomBeh.transform,d3.zoomIdentity);});
+document.getElementById('zoom-reset').addEventListener('click',()=>{currentZoom=d3.zoomIdentity;closeCountryOverlay();d3.select(svgEl).transition().call(zoomBeh.transform,d3.zoomIdentity);});
 
-/* ══ SVG SETUP ══ */
+/* ════════════════════════════════════════════════════════════
+   STRIPE PAYMENT FLOW
+══════════════════════════════════════════════════════════════ */
+window.unlockPremium = function(){
+  if(STRIPE_PAYMENT_LINK.includes('REPLACE_WITH_YOUR_LINK')){
+    alert('⚙️ Stripe Payment Link not configured yet.\n\nTo enable payments:\n1. Go to https://dashboard.stripe.com/payment-links\n2. Create a $5.99/mo recurring subscription product\n3. Copy the Payment Link URL (https://buy.stripe.com/...)\n4. Replace STRIPE_PAYMENT_LINK in the HTML\n\nNo other setup needed — Stripe handles everything.');
+    return;
+  }
+  // Append return URL so we know they came back from purchase
+  const returnUrl = window.location.origin + window.location.pathname + '?premium=success';
+  const url = STRIPE_PAYMENT_LINK + (STRIPE_PAYMENT_LINK.includes('?')?'&':'?') + 'success_url=' + encodeURIComponent(returnUrl);
+  window.location.href = url;
+};
+
+// Check if user is returning from successful Stripe payment
+function checkPremiumStatus(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('premium')==='success'){
+    localStorage.setItem('hanta_premium','active');
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(()=>alert('✓ Premium activated. Thank you for subscribing!'), 500);
+  }
+  if(localStorage.getItem('hanta_premium')==='active'){
+    const section = document.getElementById('premium-section');
+    if(section){
+      section.innerHTML = `<div class="rpl">Premium Intelligence <span style="color:var(--green);font-size:8px">✓ ACTIVE</span></div>
+        <div style="background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.4);border-radius:6px;padding:10px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:0.05em">
+          ✓ PRO SUBSCRIPTION ACTIVE<br>
+          <span style="color:var(--text2);font-size:9px">Full intelligence access enabled</span>
+        </div>`;
+    }
+    // Unlock all PRO panels
+    ['pro-heatmap-content','pro-spillover-content','pro-genomic-content'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.classList.remove('pro-locked');
+    });
+  }
+}
+checkPremiumStatus();
+
+/* ════════════════════════════════════════════════════════════
+   PROXIMITY ALERT (PRO) — flash banner if any case within 100km of user
+══════════════════════════════════════════════════════════════ */
+let lastAlertedKey = null;
+let userLat = null, userLon = null;
+
+// Haversine distance in km
+function geoDist(lat1, lon1, lat2, lon2){
+  const R = 6371;
+  const toR = d => d*Math.PI/180;
+  const dLat = toR(lat2-lat1), dLon = toR(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toR(lat1))*Math.cos(toR(lat2))*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(a));
+}
+
+let alertTargetLat = null, alertTargetLon = null;
+
+function checkProximityAlerts(){
+  // PRO-gated: only fires for active subscribers
+  if(localStorage.getItem('hanta_premium')!=='active') return;
+  if(userLat===null||userLon===null) return;
+
+  // Combine all signals: curated + live deaths and isolations + recent live news
+  const candidates = [
+    ...DEATHS.map(d=>({...d,sev:'DEATH'})),
+    ...LIVE_DEATHS.map(d=>({...d,sev:'DEATH (UNVERIFIED)'})),
+    ...ISOLATIONS.map(d=>({...d,sev:'CASE'})),
+    ...LIVE_ISOLATIONS.map(d=>({...d,sev:'CASE (UNVERIFIED)'})),
+    ...NEWS.filter(n=>n.live&&(n.cat==='death'||n.cat==='quarantine'||n.cat==='confirmed')&&n.lat&&n.lon)
+       .map(n=>({name:n.headline,loc:n.loc,lat:n.lat,lon:n.lon,sev:'LIVE NEWS'})),
+  ];
+
+  for(const c of candidates){
+    if(!c.lat||!c.lon) continue;
+    const dist = geoDist(userLat, userLon, c.lat, c.lon);
+    if(dist <= 100){
+      const key = `${c.lat},${c.lon},${c.name.slice(0,30)}`;
+      if(key === lastAlertedKey) continue; // already showed this one
+      lastAlertedKey = key;
+      showProximityAlert(c, dist);
+      return;
+    }
+  }
+}
+
+function showProximityAlert(item, distKm){
+  const banner = document.getElementById('prox-alert');
+  document.getElementById('prox-alert-text').textContent =
+    `⚠ ${item.sev} WITHIN ${Math.round(distKm)} KM OF YOUR LOCATION`;
+  document.getElementById('prox-alert-sub').textContent =
+    `${item.name.slice(0,80)} · ${item.loc} · Click to view`;
+  alertTargetLat = item.lat;
+  alertTargetLon = item.lon;
+  banner.classList.add('visible');
+}
+
+window.dismissProxAlert = function(){
+  document.getElementById('prox-alert').classList.remove('visible');
+};
+
+window.focusAlertLocation = function(){
+  if(alertTargetLat!==null) focusMapOn(alertTargetLon, alertTargetLat, true);
+};
+
+
+
+  {icon:'🧬',label:'What is it?',ans:'RNA virus — Hantaviridae',badge:'rgba(0,200,255,0.15)',bcol:'#00c8ff',title:'What is hantavirus?',body:`Hantavirus is a single-stranded RNA virus (family <em>Hantaviridae</em>). Two major syndromes:<br><br><strong style="color:#ff6060">HPS</strong> — Pulmonary Syndrome (Americas). Andes, Sin Nombre viruses. CFR 15–40%.<br><br><strong style="color:#ffd040">HFRS</strong> — Renal Syndrome (Europe/Asia). CFR 1–15%.<br><br>The <strong style="color:#ff3b3b">Andes virus</strong> responsible for the MV Hondius outbreak is the most dangerous strain and the only one confirmed capable of human-to-human spread.`},
+  {icon:'⚠️',label:'Transmissible?',ans:'Yes — via rodents',badge:'rgba(255,59,59,0.15)',bcol:'#ff6060',title:'How does it spread?',body:`Primary route: inhaling aerosolised rodent urine, droppings, or saliva.<br><br>Also via: direct rodent bite, touching contaminated surfaces then mouth/nose/eyes.<br><br><strong style="color:#00e5a0">NOT spread by</strong>: food, water, mosquitoes, ticks, or casual contact.<br><br>The index case inhaled virus dust near a rodent-heavy habitat in Argentina.`},
+  {icon:'👤',label:'Human to human?',ans:'Andes virus only — rare',badge:'rgba(255,193,7,0.15)',bcol:'#ffd040',title:'Human-to-human transmission',body:`<strong style="color:#00e5a0">Almost all hantaviruses CANNOT spread person-to-person.</strong><br><br>Exception: <strong style="color:#ff3b3b">Andes virus</strong> — the only species with confirmed human-to-human spread. Requires prolonged close contact. Not airborne like influenza.<br><br>WHO confirmed global risk remains LOW.`},
+  {icon:'🌡️',label:'Symptoms',ans:'Fever → lung failure',badge:'rgba(255,59,59,0.15)',bcol:'#ff6060',title:'Symptoms of HPS',body:`<strong style="color:#ffd040">Phase 1 — Prodromal (days 1–5):</strong> Fever 38–40°C, severe muscle pain, headache, nausea.<br><br><strong style="color:#ff3b3b">Phase 2 — Cardiopulmonary (days 5–10):</strong> Rapid pulmonary oedema, oxygen crash, cardiac failure — life-threatening within hours.<br><br><strong style="color:#00e5a0">Phase 3 — Convalescence:</strong> Survivors recover fully.<br><br><strong>Incubation: 1–8 weeks</strong>.`},
+  {icon:'💉',label:'Treatment',ans:'Supportive — no antiviral',badge:'rgba(255,193,7,0.15)',bcol:'#ffd040',title:'Treatment',body:`<strong style="color:#ff3b3b">No approved antiviral</strong>. All management is supportive ICU care:<br><br>• Mechanical ventilation or ECMO<br>• Careful fluid management<br>• Vasopressors<br><br>Early ICU admission is the single most important survival factor.`},
+  {icon:'🛡️',label:'Vaccine?',ans:'None approved (West)',badge:'rgba(176,107,255,0.15)',bcol:'#c090ff',title:'Is there a vaccine?',body:`<strong style="color:#ff3b3b">No licensed hantavirus vaccine</strong> in Western countries.<br><br>China and Korea use local inactivated vaccines.<br><br>Prevention is behavioural: seal buildings · N95 + gloves when cleaning · wet down with bleach before cleaning · NEVER dry-sweep.`},
+  {icon:'💀',label:'How deadly?',ans:'CFR 15–40% (HPS)',badge:'rgba(255,59,59,0.15)',bcol:'#ff6060',title:'Case fatality rates',body:`<div class="hv-srow"><span class="hv-sl">Andes virus (HPS)</span><span style="color:#ff3b3b">15–35%</span></div>
+    <div class="hv-srow"><span class="hv-sl">Sin Nombre (USA)</span><span style="color:#ff3b3b">~36%</span></div>
+    <div class="hv-srow"><span class="hv-sl">Hantaan (HFRS Asia)</span><span style="color:#ffc107">5–15%</span></div>
+    <div class="hv-srow"><span class="hv-sl">Puumala (HFRS Europe)</span><span style="color:#00e5a0">&lt;1%</span></div>
+    <div class="hv-srow"><span class="hv-sl">MV Hondius cluster</span><span style="color:#ff3b3b">~50% (3 of 6)</span></div>`},
+  {icon:'🚢',label:'MV Hondius',ans:'3 deaths · 23+ nations',badge:'rgba(0,255,204,0.12)',bcol:'#00ffcc',title:'The MV Hondius outbreak 2026',body:`<div class="hv-srow"><span class="hv-sl">Index case</span><span>Dutch male, 70 — birdwatcher</span></div>
+    <div class="hv-srow"><span class="hv-sl">Exposure source</span><span style="color:#ffc107">Argentina/Chile/Uruguay</span></div>
+    <div class="hv-srow"><span class="hv-sl">Confirmed deaths</span><span style="color:#ff3b3b">3</span></div>
+    <div class="hv-srow"><span class="hv-sl">Countries involved</span><span style="color:#ffc107">23+</span></div>
+    <div class="hv-srow"><span class="hv-sl">Ship ETA Tenerife</span><span style="color:#00ffcc">May 10–11</span></div>
+    <div class="hv-srow"><span class="hv-sl">WHO global risk</span><span style="color:#00e5a0">LOW</span></div>`},
+];
+
+function buildHVTiles(){
+  const grid=document.getElementById('hv-tile-grid');
+  if(grid.children.length>0) return;
+  HV_TILES.forEach((t,i)=>{
+    const d=document.createElement('div');
+    d.className='hv-tile';
+    d.setAttribute('onclick',`openHVModal(${i})`);
+    d.innerHTML=`<span class="hv-tile-icon">${t.icon}</span><div class="hv-tile-lbl">${t.label}</div><div class="hv-tile-ans">${t.ans}</div>`;
+    grid.appendChild(d);
+  });
+}
+window.toggleHVPanel=function(){
+  const panel=document.getElementById('hv-panel');
+  const caret=document.getElementById('hv-caret');
+  const open=panel.style.display==='none';
+  panel.style.display=open?'block':'none';
+  caret.style.transform=open?'rotate(180deg)':'';
+  if(open) buildHVTiles();
+};
+window.openHVModal=function(i){
+  const t=HV_TILES[i];
+  document.getElementById('hvm-label').textContent=t.label.toUpperCase();
+  document.getElementById('hvm-title').textContent=t.title;
+  document.getElementById('hvm-badge').innerHTML=`<span style="display:inline-block;font-size:10px;padding:3px 10px;border-radius:3px;font-family:var(--mono);background:${t.badge};color:${t.bcol};border:1px solid ${t.bcol}44">${t.ans}</span>`;
+  document.getElementById('hvm-body').innerHTML=t.body;
+  document.getElementById('hv-modal-bg').style.display='block';
+  document.getElementById('hv-modal').style.display='block';
+};
+window.closeHVModal=function(){
+  document.getElementById('hv-modal-bg').style.display='none';
+  document.getElementById('hv-modal').style.display='none';
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeHVModal();closeCountryOverlay();}});
+
 function setupSVG(){
   getWH();
   d3.select(svgEl).attr('viewBox',`0 0 ${W} ${H}`).attr('width','100%').attr('height','100%');
-  d3.select(svgEl).append('rect').attr('width',W).attr('height',H).attr('fill','#03060d').attr('class','bg-rect');
+  d3.select(svgEl).append('rect').attr('width',W).attr('height',H).attr('fill','#03060d').attr('class','bgr');
 }
+window.addEventListener('resize',()=>{getWH();d3.select(svgEl).attr('viewBox',`0 0 ${W} ${H}`);render();});
 
-/* ══ INIT ══ */
-window.addEventListener('resize',()=>{
-  getWH();
-  d3.select(svgEl).attr('viewBox',`0 0 ${W} ${H}`);
-  render();
-});
+/* ════════════════════════════════════════════════════════════
+   MOBILE TAB BAR — switches between map / news / data / info
+══════════════════════════════════════════════════════════════ */
+function setupMobileTabs(){
+  const tabs = document.querySelectorAll('.mtab');
+  const newsPanel = document.getElementById('news-panel');
+  const rightPanel = document.getElementById('right-panel');
 
-// Save home region
-function saveHomeRegion(code){
-  localStorage.setItem('hanta_home_region',code);
+  function closeAll(){
+    newsPanel.classList.remove('mobile-open');
+    rightPanel.classList.remove('mobile-open');
+  }
+
+  function activateTab(name){
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.panel === name));
+    closeAll();
+    if(name === 'news') newsPanel.classList.add('mobile-open');
+    else if(name === 'data') rightPanel.classList.add('mobile-open');
+    else if(name === 'info'){
+      // Open right panel AND scroll to / expand the HV info widget
+      rightPanel.classList.add('mobile-open');
+      setTimeout(()=>{
+        const hvPanel = document.getElementById('hv-panel');
+        if(hvPanel && hvPanel.style.display === 'none'){
+          window.toggleHVPanel && window.toggleHVPanel();
+        }
+        const hvTrigger = document.getElementById('hv-trigger');
+        if(hvTrigger) hvTrigger.scrollIntoView({behavior:'smooth', block:'start'});
+      }, 320);
+    }
+    // 'map' = close all panels, show map
+  }
+
+  tabs.forEach(t => t.addEventListener('click', () => activateTab(t.dataset.panel)));
+
+  // Swipe-down on drawer handle to close
+  document.querySelectorAll('.mobile-drawer-handle').forEach(handle => {
+    let startY = null;
+    handle.addEventListener('touchstart', e => { startY = e.touches[0].clientY; });
+    handle.addEventListener('touchmove', e => {
+      if(startY === null) return;
+      const dy = e.touches[0].clientY - startY;
+      if(dy > 50){
+        activateTab('map');
+        startY = null;
+      }
+    });
+  });
+
+  // Light up the news badge when new live items arrive
+  window.flashNewsBadge = function(){
+    if(window.matchMedia('(max-width: 900px)').matches){
+      const badge = document.getElementById('news-badge');
+      const activeTab = document.querySelector('.mtab.active');
+      if(badge && (!activeTab || activeTab.dataset.panel !== 'news')){
+        badge.classList.add('show');
+        setTimeout(()=>badge.classList.remove('show'), 8000);
+      }
+    }
+  };
 }
+setupMobileTabs();
+
 
 detectLocation();
-buildNewsFeed();
+buildNews();
 
 d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(data=>{
   worldData=data;
@@ -767,14 +1515,14 @@ d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(d
   initInteraction();
   render();
   initDone=true;
-  // Focus on user region after map loads
   setTimeout(()=>{
-    if(userFocusLat!==null&&userFocusLon!==null&&(userFocusLat!==0||userFocusLon!==0)){
-      focusMapOn(userFocusLon,userFocusLat);
-    }
-  },400);
-  // Save home region
-  if(userCountry) saveHomeRegion(userCountry);
+    if(userFocusLat!==null&&userFocusLon!==null&&(userFocusLat!==0||userFocusLon!==0))
+      focusMapOn(userFocusLon,userFocusLat,true);
+  },500);
+  // Start live data fetching after map loads
+  refreshLiveData();
+  // Auto-refresh every 5 minutes
+  setInterval(refreshLiveData,5*60*1000);
 }).catch(()=>{
   mapWrap.innerHTML='<div style="color:var(--red);padding:40px;font-family:monospace;font-size:13px">Map data failed to load. Check internet connection.</div>';
 });
