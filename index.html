@@ -384,7 +384,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
     Hantavirus Tracker
   </div>
   <div class="hdr-div"></div>
-  <div class="hdr-sub">Global Pathogen Intelligence · May 2026</div>
+  <div class="hdr-sub">Global Pathogen Intelligence · Updated May 11, 2026</div>
   <div class="alert-pill">⚠ CDC LEVEL 3 · WHO ACTIVE · ANDES VIRUS</div>
   <div class="hdr-right">
     <div class="live-pill" id="data-status"><div class="live-dot"></div>CONNECTING…</div>
@@ -436,15 +436,15 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
     <div class="rpl">Global Outbreak Status</div>
     <div class="cgrid">
       <div class="cc dead"><div class="cn red">3</div><div class="cl">Deaths</div></div>
-      <div class="cc iso"><div class="cn yellow">9+</div><div class="cl">Isolation</div></div>
-      <div class="cc conf"><div class="cn cyan">6</div><div class="cl">Confirmed</div></div>
-      <div class="cc watch"><div class="cn green">146</div><div class="cl">On Board</div></div>
+      <div class="cc iso"><div class="cn yellow">22+</div><div class="cl">Isolation</div></div>
+      <div class="cc conf"><div class="cn cyan">10</div><div class="cl">Conf+Prob</div></div>
+      <div class="cc watch"><div class="cn green">0</div><div class="cl">On Board</div></div>
     </div>
     <div class="sr"><span class="sl">Strain</span><span class="sv red" style="font-size:10px">Andes virus</span></div>
     <div class="sr"><span class="sl">CFR (Andes)</span><span class="sv red">~15–35%</span></div>
-    <div class="sr"><span class="sl">MV Hondius</span><span class="sv" style="color:var(--ship);font-size:10px">→ Tenerife ETA May 10</span></div>
+    <div class="sr"><span class="sl">MV Hondius</span><span class="sv" style="color:var(--green);font-size:10px">✓ Arrived Tenerife</span></div>
     <div class="sr"><span class="sl">Countries involved</span><span class="sv cyan">23+</span></div>
-    <div class="sr"><span class="sl">WHO Risk</span><span class="sv yellow">LOW (Global)</span></div>
+    <div class="sr"><span class="sl">WHO Risk</span><span class="sv green">LOW (Global)</span></div>
   </div>
 
   <div class="rps">
@@ -563,15 +563,15 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
   <div class="rps">
     <div class="rpl">Cases by Country</div>
     <div class="sr"><span class="sl">🇿🇦 South Africa</span><span class="sv" style="font-size:10px"><span style="color:var(--red)">1 death</span> · 1 ICU</span></div>
-    <div class="sr"><span class="sl">🇳🇱 Netherlands</span><span class="sv yellow" style="font-size:10px">2 hospitalised</span></div>
-    <div class="sr"><span class="sl">🇩🇪 Germany</span><span class="sv cyan" style="font-size:10px">1 confirmed</span></div>
+    <div class="sr"><span class="sl">🇳🇱 Netherlands</span><span class="sv yellow" style="font-size:10px">26 landed · 6wk quarantine</span></div>
+    <div class="sr"><span class="sl">🇩🇪 Germany</span><span class="sv yellow" style="font-size:10px">4 → Frankfurt hospital</span></div>
     <div class="sr"><span class="sl">🇨🇭 Switzerland</span><span class="sv yellow" style="font-size:10px">1 isolated</span></div>
     <div class="sr"><span class="sl">🇸🇬 Singapore</span><span class="sv yellow" style="font-size:10px">2 isolated</span></div>
     <div class="sr"><span class="sl">🇸🇭 Saint Helena</span><span class="sv yellow" style="font-size:10px">suspected</span></div>
-    <div class="sr"><span class="sl">🇫🇷 France</span><span class="sv yellow" style="font-size:10px">suspected</span></div>
-    <div class="sr"><span class="sl">🇪🇸 Spain</span><span class="sv yellow" style="font-size:10px">contact traced</span></div>
-    <div class="sr"><span class="sl">🇺🇸 USA (6 states)</span><span class="sv green" style="font-size:10px">9 monitoring</span></div>
-    <div class="sr"><span class="sl">🇬🇧 UK / Canada</span><span class="sv green" style="font-size:10px">monitoring</span></div>
+    <div class="sr"><span class="sl">🇫🇷 France</span><span class="sv red" style="font-size:10px">1 confirmed + 22 contacts</span></div>
+    <div class="sr"><span class="sl">🇪🇸 Spain</span><span class="sv cyan" style="font-size:10px">14 → military hospital</span></div>
+    <div class="sr"><span class="sl">🇺🇸 USA (17 repatriated)</span><span class="sv red" style="font-size:10px">1 PCR positive</span></div>
+    <div class="sr"><span class="sl">🇬🇧 UK / 🇨🇦 Canada</span><span class="sv yellow" style="font-size:10px">monitoring + Tristan army</span></div>
   </div>
 
   <div class="rps">
@@ -659,9 +659,13 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
    LIVE DATA SOURCES
    Tries multiple CORS proxies in order, falls back to curated data
 ══════════════════════════════════════════════════════════════ */
-// CORS proxy configs are inside tryFetch() — each proxy needs different URL encoding
+// ═══ NEWS API KEYS (free tiers — get yours in 2 min) ═══
+// GNews: https://gnews.io → sign up → copy API key → 100 req/day, CORS enabled
+const GNEWS_API_KEY = 'PASTE_YOUR_GNEWS_KEY_HERE';
+// Currents API: https://currentsapi.services → sign up → copy API key → 600 req/day
+const CURRENTS_API_KEY = 'PASTE_YOUR_CURRENTS_KEY_HERE';
 
-// ⚙️ KEYWORDS — fewer = faster. These 4 cover 95% of relevant articles.
+// Fallback keywords for GDELT (used only if both APIs above fail)
 const GDELT_KEYWORDS = [
   'hantavirus',
   '"andes virus"',
@@ -798,37 +802,79 @@ async function tryFetch(url){
 }
 
 async function fetchGDELT(){
-  try{
-    // Fire ALL keywords with 24h window in one parallel blast — fastest possible
-    // 24h gives fresh results (GDELT updates every 15 min) without being too narrow
-    const queries=GDELT_KEYWORDS.map(kw=>tryFetch(buildGdeltUrl(kw,'24h')));
-    const results=await Promise.allSettled(queries);
-    let allArticles=[];
-    results.forEach(r=>{
-      if(r.status==='fulfilled'&&r.value&&r.value.articles){
-        allArticles.push(...r.value.articles);
+  // ═══ STRATEGY: Try real news APIs first (no CORS issues), GDELT as fallback ═══
+  let articles = null;
+
+  // 1. TRY GNEWS API (fastest, CORS enabled, 100 req/day free)
+  if(GNEWS_API_KEY && !GNEWS_API_KEY.includes('PASTE_YOUR')){
+    try{
+      const url=`https://gnews.io/api/v4/search?q=hantavirus&lang=en&max=20&sortby=publishedAt&apikey=${GNEWS_API_KEY}`;
+      const c=new AbortController();const t=setTimeout(()=>c.abort(),8000);
+      const res=await fetch(url,{signal:c.signal});clearTimeout(t);
+      if(res.ok){
+        const data=await res.json();
+        if(data.articles&&data.articles.length>0){
+          articles=data.articles.map(a=>({
+            title:a.title,
+            url:a.url,
+            seendate:a.publishedAt,
+            domain:a.source?.name||'',
+            sourcecountry:'',
+          }));
+        }
       }
-    });
-    // If 24h returned nothing, try 7d as fallback (single wider query)
-    if(allArticles.length===0){
-      const fallback=await Promise.allSettled(
-        GDELT_KEYWORDS.slice(0,3).map(kw=>tryFetch(buildGdeltUrl(kw,'7d')))
-      );
-      fallback.forEach(r=>{
-        if(r.status==='fulfilled'&&r.value&&r.value.articles) allArticles.push(...r.value.articles);
+    }catch(e){}
+  }
+
+  // 2. TRY CURRENTS API (backup, 600 req/day free)
+  if(!articles&&CURRENTS_API_KEY&&!CURRENTS_API_KEY.includes('PASTE_YOUR')){
+    try{
+      const url=`https://api.currentsapi.services/v1/search?keywords=hantavirus&language=en&apiKey=${CURRENTS_API_KEY}`;
+      const c=new AbortController();const t=setTimeout(()=>c.abort(),8000);
+      const res=await fetch(url,{signal:c.signal});clearTimeout(t);
+      if(res.ok){
+        const data=await res.json();
+        if(data.news&&data.news.length>0){
+          articles=data.news.map(a=>({
+            title:a.title,
+            url:a.url,
+            seendate:a.published,
+            domain:a.author||'',
+            sourcecountry:'',
+          }));
+        }
+      }
+    }catch(e){}
+  }
+
+  // 3. FALLBACK: GDELT via proxy (unreliable but free, no signup)
+  if(!articles){
+    try{
+      const queries=GDELT_KEYWORDS.map(kw=>tryFetch(buildGdeltUrl(kw,'24h')));
+      const results=await Promise.allSettled(queries);
+      let gdeltArts=[];
+      results.forEach(r=>{
+        if(r.status==='fulfilled'&&r.value&&r.value.articles) gdeltArts.push(...r.value.articles);
       });
-    }
-    if(allArticles.length===0) return null;
+      if(gdeltArts.length===0){
+        const fb=await Promise.allSettled(GDELT_KEYWORDS.slice(0,2).map(kw=>tryFetch(buildGdeltUrl(kw,'7d'))));
+        fb.forEach(r=>{if(r.status==='fulfilled'&&r.value&&r.value.articles) gdeltArts.push(...r.value.articles);});
+      }
+      if(gdeltArts.length>0) articles=gdeltArts;
+    }catch(e){}
+  }
+
+  if(!articles||articles.length===0) return null;
+
+  try{
     // Dedupe by URL
     const seen = new Set();
-    const unique = allArticles.filter(a => {
+    const unique = articles.filter(a => {
       if(!a.url || seen.has(a.url)) return false;
       seen.add(a.url);
       return true;
     });
-    // Sort by recency
     unique.sort((a,b) => (b.seendate||'').localeCompare(a.seendate||''));
-    // Map to feed format
     return unique.slice(0,30).map(a=>{
       const loc=detectLocation(a.title+' '+(a.domain||''));
       const cls=classifyArticle(a.title);
@@ -836,7 +882,7 @@ async function fetchGDELT(){
         type:cls.type,
         cat:cls.cat,
         time:formatTimeAgo(a.seendate||new Date().toISOString()),
-        headline:a.title.replace(/\s*\|\s*.*$/,''),
+        headline:a.title.replace(/\s*\|\s*.*$/,'').replace(/\s*[-–—]\s*[A-Z].*$/,''),
         loc:loc?loc.name:(a.sourcecountry||'Global'),
         lat:loc?loc.lat:0,
         lon:loc?loc.lon:0,
@@ -846,7 +892,6 @@ async function fetchGDELT(){
       };
     }).filter(n=>n.headline&&n.headline.length>15);
   }catch(e){
-    
     return null;
   }
 }
@@ -855,21 +900,21 @@ async function fetchGDELT(){
    CURATED FALLBACK DATA (always works)
 ══════════════════════════════════════════════════════════════ */
 const CURATED_NEWS=[
-  {type:'breaking',time:'4m ago',headline:'MV Hondius confirmed en route to Tenerife — CDC biocontainment team on standby',loc:'Tenerife, Spain',lat:28.1,lon:-16.25},
-  {type:'official',time:'11m ago',headline:'WHO: KLM flight attendant who had contact with Case 2 tests negative — monitoring continues',loc:'Amsterdam, Netherlands',lat:52.34,lon:4.90},
-  {type:'official',time:'28m ago',headline:'NICD South Africa confirms PCR-positive Andes virus in Johannesburg ICU patient (Case 3)',loc:'Johannesburg, South Africa',lat:-26.19,lon:28.08},
-  {type:'social',time:'41m ago',headline:'Passenger from MV Hondius isolated in Zurich — Swiss health authorities confirm',loc:'Zurich, Switzerland',lat:47.376,lon:8.541},
-  {type:'breaking',time:'57m ago',headline:'9 US residents under monitoring across 6 states — CDC repatriation charter arranged',loc:'United States',lat:38.9,lon:-100.0},
-  {type:'official',time:'1h 12m ago',headline:'Argentina ANLIS Malbrán sends reagents to Spain, South Africa, UK for Andes virus diagnostics',loc:'Buenos Aires, Argentina',lat:-34.605,lon:-58.392},
-  {type:'social',time:'1h 38m ago',headline:'MV Hondius spotted near Canary Islands approach — ship heading to Tenerife port',loc:'North Atlantic',lat:26.5,lon:-17.8},
-  {type:'official',time:'2h 4m ago',headline:'WHO Director-General: "Overall global risk remains low — Andes virus requires close contact"',loc:'Geneva, Switzerland',lat:46.23,lon:6.15},
-  {type:'breaking',time:'2h 31m ago',headline:'Cape Verde refuses port access — MV Hondius anchored offshore, WHO medical team boards',loc:'Cape Verde',lat:14.93,lon:-23.51},
-  {type:'social',time:'3h ago',headline:'Singapore CDA isolates 2 residents after Hondius flight link confirmed',loc:'Singapore',lat:1.352,lon:103.820},
-  {type:'official',time:'3h 44m ago',headline:'UK HSCA contact-traces all 30 passengers who disembarked at Saint Helena April 24',loc:'Saint Helena',lat:-15.965,lon:-5.715},
-  {type:'breaking',time:'4h 20m ago',headline:'New suspected case on Tristan da Cunha — remote island linked to Hondius voyage',loc:'Tristan da Cunha',lat:-37.068,lon:-12.311},
-  {type:'official',time:'5h 2m ago',headline:'PAHO: 229 hantavirus cases and 59 deaths in Americas in 2025 — Argentina hardest hit',loc:'Americas',lat:-20.0,lon:-60.0},
-  {type:'social',time:'6h 15m ago',headline:'Dutch couple among deaths — birdwatched at Ushuaia landfill site',loc:'Ushuaia, Argentina',lat:-54.801,lon:-68.303},
-  {type:'official',time:'8h ago',headline:'WHO issues Disease Outbreak Notice DON-599 — Multi-country hantavirus cluster linked to cruise travel',loc:'Geneva, Switzerland',lat:46.23,lon:6.15},
+  {type:'breaking',time:'1h ago',headline:'US flight carrying 17 MV Hondius passengers arrives at Nebraska Medical Center — 1 PCR positive for Andes virus',loc:'Omaha, Nebraska',lat:41.256,lon:-95.934},
+  {type:'breaking',time:'2h ago',headline:'46 passengers disembarked from MV Hondius in Tenerife on Day 1 — repatriation flights underway to 12 countries',loc:'Tenerife, Spain',lat:28.068,lon:-16.535},
+  {type:'official',time:'3h ago',headline:'Dutch government flight lands at Eindhoven with 26 Hondius passengers — 6-week home quarantine ordered',loc:'Eindhoven, Netherlands',lat:51.450,lon:5.474},
+  {type:'breaking',time:'4h ago',headline:'14 Spanish passengers flown to Torrejon military airport Madrid — transferred to Gomez Ulla military hospital',loc:'Madrid, Spain',lat:40.487,lon:-3.451},
+  {type:'official',time:'4h ago',headline:'New confirmed case in France — Hondius passenger deteriorated on repatriation flight, now in specialist hospital',loc:'Paris, France',lat:48.856,lon:2.352},
+  {type:'official',time:'5h ago',headline:'Total cases rises to 10 confirmed and probable — WHO confirms 3 deaths, 2 lab-confirmed as Andes virus',loc:'Tenerife, Spain',lat:28.068,lon:-16.535},
+  {type:'official',time:'6h ago',headline:'WHO Director-General Tedros in Tenerife: "This is not another COVID — risk to public remains low"',loc:'Tenerife, Spain',lat:28.068,lon:-16.535},
+  {type:'breaking',time:'7h ago',headline:'MV Hondius arrives Port of Granadilla, Tenerife at 5:30 AM — Spain calls disembarkation procedures "unprecedented"',loc:'Tenerife, Spain',lat:28.068,lon:-16.535},
+  {type:'official',time:'8h ago',headline:'Norway sends air ambulance plane to Tenerife on standby for emergency evacuations during disembarkation',loc:'Tenerife, Spain',lat:28.068,lon:-16.535},
+  {type:'official',time:'10h ago',headline:'France identifies 22 contact cases from 2 flights carrying infected passengers — all isolating',loc:'Paris, France',lat:48.856,lon:2.352},
+  {type:'social',time:'12h ago',headline:'British Army parachutes onto Tristan da Cunha to help suspected hantavirus case on remote island',loc:'Tristan da Cunha',lat:-37.068,lon:-12.311},
+  {type:'official',time:'14h ago',headline:'4 German Hondius passengers to be brought to Frankfurt specialist hospital for treatment',loc:'Frankfurt, Germany',lat:50.110,lon:8.682},
+  {type:'official',time:'16h ago',headline:'Canary Islands president had opposed ship arrival — Spain overruled citing international law and humanitarian principles',loc:'Tenerife, Spain',lat:28.068,lon:-16.535},
+  {type:'social',time:'18h ago',headline:'Ushuaia tourism site denies causing hantavirus outbreak — BBC reports Argentine authorities trapping rodents along index case route',loc:'Ushuaia, Argentina',lat:-54.801,lon:-68.303},
+  {type:'official',time:'20h ago',headline:'MV Hondius will proceed to Netherlands after all passengers disembark — staffed by 30 crew and medical team',loc:'Tenerife, Spain',lat:28.068,lon:-16.535},
 ];
 
 let NEWS=[...CURATED_NEWS]; // start with curated, swap in live when fetched
@@ -897,9 +942,9 @@ const ISOLATIONS=[
 let LIVE_DEATHS=[];
 let LIVE_ISOLATIONS=[];
 
-const SHIP_ROUTE=[[-68.303,-54.801],[-60,-58],[-50,-52],[-35,-47],[-22,-35],[-14,-20],[-8,-10],[-5.715,-15.965],[-14.4,-7.9],[-23.51,14.93],[-18.5,24.0],[-16.25,28.1]];
-const SHIP_NOW={lat:26.5,lon:-17.8,name:'MV Hondius — Current Position',desc:'En route from Cape Verde to Tenerife. ~146 passengers on board. CDC team meeting ship on arrival. ETA: May 10–11.',loc:'North Atlantic · Between Cape Verde and Canary Islands'};
-const TENERIFE={lat:28.1,lon:-16.25,name:'Tenerife — Arrival Destination',desc:'Port of Granadilla, Tenerife. MV Hondius expected May 10–11. CDC, WHO, RIVM, Spanish health teams coordinating.',loc:'Tenerife, Canary Islands, Spain'};
+const SHIP_ROUTE=[[-68.303,-54.801],[-60,-58],[-50,-52],[-35,-47],[-22,-35],[-14,-20],[-8,-10],[-5.715,-15.965],[-14.4,-7.9],[-23.51,14.93],[-18.5,24.0],[-16.535,28.068]];  // Tenerife - arrived
+const SHIP_NOW={lat:28.068,lon:-16.535,name:'MV Hondius — Tenerife (Arrived)',desc:'Arrived Port of Granadilla, Tenerife at 5:30 AM local time on May 10. 46+ passengers disembarked on Day 1. Repatriation flights underway to Netherlands, USA, France, Spain, Germany. 17 US citizens flown to Nebraska Medical Center — 1 tested PCR positive. WHO Director-General on site. Ship will proceed to Netherlands with 30 crew.',loc:'Port of Granadilla, Tenerife, Canary Islands, Spain'};
+const TENERIFE={lat:28.068,lon:-16.535,name:'Tenerife — Disembarkation Site',desc:'Ship arrived May 10, 5:30 AM. Passengers ferried by boat to port. Repatriation flights: Spain (14 → Madrid military hospital), Netherlands (26 → Eindhoven, 6-week quarantine), USA (17 → Nebraska Medical Center), France (Paris Le Bourget), Germany (Frankfurt). WHO Director-General Tedros on site.',loc:'Port of Granadilla, Tenerife, Canary Islands, Spain'};
 const BSL4_LABS=[
   {name:'NICD — Hantavirus Ref Lab',city:'Johannesburg',country:'South Africa',lat:-26.181,lon:28.059,hv:true,desc:'Primary Andes hantavirus testing facility for this outbreak.'},
   {name:'USAMRIID',city:'Fort Detrick, MD',country:'USA',lat:39.434,lon:-77.415,hv:false,desc:'US Army Medical Research BSL-4 facility.'},
@@ -923,7 +968,7 @@ const COUNTRY_DATA={
   '756':{deaths:0,confirmed:1,status:'1 isolated Zurich',type:'yellow',role:'involved',labs:['Spiez Laboratory (BSL-4)'],desc:'One returning passenger confirmed Andes-positive in Zurich. Swiss Federal authorities monitoring contacts.'},
   '702':{deaths:0,confirmed:0,status:'2 isolated',type:'yellow',role:'involved',labs:[],desc:'Two Singapore residents who shared a Johannesburg flight with Case 2. Isolated in government facility.'},
   '250':{deaths:0,confirmed:0,status:'1 suspected',type:'yellow',role:'involved',labs:['Institut Pasteur Lyon P4 (HV Ref)'],desc:'One suspected case. Institut Pasteur Lyon has P4 capacity for hantavirus testing.'},
-  '724':{deaths:0,confirmed:0,status:'contact traced',type:'cyan',role:'involved',labs:[],desc:'MV Hondius arriving Port of Granadilla, Tenerife ETA May 10–11. One contact-traced asymptomatic case in Barcelona.'},
+  '724':{deaths:0,confirmed:0,status:'contact traced',type:'cyan',role:'involved',labs:[],desc:'MV Hondius arrived Tenerife May 10. 14 Spanish passengers transferred to Gomez Ulla military hospital Madrid. Disembarkation complete. Canary Islands president had opposed arrival — overruled by central government.'},
   '840':{deaths:0,confirmed:0,status:'9 monitoring',type:'cyan',role:'involved',labs:['CDC Atlanta (HV Ref)','Galveston NL (BSL-4)','USAMRIID (BSL-4)'],desc:'9 US residents monitored across 6 states. CDC Level 3 response. Biocontainment charter to Nebraska arranged.'},
   '032':{deaths:0,confirmed:0,status:'Exposure zone',type:'yellow',role:'origin',labs:['ANLIS Malbrán Buenos Aires (HV Ref)'],desc:'Index case birdwatching trip Nov 2025 – Apr 2026. 101 endemic cases in 2025 (21 deaths). ANLIS Malbrán sending reagents internationally.'},
   '152':{deaths:0,confirmed:0,status:'Exposure (endemic)',type:'yellow',role:'origin',labs:[],desc:'Part of index case route. Endemic Andes virus. Southern Cone hantavirus zone.'},
@@ -943,7 +988,7 @@ const LOCAL_PROFILES={
   'US':{name:'United States',bar:'Monitoring: <b class="lb-val yellow">9</b> across 6 states · CDC Level 3 · Surveillance: <b class="lb-val green">ACTIVE (CDC)</b>',focusLat:38.9,focusLon:-100},
   'GB':{name:'United Kingdom',bar:'Contact tracing: <b class="lb-val green">30</b> (St. Helena) · Suspected: <b class="lb-val yellow">1</b>',focusLat:51.5,focusLon:-0.12},
   'AR':{name:'Argentina',bar:'Endemic burden 2025: <b class="lb-val red">101 cases · 21 deaths</b> · Index case exposure zone',focusLat:-34.6,focusLon:-58.4},
-  'ES':{name:'Spain',bar:'MV Hondius: <b class="lb-val cyan">Tenerife ETA May 10</b> · 1 asymptomatic contact traced',focusLat:40.4,focusLon:-3.7},
+  'ES':{name:'Spain',bar:'MV Hondius: <b class="lb-val green">✓ Arrived Tenerife</b> · 14 passengers → military hospital',focusLat:40.4,focusLon:-3.7},
   'FR':{name:'France',bar:'Suspected: <b class="lb-val yellow">1</b> · BSL-4: Institut Pasteur Lyon',focusLat:46.2,focusLon:2.2},
 };
 const DEFAULT_PROFILE={name:'Your Region',bar:'No direct local impact reported · Global risk: <b class="lb-val green">LOW</b> · Follow WHO guidance',focusLat:0,focusLon:0};
@@ -1157,7 +1202,7 @@ function render(){
       .on('mousemove',ev=>showTT(ev,'🚢 MV Hondius',SHIP_NOW.loc,SHIP_NOW.desc,['b-cyan'],['Ship Tracker']))
       .on('mouseleave',hideTT)
       .on('click',ev=>{ev.stopPropagation();showDetail('MV Hondius',SHIP_NOW.loc,SHIP_NOW.desc,'ship',['b-cyan'],['Ship']);});
-    root.append('text').attr('x',sx).attr('y',sy-14).attr('text-anchor','middle').attr('fill','rgba(0,255,204,0.7)').attr('font-size','7px').attr('font-family','JetBrains Mono,monospace').attr('letter-spacing','0.08em').text('MV HONDIUS');
+    root.append('text').attr('x',sx).attr('y',sy-14).attr('text-anchor','middle').attr('fill','rgba(0,255,204,0.7)').attr('font-size','7px').attr('font-family','JetBrains Mono,monospace').attr('letter-spacing','0.08em').text('MV HONDIUS · ARRIVED');
   }
   const tenPt=proj([TENERIFE.lon,TENERIFE.lat]);
   if(tenPt&&!isNaN(tenPt[0])&&isVisible(TENERIFE.lon,TENERIFE.lat)){
