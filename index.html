@@ -692,7 +692,10 @@ async function tryFetch(url){
   for(const proxy of CORS_PROXIES){
     try{
       const proxiedUrl=proxy+encodeURIComponent(url);
-      const res=await fetch(proxiedUrl,{signal:AbortSignal.timeout(8000)});
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),8000);
+      const res=await fetch(proxiedUrl,{signal:controller.signal});
+      clearTimeout(timer);
       if(res.ok){
         const text=await res.text();
         try{return JSON.parse(text);}catch(e){return text;}
@@ -1143,17 +1146,24 @@ function render(){
 function zoomToCountry(feat,id){
   const name=countryNames[id]||'Unknown';
   if(mode==='2d'){
+    const geo=d3.geoCentroid(feat);
     const baseP=baseProj2d();
     const basePath=d3.geoPath(baseP);
-    const centroid=basePath.centroid(feat);
+    const projected=baseP(geo);
+    if(!projected||isNaN(projected[0])){showCountryOverlay(name,id);return;}
     const bounds=basePath.bounds(feat);
-    const bw=bounds[1][0]-bounds[0][0];
-    const bh=bounds[1][1]-bounds[0][1];
-    const targetScale=Math.min(W/bw,H/bh)*0.55;
-    const clampedScale=Math.max(2,Math.min(targetScale,12));
-    const tx=W/2-clampedScale*centroid[0];
-    const ty=H/2-clampedScale*centroid[1];
-    d3.select(svgEl).transition().duration(800).ease(d3.easeCubicOut).call(zoomBeh.transform,d3.zoomIdentity.translate(tx,ty).scale(clampedScale));
+    const bw=Math.max(bounds[1][0]-bounds[0][0],20);
+    const bh=Math.max(bounds[1][1]-bounds[0][1],20);
+    const targetScale=Math.min(W/bw,H/bh)*0.5;
+    const k=Math.max(2,Math.min(targetScale,12));
+    // d3 zoom math: render uses translate([W/2+tx, H/2+ty]).scale(base*k)
+    // For point projected at [px,py] by base proj, under zoom it goes to:
+    //   screen_x = k*(px - W/2) + (W/2 + tx)
+    // To center it (screen_x = W/2): tx = -k*(px - W/2) = k*(W/2 - px)
+    const tx=k*(W/2 - projected[0]);
+    const ty=k*(H/2 - projected[1]);
+    d3.select(svgEl).transition().duration(800).ease(d3.easeCubicOut)
+      .call(zoomBeh.transform,d3.zoomIdentity.translate(tx,ty).scale(k));
   } else {
     const c=d3.geoCentroid(feat);
     const target=[-c[0],-c[1],0];
@@ -1240,7 +1250,9 @@ function focusMapOn(lon,lat,animate){
     const p=baseProj2d();
     const pt=p([lon,lat]);
     if(!pt||isNaN(pt[0])) return;
-    const s=5,tx=W/2-s*pt[0],ty=H/2-s*pt[1];
+    const s=5;
+    const tx=s*(W/2 - pt[0]);
+    const ty=s*(H/2 - pt[1]);
     if(animate) d3.select(svgEl).transition().duration(700).call(zoomBeh.transform,d3.zoomIdentity.translate(tx,ty).scale(s));
     else{currentZoom=d3.zoomIdentity.translate(tx,ty).scale(s);render();}
   }
@@ -1379,8 +1391,7 @@ window.focusAlertLocation = function(){
   if(alertTargetLat!==null) focusMapOn(alertTargetLon, alertTargetLat, true);
 };
 
-
-
+const HV_TILES=[
   {icon:'🧬',label:'What is it?',ans:'RNA virus — Hantaviridae',badge:'rgba(0,200,255,0.15)',bcol:'#00c8ff',title:'What is hantavirus?',body:`Hantavirus is a single-stranded RNA virus (family <em>Hantaviridae</em>). Two major syndromes:<br><br><strong style="color:#ff6060">HPS</strong> — Pulmonary Syndrome (Americas). Andes, Sin Nombre viruses. CFR 15–40%.<br><br><strong style="color:#ffd040">HFRS</strong> — Renal Syndrome (Europe/Asia). CFR 1–15%.<br><br>The <strong style="color:#ff3b3b">Andes virus</strong> responsible for the MV Hondius outbreak is the most dangerous strain and the only one confirmed capable of human-to-human spread.`},
   {icon:'⚠️',label:'Transmissible?',ans:'Yes — via rodents',badge:'rgba(255,59,59,0.15)',bcol:'#ff6060',title:'How does it spread?',body:`Primary route: inhaling aerosolised rodent urine, droppings, or saliva.<br><br>Also via: direct rodent bite, touching contaminated surfaces then mouth/nose/eyes.<br><br><strong style="color:#00e5a0">NOT spread by</strong>: food, water, mosquitoes, ticks, or casual contact.<br><br>The index case inhaled virus dust near a rodent-heavy habitat in Argentina.`},
   {icon:'👤',label:'Human to human?',ans:'Andes virus only — rare',badge:'rgba(255,193,7,0.15)',bcol:'#ffd040',title:'Human-to-human transmission',body:`<strong style="color:#00e5a0">Almost all hantaviruses CANNOT spread person-to-person.</strong><br><br>Exception: <strong style="color:#ff3b3b">Andes virus</strong> — the only species with confirmed human-to-human spread. Requires prolonged close contact. Not airborne like influenza.<br><br>WHO confirmed global risk remains LOW.`},
