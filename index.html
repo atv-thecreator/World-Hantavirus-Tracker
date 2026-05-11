@@ -185,6 +185,9 @@ header{height:48px;background:var(--s1);border-bottom:1px solid var(--border);di
 <script>
 const STRIPE_LINKS={personal:'https://buy.stripe.com/REPLACE_PERSONAL_LINK',expert:'https://buy.stripe.com/REPLACE_EXPERT_LINK'};
 const STRIPE_DONATE_LINK='https://buy.stripe.com/REPLACE_DONATE_LINK';
+/* ═══ NEWS API KEYS ═══ */
+const GNEWS_KEY='dfa4c6bff8fa0f6f78e7bf4a17c69038';
+const CURRENTS_KEY='_Gx8VkkGOZMoGHnNTiebsVDV8cvmLVS5m_59bQkngUddtGE5';
 const GK=['hantavirus','"andes virus"','"MV Hondius"','"hantavirus outbreak" OR "hantavirus death"'];
 function gUrl(kw,ts){return`https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(kw)}&mode=ArtList&format=json&timespan=${ts||'24h'}&maxrecords=20&sort=datedesc`;}
 function gGeo(lat,lon,r,kw){return`https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(kw)}+near:${lat},${lon},${r}&mode=ArtList&format=json&timespan=14d&maxrecords=10&sort=datedesc`;}
@@ -208,7 +211,56 @@ const CN={"004":"Afghanistan","008":"Albania","012":"Algeria","024":"Angola","03
 
 /* ═══ LIVE FETCH ═══ */
 let lastLU=null;
-async function fetchG(){try{const q=GK.map(k=>tryFetch(gUrl(k,'24h')));const r=await Promise.allSettled(q);let a=[];r.forEach(x=>{if(x.status==='fulfilled'&&x.value&&x.value.articles)a.push(...x.value.articles)});if(!a.length){const fb=await Promise.allSettled(GK.slice(0,3).map(k=>tryFetch(gUrl(k,'7d'))));fb.forEach(x=>{if(x.status==='fulfilled'&&x.value&&x.value.articles)a.push(...x.value.articles)});}if(!a.length)return null;const s=new Set(),u=a.filter(x=>{if(!x.url||s.has(x.url))return false;s.add(x.url);return true});u.sort((a,b)=>(b.seendate||'').localeCompare(a.seendate||''));return u.slice(0,30).map(a=>{const l=detectLoc(a.title+(a.domain||'')),c=classify(a.title);return{type:c.type,cat:c.cat,time:timeAgo(a.seendate||new Date().toISOString()),headline:a.title.replace(/\s*\|\s*.*$/,''),loc:l?l.name:(a.sourcecountry||'Global'),lat:l?l.lat:0,lon:l?l.lon:0,url:a.url,domain:a.domain,live:true}}).filter(n=>n.headline&&n.headline.length>15)}catch(e){return null}}
+/* ═══ SOURCE 1: GNews (CORS-enabled, direct, no proxy needed) ═══ */
+async function fetchGNews(){
+  try{
+    const url=`https://gnews.io/api/v4/search?q=hantavirus&lang=en&max=10&token=${GNEWS_KEY}`;
+    const r=await fetch(url);if(!r.ok)return[];
+    const d=await r.json();if(!d.articles)return[];
+    return d.articles.map(a=>{const l=detectLoc(a.title+(a.source?.name||''));const c=classify(a.title);
+      return{type:c.type,cat:c.cat,time:timeAgo(a.publishedAt||new Date().toISOString()),headline:a.title,loc:l?l.name:(a.source?.name||'Global'),lat:l?l.lat:0,lon:l?l.lon:0,url:a.url,domain:a.source?.name||'',live:true}}).filter(n=>n.headline&&n.headline.length>15);
+  }catch(e){return[]}
+}
+
+/* ═══ SOURCE 2: Currents API (CORS-enabled, direct) ═══ */
+async function fetchCurrents(){
+  try{
+    const url=`https://api.currentsapi.services/v1/search?keywords=hantavirus&language=en&apiKey=${CURRENTS_KEY}`;
+    const r=await fetch(url);if(!r.ok)return[];
+    const d=await r.json();if(!d.news)return[];
+    return d.news.map(a=>{const l=detectLoc(a.title+(a.description||''));const c=classify(a.title);
+      return{type:c.type,cat:c.cat,time:timeAgo(a.published||new Date().toISOString()),headline:a.title,loc:l?l.name:'Global',lat:l?l.lat:0,lon:l?l.lon:0,url:a.url,domain:a.author||'',live:true}}).filter(n=>n.headline&&n.headline.length>15);
+  }catch(e){return[]}
+}
+
+/* ═══ SOURCE 3: GDELT (via proxy, fallback) ═══ */
+async function fetchGdelt(){
+  try{
+    const q=GK.map(k=>tryFetch(gUrl(k,'24h')));const r=await Promise.allSettled(q);let a=[];
+    r.forEach(x=>{if(x.status==='fulfilled'&&x.value&&x.value.articles)a.push(...x.value.articles)});
+    if(!a.length)return[];
+    const s=new Set(),u=a.filter(x=>{if(!x.url||s.has(x.url))return false;s.add(x.url);return true});
+    u.sort((a,b)=>(b.seendate||'').localeCompare(a.seendate||''));
+    return u.slice(0,20).map(a=>{const l=detectLoc(a.title+(a.domain||'')),c=classify(a.title);
+      return{type:c.type,cat:c.cat,time:timeAgo(a.seendate||new Date().toISOString()),headline:a.title.replace(/\s*\|\s*.*$/,''),loc:l?l.name:(a.sourcecountry||'Global'),lat:l?l.lat:0,lon:l?l.lon:0,url:a.url,domain:a.domain,live:true}}).filter(n=>n.headline&&n.headline.length>15);
+  }catch(e){return[]}
+}
+
+/* ═══ COMBINED: All 3 sources in parallel ═══ */
+async function fetchG(){
+  const [gnews,currents,gdelt]=await Promise.allSettled([fetchGNews(),fetchCurrents(),fetchGdelt()]);
+  const all=[];
+  if(gnews.status==='fulfilled')all.push(...gnews.value);
+  if(currents.status==='fulfilled')all.push(...currents.value);
+  if(gdelt.status==='fulfilled')all.push(...gdelt.value);
+  if(!all.length)return null;
+  // Dedupe by headline prefix
+  const seen=new Set(),uniq=[];
+  all.forEach(n=>{const k=n.headline.toLowerCase().slice(0,40);if(!seen.has(k)){seen.add(k);uniq.push(n)}});
+  // Sort newest first
+  uniq.sort((a,b)=>{const ta=a.time,tb=b.time;if(ta.includes('m')&&tb.includes('h'))return-1;if(ta.includes('h')&&tb.includes('m'))return 1;return ta.localeCompare(tb)});
+  return uniq.slice(0,30);
+}
 
 async function refresh(){setS('c');const ln=await fetchG();if(ln&&ln.length>0){const s=new Set(),cb=[];for(const n of ln){const k=n.headline.toLowerCase().slice(0,35);if(!s.has(k)){s.add(k);cb.push(n)}}for(const n of CURATED_NEWS){const k=n.headline.toLowerCase().slice(0,35);if(!s.has(k)){s.add(k);cb.push(n)}}NEWS=cb.slice(0,40);LIVE_DEATHS=ln.filter(n=>n.cat==='death'&&n.lat).map(n=>({name:'[LIVE] '+n.headline.slice(0,55),loc:n.loc,lat:n.lat,lon:n.lon,desc:n.headline,badges:['b-red'],blabels:['Live'],live:1}));LIVE_ISOLATIONS=ln.filter(n=>n.cat==='quarantine'&&n.lat).map(n=>({name:'[LIVE] '+n.headline.slice(0,55),loc:n.loc,lat:n.lat,lon:n.lon,desc:n.headline,badges:['b-yellow'],blabels:['Live'],live:1}));lastLU=new Date();setS('l',ln.length)}else setS('f');buildN();if(WD)render();checkPA()}
 
