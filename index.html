@@ -118,6 +118,8 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 .mc-btn{background:rgba(7,14,26,0.9);border:1px solid var(--border2);color:var(--cyan);font-family:var(--mono);font-size:12px;width:28px;height:28px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
 .mc-btn:hover{background:var(--s3);border-color:var(--cyan)}
 #mode-hint{position:absolute;top:10px;right:14px;font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.06em;pointer-events:none}
+#mobile-view-toggle{display:none;position:absolute;top:10px;left:10px;z-index:60;gap:4px}
+#mobile-view-toggle .vbtn{padding:6px 14px;font-size:11px;border-radius:6px;background:rgba(7,14,26,0.92);border:1.5px solid var(--border2)}
 #sel-bar{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.1em;background:rgba(3,6,13,0.85);padding:4px 12px;border-radius:3px;border:1px solid var(--border);pointer-events:none;white-space:nowrap;text-transform:uppercase}
 #coords-bar{position:absolute;bottom:18px;right:14px;font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.06em}
 
@@ -201,119 +203,232 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 /* ═══════════════════════════════════════
    MOBILE RESPONSIVE LAYOUT
 ═══════════════════════════════════════ */
-@media (max-width: 900px){
-  html,body{font-size:13px}
+/* ═══════════════════════════════════════
+   TABLET (601-900px)
+═══════════════════════════════════════ */
+@media (max-width: 900px) and (min-width: 601px){
+  body::before{display:none}
+  #local-bar{height:auto;min-height:36px;padding:8px 14px;gap:10px;flex-wrap:wrap;font-size:11px}
+  #local-bar .lb-sep{display:none}
+  .hdr-div,.hdr-sub{display:none}
+  header{height:50px;padding:0 14px}
+  .logo{font-size:13px}
+  .app-body{display:block;height:calc(100vh - 50px - 36px - 56px);position:relative;overflow:hidden}
+  #news-panel,#right-panel{position:fixed;bottom:56px;left:0;right:0;top:auto;width:100%;height:60vh;max-height:60vh;border-left:none;border-right:none;border-top:2px solid var(--border2);z-index:250;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.22,1,0.36,1);box-shadow:0 -8px 30px rgba(0,0,0,0.6)}
+  #news-panel.mobile-open,#right-panel.mobile-open{transform:translateY(0)}
+  #map-wrap{height:100%;width:100%}
+  #mobile-tabs{display:flex}
+  .rps{padding:12px 16px}
+  .ni{padding:12px}
+  .nhl{font-size:14px;line-height:1.5}
+  .ntime,.nloc{font-size:11px}
+  .ntag{font-size:10px;padding:2px 8px}
+  .cn{font-size:22px}
+  .cl{font-size:9px}
+  .sr{padding:8px 0}
+  .sl{font-size:12px}
+  .sv{font-size:13px}
+  #hv-modal{width:80vw;max-height:80vh;padding:20px 22px}
+  #donate-modal{width:min(440px,85vw)}
+}
+
+/* ═══════════════════════════════════════
+   MOBILE PHONES (max-width: 600px)
+═══════════════════════════════════════ */
+@media (max-width: 600px){
+  html,body{font-size:15px}
   body::before{display:none}
 
-  /* Local bar — wraps cleanly, smaller */
-  #local-bar{height:auto;min-height:30px;padding:6px 12px;gap:8px;flex-wrap:wrap;font-size:9px}
+  /* ── LOCAL BAR: 2 lines max ── */
+  #local-bar{height:auto;min-height:38px;padding:8px 12px;gap:6px;flex-wrap:wrap;font-size:12px;line-height:1.4}
   #local-bar .lb-sep{display:none}
-  #local-bar .lb-status{margin-left:0;width:100%;justify-content:flex-end;padding-top:2px;border-top:1px solid rgba(0,200,255,0.08);margin-top:2px}
+  #local-bar .lb-status{margin-left:0;width:100%;justify-content:flex-end;padding-top:3px;border-top:1px solid rgba(0,200,255,0.1);margin-top:3px;font-size:10px}
+  .lb-region{font-size:12px}
 
-  /* Header — keep compact */
-  header{height:46px;padding:0 12px;gap:8px;flex-wrap:nowrap}
-  .logo{font-size:11px;letter-spacing:0.1em}
-  .logo-ring{width:22px;height:22px}
-  .logo-ring::before{width:10px}
-  .logo-ring::after{height:10px}
+  /* ── HEADER: just logo + alert, everything else moves ── */
+  header{height:48px;padding:0 12px;gap:8px;flex-wrap:nowrap;overflow:hidden}
+  .logo{font-size:13px;letter-spacing:0.08em;gap:8px;flex-shrink:0}
+  .logo-ring{width:24px;height:24px}
+  .logo-ring::before{width:11px}
+  .logo-ring::after{height:11px}
   .hdr-div,.hdr-sub{display:none}
-  .alert-pill{padding:3px 7px;font-size:8px;letter-spacing:0.05em}
-  .hdr-right{gap:6px;margin-left:auto}
-  .live-pill{font-size:8px}
+  .alert-pill{padding:4px 8px;font-size:9px;letter-spacing:0.03em;flex-shrink:1;overflow:hidden;text-overflow:ellipsis}
+  /* HIDE these from header on mobile — they move to floating buttons */
+  .hdr-right{margin-left:auto;gap:6px}
+  .view-btns{display:none !important}
+  .live-pill{font-size:9px}
   .live-pill span:not(.live-dot){display:none}
-  .vbtn{padding:3px 9px;font-size:8px}
+  /* Donate button stays in header but smaller */
+  .hdr-right button[onclick="openDonate()"]{font-size:10px;padding:5px 10px;border-radius:6px}
 
-  /* App body — map full screen, sidebars become drawers */
-  .app-body{display:block;height:calc(100vh - 46px - 30px - 54px);position:relative;overflow:hidden}
+  /* ── LAYOUT ── */
+  .app-body{display:block;height:calc(100vh - 48px - 38px - 56px);position:relative;overflow:hidden}
 
-  /* Sidebars hidden by default, shown as drawers */
-  #news-panel, #right-panel{
-    position:fixed;
-    bottom:54px;
-    left:0;
-    right:0;
-    top:auto;
-    width:100%;
-    height:65vh;
-    max-height:65vh;
-    border-left:none;
-    border-right:none;
-    border-top:1px solid var(--border2);
+  /* ── MAP: full screen, proper viewbox ── */
+  #map-wrap{height:100%;width:100%;touch-action:none}
+  #map-svg{touch-action:none}
+
+  /* ── FLOATING 2D/3D TOGGLE ON MAP (replaces hidden header buttons) ── */
+  #mobile-view-toggle{
+    display:flex !important;
+    position:absolute;top:10px;left:10px;z-index:60;
+    gap:4px;
+  }
+
+  /* ── MAP CONTROLS: big touch targets, left side ── */
+  #map-controls{bottom:14px;left:10px;right:auto;transform:none;gap:6px;flex-direction:column}
+  .mc-btn{width:44px;height:44px;font-size:20px;border-radius:10px;background:rgba(7,14,26,0.95);border-width:1.5px}
+
+  /* ── MAP OVERLAYS ── */
+  #mode-hint{display:none}
+  #sel-bar{font-size:11px;top:10px;left:auto;right:10px;transform:none;padding:6px 12px;max-width:55vw;border-radius:8px;text-align:right}
+  #coords-bar{bottom:14px;right:10px;font-size:10px;background:rgba(3,6,13,0.7);padding:3px 8px;border-radius:4px}
+
+  /* ── TOOLTIP ── */
+  #map-tt{max-width:75vw;font-size:13px;padding:12px 14px;border-radius:10px}
+  .tt-name{font-size:15px}
+  .tt-loc{font-size:11px;margin-bottom:6px}
+  .tt-desc{font-size:13px;line-height:1.5}
+  .badge{font-size:10px;padding:3px 8px;border-radius:4px}
+  #tt-bgs{gap:6px}
+
+  /* ── COUNTRY NEON OVERLAY ── */
+  #country-overlay{padding:14px 14px 12px;border-radius:16px 16px 0 0}
+  #co-name{font-size:16px;letter-spacing:0.08em;margin-bottom:4px}
+  .co-tile{padding:10px 12px;font-size:12px;border-radius:8px}
+  .co-tile .tv{font-size:18px}
+  #co-desc{font-size:13px;line-height:1.6;margin-top:10px}
+  #co-close{font-size:13px;padding:6px 12px;border-radius:6px}
+
+  /* ── PROXIMITY ALERT ── */
+  #prox-alert{top:60px;left:8px;right:8px;transform:none;padding:12px 14px;font-size:13px;max-width:none;border-radius:10px}
+  #prox-alert-sub{font-size:11px !important;margin-top:4px !important}
+  .prox-icon{font-size:22px !important}
+  .prox-close{padding:5px 12px;font-size:12px;border-radius:4px}
+
+  /* ── MOBILE TAB BAR ── */
+  #mobile-tabs{display:flex;height:56px;padding-bottom:env(safe-area-inset-bottom,0)}
+  .mtab{font-size:10px;letter-spacing:0.05em}
+  .mtab .icon{font-size:22px}
+  .mtab.active::before{height:3px;left:12%;right:12%;box-shadow:0 0 10px var(--cyan)}
+  .mtab .badge-dot{width:8px;height:8px;top:5px;right:28%}
+
+  /* ── BOTTOM DRAWERS ── */
+  #news-panel,#right-panel{
+    position:fixed;bottom:56px;left:0;right:0;top:auto;
+    width:100%;height:75vh;max-height:75vh;
+    border-left:none;border-right:none;
+    border-top:2px solid var(--border2);
+    border-radius:18px 18px 0 0;
     z-index:250;
     transform:translateY(100%);
     transition:transform 0.3s cubic-bezier(0.22,1,0.36,1);
-    box-shadow:0 -8px 24px rgba(0,0,0,0.5);
+    box-shadow:0 -12px 40px rgba(0,0,0,0.7);
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:env(safe-area-inset-bottom,0);
   }
-  #news-panel.mobile-open, #right-panel.mobile-open{
-    transform:translateY(0);
-  }
+  #news-panel.mobile-open,#right-panel.mobile-open{transform:translateY(0)}
 
-  /* Drag handle on top of mobile drawers */
-  .mobile-drawer-handle{
-    display:flex;
-    height:24px;
-    align-items:center;
-    justify-content:center;
-    border-bottom:1px solid var(--border);
-    background:var(--s2);
-    flex-shrink:0;
-  }
-  .mobile-drawer-handle::before{
-    content:'';
-    width:42px;
-    height:3px;
-    background:var(--border2);
-    border-radius:2px;
-  }
-  @media (min-width:901px){
-    .mobile-drawer-handle{display:none}
-  }
+  .mobile-drawer-handle{display:flex;height:30px;align-items:center;justify-content:center;border-bottom:1px solid var(--border);background:var(--s2);flex-shrink:0;border-radius:18px 18px 0 0;position:sticky;top:0;z-index:5}
+  .mobile-drawer-handle::before{content:'';width:50px;height:4px;background:var(--border2);border-radius:3px}
 
-  /* Map fills available space */
-  #map-wrap{height:100%;width:100%}
+  /* ── NEWS ITEMS: big, readable, tappable ── */
+  .news-hdr{padding:12px 16px}
+  .news-title{font-size:13px}
+  .news-cnt{font-size:11px}
+  .news-src{padding:8px 16px;font-size:11px}
+  #news-feed{padding:8px 12px}
+  .ni{padding:14px;margin-bottom:8px;border-radius:10px}
+  .ntag{font-size:11px;padding:3px 10px;border-radius:4px;margin-bottom:6px}
+  .tag-live{margin-left:6px}
+  .nhl{font-size:16px;font-weight:500;line-height:1.5;margin-bottom:6px}
+  .nmeta{margin-top:6px}
+  .ntime{font-size:12px}
+  .nloc{font-size:12px}
 
-  /* Tooltip — narrower for mobile */
-  #map-tt{max-width:220px;font-size:10px;padding:8px 11px}
-  .tt-name{font-size:11px}
+  /* ── RIGHT PANEL ── */
+  .rps{padding:14px 16px}
+  .rpl{font-size:10px;letter-spacing:0.14em;margin-bottom:10px;padding-bottom:8px}
+  .sr{padding:10px 0}
+  .sl{font-size:13px}
+  .sv{font-size:14px}
+  .cgrid{gap:10px;margin-bottom:10px}
+  .cc{padding:14px 10px;border-radius:8px}
+  .cn{font-size:26px}
+  .cl{font-size:10px;margin-top:5px}
 
-  /* Country overlay — smaller on mobile */
-  #country-overlay{padding:12px 14px 12px}
-  #co-name{font-size:14px;letter-spacing:0.1em}
-  .co-tile{padding:6px 10px;font-size:9px}
-  .co-tile .tv{font-size:14px}
-  #co-desc{font-size:10px;max-width:none}
-  #co-close{font-size:9px;padding:2px 6px}
+  /* ── TIER CARDS ── */
+  #tier-cards>div{padding:14px 16px !important;border-radius:10px !important;margin-bottom:2px}
+  #tier-cards button{padding:12px 0 !important;font-size:13px !important;border-radius:8px !important}
 
-  /* Map controls — bottom right, smaller */
-  #map-controls{bottom:10px;gap:4px}
-  .mc-btn{width:26px;height:26px;font-size:11px}
-  #mode-hint{font-size:8px;top:8px;right:8px}
-  #sel-bar{font-size:8px;top:8px;padding:3px 9px;max-width:60vw;overflow:hidden;text-overflow:ellipsis}
-  #coords-bar{bottom:42px;font-size:8px;right:8px}
+  /* ── HV INFO WIDGET ── */
+  #hv-trigger{padding:14px 16px;font-size:14px;border-radius:10px}
+  #hv-caret{font-size:12px}
+  #hv-tile-grid{grid-template-columns:1fr;gap:8px}
+  .hv-tile{padding:16px;border-radius:10px}
+  .hv-tile-icon{font-size:24px;margin-bottom:8px}
+  .hv-tile-lbl{font-size:11px;margin-bottom:4px}
+  .hv-tile-ans{font-size:13px}
+  .hv-close{padding:12px;font-size:13px;margin-top:12px;border-radius:8px}
 
-  /* Show mobile tabs */
-  #mobile-tabs{display:flex}
+  /* ── HV MODAL ── */
+  #hv-modal{width:96vw;max-height:88vh;padding:20px 18px;border-radius:14px}
+  .hv-ml{font-size:11px}
+  .hv-mt{font-size:17px;margin-bottom:10px}
+  .hv-mb{font-size:14px;line-height:1.7}
+  .hv-mb ul{margin:8px 0 8px 20px}
+  .hv-mb li{margin-bottom:6px;font-size:14px}
+  .hv-srow{font-size:13px;padding:7px 0}
+  .hv-modal-close{padding:8px 14px;font-size:16px;top:14px;right:14px}
 
-  /* Proximity alert — fit mobile width */
-  #prox-alert{top:80px;left:8px;right:8px;transform:none;padding:8px 14px;font-size:10px;max-width:none}
-  #prox-alert.visible{display:flex}
+  /* ── DONATE MODAL ── */
+  #donate-modal{width:96vw;padding:22px 18px;border-radius:14px}
 
-  /* HV Modal — mobile */
-  #hv-modal{width:94vw;max-height:80vh;padding:14px 16px}
-  .hv-mt{font-size:13px}
-  .hv-mb{font-size:10px}
+  /* ── RISK BARS / GENOMIC / SPILLOVER ── */
+  .risk-row{padding:7px 0}
+  .risk-name{font-size:12px;width:72px}
+  .risk-bar{height:10px;border-radius:3px}
+  .risk-val{font-size:13px}
+  .gen-row{font-size:12px;padding:8px 0}
+  .heat-legend{font-size:10px;margin-top:8px}
 
-  /* Right panel content — tighter spacing */
-  .rps{padding:9px 11px}
-  .cgrid{gap:5px}
-  .cc{padding:6px 7px}
-  .cn{font-size:18px}
-  .cl{font-size:7px}
+  /* ── LEGEND ── */
+  .leg-grid{gap:10px}
+  .leg-item{font-size:14px;gap:10px}
+  .leg-dot{width:12px;height:12px}
+  .leg-sq{width:14px;height:10px}
+
+  /* ── PRO LOCKED ── */
+  .pro-locked::after{font-size:12px;padding:10px 16px;border-radius:6px}
+
+  /* ── DETAIL CARD ── */
+  #detail-card{padding:12px;border-radius:8px}
+  .dc-title{font-size:14px}
+  .dc-sub{font-size:11px}
+  .dc-desc{font-size:13px;line-height:1.6}
+  .dc-bgs{gap:6px;margin-top:8px}
+  .empty-d{font-size:13px;padding:16px 0}
 }
 
-/* Very small phones */
+/* ═══════════════════════════════════════
+   VERY SMALL PHONES (max-width: 380px)
+═══════════════════════════════════════ */
 @media (max-width: 380px){
-  .logo{font-size:10px}
+  .logo{font-size:11px}
+  .alert-pill{display:none}
+  header{height:48px}
+  .app-body{height:calc(100vh - 48px - 40px - 56px)}
+  #news-panel,#right-panel{height:78vh;max-height:78vh}
+  .nhl{font-size:14px}
+  .hdr-right button[onclick="openDonate()"]{padding:4px 8px;font-size:9px}
+}
+
+/* Hide drawer handle on desktop */
+@media (min-width:901px){
+  .mobile-drawer-handle{display:none}
+  #mobile-tabs{display:none}
+}
   .alert-pill{display:none}
   .live-pill .live-dot{display:none}
   #news-panel, #right-panel{height:72vh;max-height:72vh}
@@ -407,6 +522,12 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 
 <div id="map-wrap">
   <div id="map-tt">
+
+  <!-- Mobile floating 2D/3D toggle (hidden on desktop via CSS) -->
+  <div id="mobile-view-toggle" style="display:none">
+    <button class="vbtn active" onclick="setMode('2d');this.classList.add('active');this.nextElementSibling.classList.remove('active')">2D</button>
+    <button class="vbtn" onclick="setMode('3d');this.classList.add('active');this.previousElementSibling.classList.remove('active')">3D</button>
+  </div>
     <div class="tt-name" id="tt-name"></div>
     <div class="tt-loc" id="tt-loc"></div>
     <div class="tt-desc" id="tt-desc"></div>
@@ -661,9 +782,9 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 ══════════════════════════════════════════════════════════════ */
 // ═══ NEWS API KEYS (free tiers — get yours in 2 min) ═══
 // GNews: https://gnews.io → sign up → copy API key → 100 req/day, CORS enabled
-const GNEWS_API_KEY = 'dfa4c6bff8fa0f6f78e7bf4a17c69038';
+const GNEWS_API_KEY = 'PASTE_YOUR_GNEWS_KEY_HERE';
 // Currents API: https://currentsapi.services → sign up → copy API key → 600 req/day
-const CURRENTS_API_KEY = '_Gx8VkkGOZMoGHnNTiebsVDV8cvmLVS5m_59bQkngUddtGE5';
+const CURRENTS_API_KEY = 'PASTE_YOUR_CURRENTS_KEY_HERE';
 
 // Fallback keywords for GDELT (used only if both APIs above fail)
 const GDELT_KEYWORDS = [
@@ -691,13 +812,13 @@ function buildGdeltGeoUrl(lat,lon,radiusKm,keyword){
 // ⚙️ STRIPE PAYMENT LINKS — create each at dashboard.stripe.com/payment-links
 // Create 2 products: Personal ($3.99/mo) and Expert ($9.99/mo)
 const STRIPE_LINKS = {
-  personal: 'https://buy.stripe.com/aFa8wJ3Jn7hMbEl8pU7g400',  // $3.99/mo
-  expert:   'https://buy.stripe.com/14AbIVcfT8lQ23L49E7g401',    // $9.99/mo
+  personal: 'https://buy.stripe.com/REPLACE_PERSONAL_LINK',  // $3.99/mo
+  expert:   'https://buy.stripe.com/REPLACE_EXPERT_LINK',    // $9.99/mo
 };
 
 // ⚙️ STRIPE DONATE LINK — create at dashboard.stripe.com/payment-links
 // Set as "customer chooses amount" or fixed donation tiers ($5, $10, $25)
-const STRIPE_DONATE_LINK = 'https://buy.stripe.com/00weV7bbP1Xs0ZH8pU7g402';
+const STRIPE_DONATE_LINK = 'https://buy.stripe.com/REPLACE_DONATE_LINK';
 
 const COUNTRY_COORDS = {
   'south africa':{lat:-26.2,lon:28.0,name:'South Africa'},
