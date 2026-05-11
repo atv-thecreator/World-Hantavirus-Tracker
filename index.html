@@ -392,6 +392,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
       <button class="vbtn active" id="btn-2d">2D</button>
       <button class="vbtn" id="btn-3d">3D Globe</button>
     </div>
+    <button onclick="openDonate()" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff;border:none;border-radius:4px;padding:5px 12px;font-family:var(--mono);font-size:9px;letter-spacing:0.08em;cursor:pointer;font-weight:600;white-space:nowrap;transition:opacity 0.15s;box-shadow:0 0 10px rgba(238,90,36,0.3)" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">♥ Donate</button>
   </div>
 </header>
 
@@ -628,6 +629,31 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
   <div class="hv-mb" id="hvm-body"></div>
 </div>
 
+<!-- DONATE MODAL -->
+<div id="donate-bg" onclick="closeDonate()" style="display:none;position:fixed;inset:0;background:rgba(3,6,13,0.9);z-index:9000"></div>
+<div id="donate-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--s2);border:1px solid rgba(238,90,36,0.4);border-radius:10px;padding:24px 28px;width:min(420px,90vw);z-index:9001;text-align:center">
+  <button onclick="closeDonate()" style="position:absolute;top:12px;right:14px;background:none;border:1px solid var(--border);border-radius:3px;padding:3px 8px;cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--text2)">✕</button>
+  <div style="font-size:32px;margin-bottom:12px">♥</div>
+  <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--textb);letter-spacing:0.1em;margin-bottom:6px">Support This Project</div>
+  <div style="font-size:12px;color:var(--text);line-height:1.7;margin-bottom:16px">
+    This tracker was built by a <strong style="color:var(--textb)">university student</strong> as a medical school project. 
+    Every donation goes directly towards my <strong style="color:var(--cyan)">college fund</strong> — helping me continue my education in public health and epidemiology.
+  </div>
+  <div style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:16px;text-align:left">
+    <div style="font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.1em;margin-bottom:8px;text-transform:uppercase">Your donation helps fund</div>
+    <div style="font-size:11px;color:var(--text);line-height:1.8">
+      📚 Tuition and course materials<br>
+      💻 Server costs to keep this tracker live<br>
+      🔬 Research tools and data access<br>
+      🎓 A future public health professional
+    </div>
+  </div>
+  <button onclick="processDonate()" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff;border:none;border-radius:6px;padding:12px 0;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;cursor:pointer;font-weight:700;text-transform:uppercase;width:100%;transition:opacity 0.15s;box-shadow:0 0 16px rgba(238,90,36,0.4)" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+    ♥ Donate — For My College Fund
+  </button>
+  <div style="font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:0.06em;margin-top:8px">Secured by Stripe · Any amount appreciated · Thank you 🙏</div>
+</div>
+
 <script>
 /* ════════════════════════════════════════════════════════════
    LIVE DATA SOURCES
@@ -669,6 +695,10 @@ const STRIPE_LINKS = {
   personal: 'https://buy.stripe.com/REPLACE_PERSONAL_LINK',  // $3.99/mo
   expert:   'https://buy.stripe.com/REPLACE_EXPERT_LINK',    // $9.99/mo
 };
+
+// ⚙️ STRIPE DONATE LINK — create at dashboard.stripe.com/payment-links
+// Set as "customer chooses amount" or fixed donation tiers ($5, $10, $25)
+const STRIPE_DONATE_LINK = 'https://buy.stripe.com/REPLACE_DONATE_LINK';
 
 const COUNTRY_COORDS = {
   'south africa':{lat:-26.2,lon:28.0,name:'South Africa'},
@@ -1737,7 +1767,24 @@ window.closeHVModal=function(){
   document.getElementById('hv-modal-bg').style.display='none';
   document.getElementById('hv-modal').style.display='none';
 };
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeHVModal();closeCountryOverlay();}});
+
+/* ═══════════════ DONATE MODAL ═══════════════ */
+window.openDonate=function(){
+  document.getElementById('donate-bg').style.display='block';
+  document.getElementById('donate-modal').style.display='block';
+};
+window.closeDonate=function(){
+  document.getElementById('donate-bg').style.display='none';
+  document.getElementById('donate-modal').style.display='none';
+};
+window.processDonate=function(){
+  if(STRIPE_DONATE_LINK.includes('REPLACE_')){
+    alert('Stripe Donate link not configured yet.\n\n1. Go to dashboard.stripe.com/payment-links\n2. Create a new link → "Customer chooses amount"\n3. Name it "Donation — College Fund"\n4. Copy the link and replace STRIPE_DONATE_LINK in the HTML');
+    return;
+  }
+  window.location.href=STRIPE_DONATE_LINK;
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeHVModal();closeCountryOverlay();closeDonate();}});
 
 function setupSVG(){
   getWH();
