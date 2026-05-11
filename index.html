@@ -85,7 +85,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 .ntime{font-family:var(--mono);font-size:9px;color:var(--text2)}
 .nloc{font-family:var(--mono);font-size:9px;color:var(--cyan);opacity:0.65}
 
-#map-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg)}
+#map-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg);isolation:isolate;z-index:1}
 #map-svg{width:100%;height:100%;display:block;cursor:default}
 #map-svg.grabbing{cursor:grabbing !important}
 
@@ -123,7 +123,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 #sel-bar{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.1em;background:rgba(3,6,13,0.85);padding:4px 12px;border-radius:3px;border:1px solid var(--border);pointer-events:none;white-space:nowrap;text-transform:uppercase}
 #coords-bar{position:absolute;bottom:18px;right:14px;font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.06em}
 
-#right-panel{width:255px;flex-shrink:0;background:var(--s1);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+#right-panel{width:255px;flex-shrink:0;background:var(--s1);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;isolation:isolate}
 #right-panel::-webkit-scrollbar{width:2px}
 #right-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 .rps{padding:11px 13px;border-bottom:1px solid var(--border)}
@@ -435,9 +435,10 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 }
 
 /* ─── PRO FEATURE STYLES ─── */
-.pro-locked{position:relative;min-height:60px}
-.pro-locked::before{content:'';position:absolute;inset:-4px;backdrop-filter:blur(6px);background:rgba(3,6,13,0.5);z-index:5;border-radius:5px}
-.pro-locked::after{content:'🔒 PRO ONLY · Upgrade to unlock';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-size:9px;color:var(--purple);letter-spacing:0.1em;z-index:6;background:rgba(176,107,255,0.12);border:1px solid rgba(176,107,255,0.4);padding:5px 10px;border-radius:4px;white-space:nowrap}
+.pro-locked{position:relative;min-height:60px;overflow:hidden;border-radius:5px;isolation:isolate}
+.pro-locked>*{opacity:0.15;pointer-events:none}
+.pro-locked::before{content:'';position:absolute;inset:0;backdrop-filter:blur(4px);background:rgba(3,6,13,0.4);z-index:5;border-radius:5px;pointer-events:none}
+.pro-locked::after{content:'🔒 PRO ONLY';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-size:9px;color:var(--purple);letter-spacing:0.1em;z-index:6;background:rgba(176,107,255,0.15);border:1px solid rgba(176,107,255,0.4);padding:5px 10px;border-radius:4px;white-space:nowrap;pointer-events:none}
 
 /* Spillover risk bars */
 .risk-row{display:flex;align-items:center;gap:8px;padding:4px 0}
@@ -522,17 +523,18 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 
 <div id="map-wrap">
   <div id="map-tt">
+    <div class="tt-name" id="tt-name"></div>
+    <div class="tt-loc" id="tt-loc"></div>
+    <div class="tt-desc" id="tt-desc"></div>
+    <div id="tt-bgs"></div>
+  </div>
 
   <!-- Mobile floating 2D/3D toggle (hidden on desktop via CSS) -->
   <div id="mobile-view-toggle" style="display:none">
     <button class="vbtn active" onclick="setMode('2d');this.classList.add('active');this.nextElementSibling.classList.remove('active')">2D</button>
     <button class="vbtn" onclick="setMode('3d');this.classList.add('active');this.previousElementSibling.classList.remove('active')">3D</button>
   </div>
-    <div class="tt-name" id="tt-name"></div>
-    <div class="tt-loc" id="tt-loc"></div>
-    <div class="tt-desc" id="tt-desc"></div>
-    <div id="tt-bgs"></div>
-  </div>
+
   <svg id="map-svg"></svg>
   <div id="sel-bar">Click a country or marker · Scroll over map to zoom in</div>
   <div id="mode-hint">2D · Scroll over location to zoom in · Drag to pan</div>
