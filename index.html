@@ -464,20 +464,54 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
   </div>
 
   <div class="rps" id="premium-section">
-    <div class="rpl">Premium Intelligence <span style="color:var(--purple);font-size:8px">PRO</span></div>
-    <div style="background:linear-gradient(135deg,rgba(176,107,255,0.08),rgba(0,200,255,0.06));border:1px solid rgba(176,107,255,0.3);border-radius:6px;padding:12px;text-align:center">
-      <div style="font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.1em;margin-bottom:6px;text-transform:uppercase">Unlock with Pro</div>
-      <ul style="text-align:left;list-style:none;padding:0;margin:8px 0 10px;font-size:10px;color:var(--text);line-height:1.7">
-        <li>✓ Rodent reservoir heatmap</li>
-        <li>✓ Spillover risk scoring</li>
-        <li>✓ SMS outbreak alerts</li>
-        <li>✓ Genomic surveillance feed</li>
-        <li>✓ Priority WHO/CDC data</li>
-      </ul>
-      <button onclick="unlockPremium()" style="background:linear-gradient(135deg,#00c8ff,#b06bff);color:#fff;border:none;border-radius:5px;padding:8px 16px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;cursor:pointer;font-weight:600;text-transform:uppercase;width:100%;transition:opacity 0.15s;box-shadow:0 0 12px rgba(0,200,255,0.3)" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-        Unlock Premium — $5.99/mo
-      </button>
-      <div style="font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:0.06em;margin-top:6px">Secured by Stripe · Cancel anytime</div>
+    <div class="rpl">Intelligence Tiers</div>
+    <div style="display:flex;flex-direction:column;gap:6px" id="tier-cards">
+      <div style="background:var(--s3);border:1px solid var(--border);border-radius:5px;padding:9px 11px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--green);font-weight:600;letter-spacing:0.08em">FREE</span>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--green)">✓ ACTIVE</span>
+        </div>
+        <div style="font-size:9px;color:var(--text2);line-height:1.5">Map pins · WHO/CDC feed · Country lookups</div>
+      </div>
+      <div style="background:rgba(0,200,255,0.06);border:1px solid rgba(0,200,255,0.3);border-radius:5px;padding:9px 11px" id="tier-personal">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--cyan);font-weight:600;letter-spacing:0.08em">PERSONAL</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--textb);font-weight:600">$3.99/mo</span>
+        </div>
+        <div style="font-size:9px;color:var(--text);line-height:1.6;margin-bottom:7px">✓ 100km proximity alerts<br>✓ Travel route safety audit<br>✓ Reservoir heatmap</div>
+        <button onclick="subscribeTier('personal')" style="background:var(--cyan);color:#000;border:none;border-radius:4px;padding:6px 0;font-family:var(--mono);font-size:9px;letter-spacing:0.08em;cursor:pointer;font-weight:600;text-transform:uppercase;width:100%;transition:opacity 0.15s" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Subscribe Personal</button>
+      </div>
+      <div style="background:rgba(176,107,255,0.06);border:1px solid rgba(176,107,255,0.35);border-radius:5px;padding:9px 11px" id="tier-expert">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--purple);font-weight:600;letter-spacing:0.08em">EXPERT</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--textb);font-weight:600">$9.99/mo</span>
+        </div>
+        <div style="font-size:9px;color:var(--text);line-height:1.6;margin-bottom:7px">✓ Everything in Personal<br>✓ Live mortality feed (KILL counts)<br>✓ Genomic lineage tracking<br>✓ Spillover risk index · API access</div>
+        <button onclick="subscribeTier('expert')" style="background:linear-gradient(135deg,var(--purple),#6040ff);color:#fff;border:none;border-radius:4px;padding:6px 0;font-family:var(--mono);font-size:9px;letter-spacing:0.08em;cursor:pointer;font-weight:600;text-transform:uppercase;width:100%;transition:opacity 0.15s" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Subscribe Expert</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAVEL ROUTE WIDGET (Personal+) -->
+  <div class="rps" id="route-widget-section">
+    <div class="rpl">Travel Route Audit <span style="color:var(--cyan);font-size:8px">PERSONAL+</span></div>
+    <div id="route-widget-content" class="pro-locked">
+      <div style="font-size:10px;color:var(--text);margin-bottom:8px;line-height:1.5">Check if your route intersects hantavirus events (14 days).</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+        <input id="route-from" type="text" placeholder="From (e.g. Buenos Aires)" style="background:var(--s3);border:1px solid var(--border);color:var(--textb);font-family:var(--mono);font-size:10px;padding:7px 10px;border-radius:4px;width:100%;outline:none" onfocus="this.style.borderColor='var(--cyan)'" onblur="this.style.borderColor='var(--border)'">
+        <input id="route-to" type="text" placeholder="To (e.g. Santiago)" style="background:var(--s3);border:1px solid var(--border);color:var(--textb);font-family:var(--mono);font-size:10px;padding:7px 10px;border-radius:4px;width:100%;outline:none" onfocus="this.style.borderColor='var(--cyan)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <button onclick="runRouteAudit()" id="route-btn" style="background:var(--cyan);color:#000;border:none;border-radius:4px;padding:7px 0;font-family:var(--mono);font-size:9px;letter-spacing:0.08em;cursor:pointer;font-weight:600;text-transform:uppercase;width:100%;transition:opacity 0.15s" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Audit Route</button>
+      <div id="route-result" style="margin-top:8px;display:none"></div>
+    </div>
+  </div>
+
+  <!-- LIVE MORTALITY FEED (Expert only) -->
+  <div class="rps" id="mortality-feed-section">
+    <div class="rpl">Live Mortality Feed <span style="color:var(--purple);font-size:8px">EXPERT</span></div>
+    <div id="mortality-feed-content" class="pro-locked">
+      <div style="font-size:9px;color:var(--text2);margin-bottom:6px;font-family:var(--mono);letter-spacing:0.05em">GDELT V2 GKG · KILL + AFFECTED · 14-day window</div>
+      <div id="mortality-rows"><div style="text-align:center;padding:12px;font-size:10px;color:var(--text3)">Loading mortality data…</div></div>
     </div>
   </div>
 
@@ -599,11 +633,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
    LIVE DATA SOURCES
    Tries multiple CORS proxies in order, falls back to curated data
 ══════════════════════════════════════════════════════════════ */
-const CORS_PROXIES = [
-  'https://corsproxy.io/?',
-  'https://api.allorigins.win/raw?url=',
-  'https://api.codetabs.com/v1/proxy/?quest=',
-];
+// CORS proxy configs are inside tryFetch() — each proxy needs different URL encoding
 
 // ⚙️ GDELT KEYWORDS — add/remove anytime, no other code changes needed.
 // Each runs as a separate query, results merged + deduped.
@@ -622,8 +652,22 @@ function buildGdeltUrl(keyword){
   return `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(keyword)}&mode=ArtList&format=json&timespan=14d&maxrecords=15&sort=datedesc`;
 }
 
-// ⚙️ STRIPE PAYMENT LINK — replace with your link from dashboard.stripe.com/payment-links
-const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/REPLACE_WITH_YOUR_LINK';
+// GDELT V2 GKG — Global Knowledge Graph for structured KILL/AFFECTED counts
+function buildGkgUrl(keyword){
+  return `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(keyword)}&mode=TimelineVolInfo&format=json&timespan=14d`;
+}
+
+// GDELT GEO query — finds geocoded events near a lat/lon within radius
+function buildGdeltGeoUrl(lat,lon,radiusKm,keyword){
+  return `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(keyword)}+near:${lat},${lon},${radiusKm}&mode=ArtList&format=json&timespan=14d&maxrecords=10&sort=datedesc`;
+}
+
+// ⚙️ STRIPE PAYMENT LINKS — create each at dashboard.stripe.com/payment-links
+// Create 2 products: Personal ($3.99/mo) and Expert ($9.99/mo)
+const STRIPE_LINKS = {
+  personal: 'https://buy.stripe.com/REPLACE_PERSONAL_LINK',  // $3.99/mo
+  expert:   'https://buy.stripe.com/REPLACE_EXPERT_LINK',    // $9.99/mo
+};
 
 const COUNTRY_COORDS = {
   'south africa':{lat:-26.2,lon:28.0,name:'South Africa'},
@@ -689,9 +733,15 @@ function formatTimeAgo(dateStr){
 }
 
 async function tryFetch(url){
-  for(const proxy of CORS_PROXIES){
+  // Each proxy has different URL encoding requirements
+  const proxyConfigs=[
+    {prefix:'https://corsproxy.io/?', encode:true},         // needs encoded URL
+    {prefix:'https://api.allorigins.win/raw?url=', encode:true}, // needs encoded URL
+    {prefix:'https://api.codetabs.com/v1/proxy/?quest=', encode:false}, // needs raw URL
+  ];
+  for(const proxy of proxyConfigs){
     try{
-      const proxiedUrl=proxy+encodeURIComponent(url);
+      const proxiedUrl = proxy.prefix + (proxy.encode ? encodeURIComponent(url) : url);
       const controller=new AbortController();
       const timer=setTimeout(()=>controller.abort(),8000);
       const res=await fetch(proxiedUrl,{signal:controller.signal});
@@ -700,24 +750,36 @@ async function tryFetch(url){
         const text=await res.text();
         try{return JSON.parse(text);}catch(e){return text;}
       }
-    }catch(e){console.warn('Proxy failed:',proxy,e.message);}
+    }catch(e){console.warn('Proxy failed:',proxy.prefix,e.message);}
   }
-  throw new Error('All CORS proxies failed');
+  // Final fallback: try GDELT directly (works if CORS headers are present)
+  try{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),6000);
+    const res=await fetch(url,{signal:controller.signal});
+    clearTimeout(timer);
+    if(res.ok){const text=await res.text();try{return JSON.parse(text);}catch(e){return text;}}
+  }catch(e){console.warn('Direct GDELT failed:',e.message);}
+  throw new Error('All proxies and direct fetch failed');
 }
 
 async function fetchGDELT(){
   try{
-    // Fire all keyword queries in parallel — much faster than sequential
+    console.log('[GDELT] Starting fetch for',GDELT_KEYWORDS.length,'keywords...');
     const results = await Promise.allSettled(
       GDELT_KEYWORDS.map(kw => tryFetch(buildGdeltUrl(kw)))
     );
-    // Merge all successful results
     const allArticles = [];
-    results.forEach(r => {
+    let successCount=0;
+    results.forEach((r,i) => {
       if(r.status==='fulfilled' && r.value && r.value.articles){
         allArticles.push(...r.value.articles);
+        successCount++;
+      } else {
+        console.warn('[GDELT] Keyword failed:',GDELT_KEYWORDS[i],r.reason?.message||r.status);
       }
     });
+    console.log('[GDELT]',successCount+'/'+GDELT_KEYWORDS.length,'queries succeeded,',allArticles.length,'articles total');
     if(allArticles.length===0) return null;
     // Dedupe by URL
     const seen = new Set();
@@ -1288,44 +1350,184 @@ document.getElementById('zoom-out').addEventListener('click',()=>d3.select(svgEl
 document.getElementById('zoom-reset').addEventListener('click',()=>{currentZoom=d3.zoomIdentity;closeCountryOverlay();d3.select(svgEl).transition().call(zoomBeh.transform,d3.zoomIdentity);});
 
 /* ════════════════════════════════════════════════════════════
-   STRIPE PAYMENT FLOW
+   THREE-TIER PAYMENT SYSTEM
 ══════════════════════════════════════════════════════════════ */
-window.unlockPremium = function(){
-  if(STRIPE_PAYMENT_LINK.includes('REPLACE_WITH_YOUR_LINK')){
-    alert('⚙️ Stripe Payment Link not configured yet.\n\nTo enable payments:\n1. Go to https://dashboard.stripe.com/payment-links\n2. Create a $5.99/mo recurring subscription product\n3. Copy the Payment Link URL (https://buy.stripe.com/...)\n4. Replace STRIPE_PAYMENT_LINK in the HTML\n\nNo other setup needed — Stripe handles everything.');
+function getUserTier(){return localStorage.getItem('hanta_tier')||'free';}
+
+window.subscribeTier=function(tier){
+  const link=STRIPE_LINKS[tier];
+  if(!link||link.includes('REPLACE_')){
+    alert('Stripe link not set for '+tier+'. Go to dashboard.stripe.com/payment-links, create the product, and replace STRIPE_LINKS.'+tier+' in the HTML.');
     return;
   }
-  // Append return URL so we know they came back from purchase
-  const returnUrl = window.location.origin + window.location.pathname + '?premium=success';
-  const url = STRIPE_PAYMENT_LINK + (STRIPE_PAYMENT_LINK.includes('?')?'&':'?') + 'success_url=' + encodeURIComponent(returnUrl);
-  window.location.href = url;
+  const returnUrl=window.location.origin+window.location.pathname+'?tier='+tier;
+  const url=link+(link.includes('?')?'&':'?')+'success_url='+encodeURIComponent(returnUrl);
+  window.location.href=url;
 };
 
-// Check if user is returning from successful Stripe payment
 function checkPremiumStatus(){
-  const params = new URLSearchParams(window.location.search);
-  if(params.get('premium')==='success'){
-    localStorage.setItem('hanta_premium','active');
-    window.history.replaceState({}, '', window.location.pathname);
-    setTimeout(()=>alert('✓ Premium activated. Thank you for subscribing!'), 500);
+  const params=new URLSearchParams(window.location.search);
+  const tierParam=params.get('tier');
+  if(tierParam&&(tierParam==='personal'||tierParam==='expert')){
+    localStorage.setItem('hanta_tier',tierParam);
+    window.history.replaceState({},'',window.location.pathname);
+    setTimeout(()=>alert('Tier activated: '+tierParam),500);
   }
-  if(localStorage.getItem('hanta_premium')==='active'){
-    const section = document.getElementById('premium-section');
-    if(section){
-      section.innerHTML = `<div class="rpl">Premium Intelligence <span style="color:var(--green);font-size:8px">✓ ACTIVE</span></div>
-        <div style="background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.4);border-radius:6px;padding:10px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:0.05em">
-          ✓ PRO SUBSCRIPTION ACTIVE<br>
-          <span style="color:var(--text2);font-size:9px">Full intelligence access enabled</span>
-        </div>`;
-    }
-    // Unlock all PRO panels
-    ['pro-heatmap-content','pro-spillover-content','pro-genomic-content'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el) el.classList.remove('pro-locked');
-    });
+  const tier=getUserTier();
+  if(tier==='personal'||tier==='expert'){
+    const pb=document.querySelector('#tier-personal button');
+    if(pb){pb.textContent=tier==='personal'?'ACTIVE':'INCLUDED';pb.style.background='var(--green)';pb.style.color='#000';pb.disabled=true;}
+    ['route-widget-content','pro-heatmap-content'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('pro-locked');});
+  }
+  if(tier==='expert'){
+    const eb=document.querySelector('#tier-expert button');
+    if(eb){eb.textContent='ACTIVE';eb.style.background='var(--green)';eb.style.color='#000';eb.disabled=true;}
+    ['pro-spillover-content','pro-genomic-content','mortality-feed-content'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('pro-locked');});
+    fetchMortalityFeed();
   }
 }
 checkPremiumStatus();
+
+/* ════════════════════════════════════════════════════════════
+   TRAVEL ROUTE SAFETY AUDIT (Personal+)
+══════════════════════════════════════════════════════════════ */
+const CITY_COORDS_LOOKUP={
+  'buenos aires':{lat:-34.61,lon:-58.38},'santiago':{lat:-33.45,lon:-70.67},
+  'montevideo':{lat:-34.9,lon:-56.19},'sao paulo':{lat:-23.55,lon:-46.63},
+  'rio de janeiro':{lat:-22.91,lon:-43.17},'lima':{lat:-12.05,lon:-77.04},
+  'bogota':{lat:4.71,lon:-74.07},'ushuaia':{lat:-54.80,lon:-68.30},
+  'mendoza':{lat:-32.89,lon:-68.83},'cordoba':{lat:-31.42,lon:-64.18},
+  'new york':{lat:40.71,lon:-74.01},'los angeles':{lat:34.05,lon:-118.24},
+  'london':{lat:51.51,lon:-0.13},'paris':{lat:48.86,lon:2.35},
+  'berlin':{lat:52.52,lon:13.41},'amsterdam':{lat:52.37,lon:4.90},
+  'zurich':{lat:47.38,lon:8.54},'singapore':{lat:1.35,lon:103.82},
+  'johannesburg':{lat:-26.20,lon:28.05},'cape town':{lat:-33.93,lon:18.42},
+  'tenerife':{lat:28.12,lon:-16.25},'madrid':{lat:40.42,lon:-3.70},
+  'barcelona':{lat:41.39,lon:2.17},'sydney':{lat:-33.87,lon:151.21},
+  'tokyo':{lat:35.68,lon:139.69},'phoenix':{lat:33.45,lon:-112.07},
+  'atlanta':{lat:33.75,lon:-84.39},'bariloche':{lat:-41.13,lon:-71.31},
+  'neuquen':{lat:-38.95,lon:-68.06},'asuncion':{lat:-25.26,lon:-57.58},
+  'la paz':{lat:-16.50,lon:-68.15},'quito':{lat:-0.18,lon:-78.47},
+};
+
+function lookupCity(name){
+  const key=name.toLowerCase().trim();
+  if(CITY_COORDS_LOOKUP[key]) return CITY_COORDS_LOOKUP[key];
+  for(const[k,v] of Object.entries(CITY_COORDS_LOOKUP)){if(k.includes(key)||key.includes(k))return v;}
+  for(const[k,v] of Object.entries(COUNTRY_COORDS)){if(k.includes(key)||key.includes(k))return v;}
+  return null;
+}
+
+window.runRouteAudit=async function(){
+  const tier=getUserTier();
+  if(tier!=='personal'&&tier!=='expert'){alert('Requires Personal or Expert subscription.');return;}
+  const fromText=document.getElementById('route-from').value.trim();
+  const toText=document.getElementById('route-to').value.trim();
+  if(!fromText||!toText){alert('Enter both From and To locations.');return;}
+  const fromCoord=lookupCity(fromText);
+  const toCoord=lookupCity(toText);
+  if(!fromCoord){alert('Location not found: '+fromText);return;}
+  if(!toCoord){alert('Location not found: '+toText);return;}
+
+  const btn=document.getElementById('route-btn');
+  btn.textContent='SCANNING…';btn.disabled=true;
+  const result=document.getElementById('route-result');
+  result.style.display='block';
+  result.innerHTML='<div style="text-align:center;font-size:10px;color:var(--text2)">Querying GDELT for events along route…</div>';
+
+  // 6 waypoints, 50km buffer each
+  const waypoints=[];
+  for(let i=0;i<=5;i++){const t=i/5;waypoints.push({lat:fromCoord.lat+(toCoord.lat-fromCoord.lat)*t,lon:fromCoord.lon+(toCoord.lon-fromCoord.lon)*t});}
+  let threats=[];
+  let totalArticles=0;
+
+  try{
+    const checks=await Promise.allSettled(
+      waypoints.map(wp=>tryFetch(buildGdeltGeoUrl(wp.lat.toFixed(2),wp.lon.toFixed(2),50,'hantavirus')))
+    );
+    checks.forEach((r,i)=>{
+      if(r.status==='fulfilled'&&r.value&&r.value.articles){
+        totalArticles+=r.value.articles.length;
+        r.value.articles.forEach(a=>{
+          const cls=classifyArticle(a.title);
+          if(cls.cat==='death'||cls.cat==='quarantine'||cls.cat==='confirmed'){
+            threats.push({wp:waypoints[i],title:a.title,severity:cls.cat});
+          }
+        });
+      }
+    });
+  }catch(e){console.warn('Route audit error:',e);}
+
+  // Also check curated cases
+  [...DEATHS,...ISOLATIONS,...LIVE_DEATHS,...LIVE_ISOLATIONS].forEach(d=>{
+    if(!d.lat||!d.lon) return;
+    waypoints.forEach(wp=>{
+      if(geoDist(wp.lat,wp.lon,d.lat,d.lon)<=50){
+        threats.push({wp,title:d.name,severity:'curated'});
+      }
+    });
+  });
+
+  const deathCount=threats.filter(t=>t.severity==='death'||t.severity==='curated').length;
+  const caseCount=threats.filter(t=>t.severity==='quarantine'||t.severity==='confirmed').length;
+  const score=Math.min(100,deathCount*30+caseCount*15+totalArticles*2);
+  const color=score>=70?'var(--red)':score>=30?'var(--yellow)':'var(--green)';
+  const label=score>=70?'HIGH RISK':score>=30?'MODERATE':'LOW RISK';
+
+  result.innerHTML=`
+    <div style="text-align:center;padding:10px;background:var(--s3);border-radius:5px;border:1px solid ${color}44">
+      <div style="font-family:var(--mono);font-size:24px;font-weight:700;color:${color};text-shadow:0 0 12px ${color};margin-bottom:4px">${score}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:${color};letter-spacing:0.1em;margin-bottom:8px">${label}</div>
+      <div style="font-size:10px;color:var(--text);line-height:1.6">
+        ${fromText} → ${toText}<br>
+        ${threats.length} threat${threats.length!==1?'s':''} · ${totalArticles} articles scanned
+        ${threats.length>0?'<br><span style="color:var(--yellow);font-size:9px">'+threats.slice(0,3).map(t=>t.title.slice(0,50)).join(' · ')+'</span>':''}
+      </div>
+    </div>`;
+  if(mode==='2d'){
+    const midLat=(fromCoord.lat+toCoord.lat)/2;
+    const midLon=(fromCoord.lon+toCoord.lon)/2;
+    focusMapOn(midLon,midLat,true);
+  }
+  btn.textContent='AUDIT ROUTE';btn.disabled=false;
+};
+
+/* ════════════════════════════════════════════════════════════
+   LIVE MORTALITY FEED (Expert only) — GDELT KILL/AFFECTED extraction
+══════════════════════════════════════════════════════════════ */
+async function fetchMortalityFeed(){
+  const container=document.getElementById('mortality-rows');
+  if(!container)return;
+  try{
+    const killResults=await tryFetch(buildGdeltUrl('"hantavirus" death OR died OR fatal'));
+    const affectedResults=await tryFetch(buildGdeltUrl('"hantavirus" hospitalized OR quarantine OR isolated'));
+    const killArticles=(killResults&&killResults.articles)||[];
+    const affectedArticles=(affectedResults&&affectedResults.articles)||[];
+    function extractCount(title,rx){const m=title.match(rx);return m?parseInt(m[1]):1;}
+    const countryKills={},countryAffected={};
+    killArticles.forEach(a=>{
+      const loc=detectLocation(a.title+(a.domain||''));
+      const name=loc?loc.name:'Unknown';
+      countryKills[name]=(countryKills[name]||0)+extractCount(a.title,/(\d+)\s*(dead|death|died|kill|fatal)/i);
+    });
+    affectedArticles.forEach(a=>{
+      const loc=detectLocation(a.title+(a.domain||''));
+      const name=loc?loc.name:'Unknown';
+      countryAffected[name]=(countryAffected[name]||0)+extractCount(a.title,/(\d+)\s*(hospital|isolat|quarantin|case|infect|confirm)/i);
+    });
+    const allC=new Set([...Object.keys(countryKills),...Object.keys(countryAffected)]);
+    const rows=[...allC].map(c=>({country:c,kills:countryKills[c]||0,affected:countryAffected[c]||0}))
+      .sort((a,b)=>(b.kills+b.affected)-(a.kills+a.affected)).slice(0,10);
+    if(rows.length===0){container.innerHTML='<div style="text-align:center;padding:10px;font-size:10px;color:var(--text3)">No events in 14-day window</div>';return;}
+    container.innerHTML=`<div style="display:grid;grid-template-columns:1fr 50px 50px;gap:4px;font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:0.08em;padding-bottom:4px;border-bottom:1px solid var(--border)">
+      <span>COUNTRY</span><span style="text-align:right;color:var(--red)">KILL</span><span style="text-align:right;color:var(--yellow)">AFFECTED</span></div>
+      ${rows.map(r=>`<div style="display:grid;grid-template-columns:1fr 50px 50px;gap:4px;padding:4px 0;border-bottom:1px solid rgba(0,200,255,0.04);font-size:10px">
+        <span style="color:var(--text)">${r.country}</span>
+        <span style="text-align:right;font-family:var(--mono);color:${r.kills>0?'var(--red)':'var(--text3)'}">${r.kills}</span>
+        <span style="text-align:right;font-family:var(--mono);color:${r.affected>0?'var(--yellow)':'var(--text3)'}">${r.affected}</span></div>`).join('')}
+      <div style="font-family:var(--mono);font-size:8px;color:var(--text3);margin-top:6px">GDELT V2 · ${new Date().toLocaleTimeString()}</div>`;
+  }catch(e){container.innerHTML='<div style="text-align:center;padding:10px;font-size:10px;color:var(--text3)">Feed unavailable</div>';}
+}
 
 /* ════════════════════════════════════════════════════════════
    PROXIMITY ALERT (PRO) — flash banner if any case within 100km of user
@@ -1346,7 +1548,7 @@ let alertTargetLat = null, alertTargetLon = null;
 
 function checkProximityAlerts(){
   // PRO-gated: only fires for active subscribers
-  if(localStorage.getItem('hanta_premium')!=='active') return;
+  const t=getUserTier();if(t!=='personal'&&t!=='expert') return;
   if(userLat===null||userLon===null) return;
 
   // Combine all signals: curated + live deaths and isolations + recent live news
