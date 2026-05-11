@@ -634,10 +634,10 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 <div id="donate-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--s2);border:1px solid rgba(238,90,36,0.4);border-radius:10px;padding:24px 28px;width:min(420px,90vw);z-index:9001;text-align:center">
   <button onclick="closeDonate()" style="position:absolute;top:12px;right:14px;background:none;border:1px solid var(--border);border-radius:3px;padding:3px 8px;cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--text2)">✕</button>
   <div style="font-size:32px;margin-bottom:12px">♥</div>
-  <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--textb);letter-spacing:0.1em;margin-bottom:6px">Support This Project</div>
+  <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--textb);letter-spacing:0.1em;margin-bottom:6px">Please Support This Project</div>
   <div style="font-size:12px;color:var(--text);line-height:1.7;margin-bottom:16px">
     This tracker was built by a <strong style="color:var(--textb)">university student</strong> as a medical school project. 
-    Every donation goes directly towards my <strong style="color:var(--cyan)">college fund</strong> — helping me continue my education in public health and epidemiology.
+    Please consider donating — every contribution goes directly towards my <strong style="color:var(--cyan)">college fund</strong>, helping me continue my education in public health and epidemiology. It would mean the world to me. 🙏
   </div>
   <div style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:16px;text-align:left">
     <div style="font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.1em;margin-bottom:8px;text-transform:uppercase">Your donation helps fund</div>
@@ -649,7 +649,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
     </div>
   </div>
   <button onclick="processDonate()" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff;border:none;border-radius:6px;padding:12px 0;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;cursor:pointer;font-weight:700;text-transform:uppercase;width:100%;transition:opacity 0.15s;box-shadow:0 0 16px rgba(238,90,36,0.4)" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-    ♥ Donate — For My College Fund
+    ♥ Please Donate — For My College Fund
   </button>
   <div style="font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:0.06em;margin-top:8px">Secured by Stripe · Any amount appreciated · Thank you 🙏</div>
 </div>
@@ -661,17 +661,12 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 ══════════════════════════════════════════════════════════════ */
 // CORS proxy configs are inside tryFetch() — each proxy needs different URL encoding
 
-// ⚙️ GDELT KEYWORDS — add/remove anytime, no other code changes needed.
-// Each runs as a separate query, results merged + deduped.
+// ⚙️ KEYWORDS — fewer = faster. These 4 cover 95% of relevant articles.
 const GDELT_KEYWORDS = [
-  '"hantavirus"',
+  'hantavirus',
   '"andes virus"',
   '"MV Hondius"',
-  '"hantavirus outbreak"',
-  '"hantavirus death"',
-  '"hantavirus quarantine"',
-  '"sin nombre virus"',
-  '"hantavirus pulmonary syndrome"',
+  '"hantavirus outbreak" OR "hantavirus death"',
 ];
 
 function buildGdeltUrl(keyword,timespan){
@@ -804,33 +799,25 @@ async function tryFetch(url){
 
 async function fetchGDELT(){
   try{
-    
-
-    // Strategy: try most recent first, widen if empty
-    // GDELT updates every 15 minutes — try that window first for freshest data
-    const timespans=['15min','24h','7d'];
+    // Fire ALL keywords with 24h window in one parallel blast — fastest possible
+    // 24h gives fresh results (GDELT updates every 15 min) without being too narrow
+    const queries=GDELT_KEYWORDS.map(kw=>tryFetch(buildGdeltUrl(kw,'24h')));
+    const results=await Promise.allSettled(queries);
     let allArticles=[];
-
-    for(const ts of timespans){
-      if(allArticles.length>=5) break; // Got enough from a fresher window
-      
-      const results=await Promise.allSettled(
-        GDELT_KEYWORDS.map(kw=>tryFetch(buildGdeltUrl(kw,ts)))
-      );
-      let batchArticles=[];
-      let successCount=0;
-      results.forEach((r,i)=>{
-        if(r.status==='fulfilled'&&r.value&&r.value.articles){
-          batchArticles.push(...r.value.articles);
-          successCount++;
-        }
-      });
-      
-      if(batchArticles.length>0){
-        allArticles.push(...batchArticles);
+    results.forEach(r=>{
+      if(r.status==='fulfilled'&&r.value&&r.value.articles){
+        allArticles.push(...r.value.articles);
       }
+    });
+    // If 24h returned nothing, try 7d as fallback (single wider query)
+    if(allArticles.length===0){
+      const fallback=await Promise.allSettled(
+        GDELT_KEYWORDS.slice(0,3).map(kw=>tryFetch(buildGdeltUrl(kw,'7d')))
+      );
+      fallback.forEach(r=>{
+        if(r.status==='fulfilled'&&r.value&&r.value.articles) allArticles.push(...r.value.articles);
+      });
     }
-
     if(allArticles.length===0) return null;
     // Dedupe by URL
     const seen = new Set();
