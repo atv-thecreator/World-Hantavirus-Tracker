@@ -59,7 +59,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 
 .app-body{display:flex;height:calc(100vh - 50px - 34px);overflow:hidden}
 
-#news-panel{width:270px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+#news-panel{width:240px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
 .news-hdr{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .news-title{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--cyan)}
 .news-cnt{font-family:var(--mono);font-size:9px;color:var(--text2)}
@@ -123,7 +123,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 #sel-bar{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.1em;background:rgba(3,6,13,0.85);padding:4px 12px;border-radius:3px;border:1px solid var(--border);pointer-events:none;white-space:nowrap;text-transform:uppercase}
 #coords-bar{position:absolute;bottom:18px;right:14px;font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.06em}
 
-#right-panel{width:255px;flex-shrink:0;background:var(--s1);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;isolation:isolate}
+#right-panel{width:240px;flex-shrink:0;background:var(--s1);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;isolation:isolate}
 #right-panel::-webkit-scrollbar{width:2px}
 #right-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 .rps{padding:11px 13px;border-bottom:1px solid var(--border)}
@@ -206,7 +206,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 /* ═══════════════════════════════════════
    TABLET (601-900px)
 ═══════════════════════════════════════ */
-@media (max-width: 900px) and (min-width: 601px){
+@media (max-width: 768px) and (min-width: 481px){
   body::before{display:none}
   #local-bar{height:auto;min-height:36px;padding:8px 14px;gap:10px;flex-wrap:wrap;font-size:11px}
   #local-bar .lb-sep{display:none}
@@ -214,7 +214,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
   header{height:50px;padding:0 14px}
   .logo{font-size:13px}
   .app-body{display:block;height:calc(100vh - 50px - 36px - 56px);position:relative;overflow:hidden}
-  #news-panel,#right-panel{position:fixed;bottom:56px;left:0;right:0;top:auto;width:100%;height:60vh;max-height:60vh;border-left:none;border-right:none;border-top:2px solid var(--border2);z-index:250;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.22,1,0.36,1);box-shadow:0 -8px 30px rgba(0,0,0,0.6)}
+  #news-panel,#right-panel{position:fixed;bottom:56px;left:0;right:0;top:auto;width:100%;height:65vh;max-height:65vh;border-left:none;border-right:none;border-top:2px solid var(--border2);z-index:250;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.22,1,0.36,1);box-shadow:0 -8px 30px rgba(0,0,0,0.6)}
   #news-panel.mobile-open,#right-panel.mobile-open{transform:translateY(0)}
   #map-wrap{height:100%;width:100%}
   #mobile-tabs{display:flex}
@@ -235,7 +235,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 /* ═══════════════════════════════════════
    MOBILE PHONES (max-width: 600px)
 ═══════════════════════════════════════ */
-@media (max-width: 600px){
+@media (max-width: 480px){
   html,body{font-size:15px}
   body::before{display:none}
 
@@ -414,7 +414,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 /* ═══════════════════════════════════════
    VERY SMALL PHONES (max-width: 380px)
 ═══════════════════════════════════════ */
-@media (max-width: 380px){
+@media (max-width: 360px){
   .logo{font-size:11px}
   .alert-pill{display:none}
   header{height:48px}
@@ -425,7 +425,7 @@ header{height:50px;background:var(--s1);border-bottom:1px solid var(--border);di
 }
 
 /* Hide drawer handle on desktop */
-@media (min-width:901px){
+@media (min-width:769px){
   .mobile-drawer-handle{display:none}
   #mobile-tabs{display:none}
 }
