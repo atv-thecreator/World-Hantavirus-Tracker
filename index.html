@@ -119,11 +119,119 @@ header{height:48px;background:var(--s1);border-bottom:1px solid var(--border);di
 #detail-card{background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:9px}
 .dc-title{font-size:11px;font-weight:600;color:var(--textb);margin-bottom:2px}.dc-sub{font-family:var(--mono);font-size:8px;color:var(--cyan);margin-bottom:6px}.dc-desc{font-size:9px;color:var(--text);line-height:1.5}.dc-bgs{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px}
 ::-webkit-scrollbar{width:2px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ══════════════════════════════════════
+   TABLET (768px - 1024px)
+   Keep 3-panel but narrower sidebars
+══════════════════════════════════════ */
+@media(max-width:1024px){
+  #news-panel{width:220px;min-width:220px;max-width:220px}
+  #right-panel{width:210px;min-width:210px;max-width:210px}
+  .hdr-sub{display:none}
+  .alert-pill{font-size:7px;padding:2px 6px}
+}
+
+/* ══════════════════════════════════════
+   MOBILE (under 768px)
+   Stack vertically: header → map → tabs → panels
+══════════════════════════════════════ */
+@media(max-width:768px){
+  /* Local bar compact */
+  #local-bar{height:auto;min-height:28px;padding:4px 10px;gap:6px;flex-wrap:wrap;font-size:8px}
+  #local-bar .lb-sep{display:none}
+  #local-bar .lb-status{margin-left:auto}
+
+  /* Header compact */
+  header{height:42px;padding:0 10px;gap:6px}
+  .logo{font-size:11px;gap:6px}
+  .logo span{font-size:15px!important}
+  .hdr-div,.hdr-sub,.alert-pill{display:none}
+  .hdr-right{gap:5px}
+  .live-pill{font-size:7px}
+  .vbtn{padding:2px 7px;font-size:7px}
+  .donate-btn{padding:3px 7px;font-size:8px}
+
+  /* Stack layout */
+  .app-body{flex-direction:column!important;height:calc(100vh - 42px - 28px)}
+
+  /* Map takes most of the screen */
+  #map-wrap{flex:none;height:55vh;width:100%;order:1}
+
+  /* Search bar adjustments */
+  #map-search{top:28px;gap:3px}
+  #map-search select{font-size:7px;padding:3px 4px}
+  #map-search input{width:110px;font-size:8px;padding:3px 6px 3px 16px}
+  #map-search span{font-size:8px}
+
+  /* Hide both sidebars by default */
+  #news-panel,#right-panel{
+    display:none;
+    width:100%!important;min-width:100%!important;max-width:100%!important;
+    height:auto;max-height:40vh;
+    border-left:none;border-right:none;
+    border-top:1px solid var(--border2);
+    overflow-y:auto;
+  }
+  #news-panel{order:2}
+  #right-panel{order:3}
+  #news-panel.mob-open,#right-panel.mob-open{display:flex}
+
+  /* Mobile tab bar */
+  #mob-tabs{display:flex!important}
+  .mtb{flex:1;height:100%;background:none;border:none;color:var(--text2);font-family:var(--mono);font-size:7px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;letter-spacing:0.05em}
+  .mtb span{font-size:7px}
+  .mtb.active{color:var(--cyan)}
+
+  /* Account for tab bar height */
+  .app-body{height:calc(100vh - 42px - 28px - 48px)}
+
+  /* Country overlay */
+  #country-overlay{padding:10px 12px 10px}
+  #co-name{font-size:13px}
+  .co-tile{padding:5px 8px;font-size:8px}
+  .co-tile .tv{font-size:12px}
+  #co-desc{font-size:9px}
+
+  /* Tooltip */
+  #map-tt{max-width:180px;font-size:9px;padding:7px 9px}
+
+  /* Map controls */
+  #map-controls{bottom:8px}
+  .mc-btn{width:24px;height:24px;font-size:10px}
+  #mode-hint{font-size:7px;top:6px;right:6px}
+  #sel-bar{font-size:7px;padding:2px 7px;max-width:55vw}
+  #coords-bar{font-size:7px;bottom:10px;right:6px}
+
+  /* Right panel content tighter */
+  .rps{padding:8px 10px}
+  .cn{font-size:16px}
+  .cl{font-size:6px}
+  .cgrid{gap:4px}
+}
+
+/* ══════════════════════════════════════
+   SMALL PHONES (under 400px)
+══════════════════════════════════════ */
+@media(max-width:400px){
+  header{height:38px;padding:0 8px}
+  .logo{font-size:10px}
+  .vbtn{display:none}
+  .donate-btn{font-size:7px;padding:2px 6px}
+  #map-wrap{height:50vh}
+  #map-search{flex-direction:column;gap:3px;top:24px}
+  #map-search input{width:140px}
+}
 </style>
 </head>
 <body>
 <div id="prox-alert" onclick="focusAlertLocation()"><span style="font-size:16px">⚠</span><div><div id="prox-alert-text"></div><div id="prox-alert-sub" style="font-size:8px;opacity:0.8"></div></div><button style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.4);color:#fff;border-radius:2px;padding:2px 6px;font-size:9px;cursor:pointer;margin-left:4px" onclick="event.stopPropagation();document.getElementById('prox-alert').classList.remove('visible')">✕</button></div>
-<div id="local-bar"><span id="locating-msg"><span style="color:var(--cyan)">◉</span> Detecting region…</span></div>
+<div id="local-bar">
+<span id="locating-msg"><span style="color:var(--cyan)">◉</span> Detecting region…</span>
+<div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+<span id="visitor-count" style="font-family:var(--mono);font-size:9px;color:var(--cyan);letter-spacing:0.06em;display:flex;align-items:center;gap:5px"><span style="width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block"></span>Loading…</span>
+<span id="visitor-countries" style="font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.06em"></span>
+</div>
+</div>
 <header>
 <div class="logo"><span style="font-size:18px;line-height:1">🌍</span>Hantavirus Tracker</div>
 <div class="hdr-div"></div>
@@ -204,6 +312,11 @@ header{height:48px;background:var(--s1);border-bottom:1px solid var(--border);di
 <div class="leg-item"><div class="leg-sq" style="background:#1a3354;border:1px solid rgba(0,200,255,0.4)"></div>Involved</div>
 <div class="leg-item"><div class="leg-dot" style="background:rgba(0,229,160,0.5)"></div>💉 Vaccine manufacturer</div></div></div>
 </aside></div>
+<div id="mob-tabs" style="display:none;position:fixed;bottom:0;left:0;right:0;height:48px;background:var(--s1);border-top:1px solid var(--border2);z-index:300;justify-content:space-around;align-items:center">
+<button class="mtb active" data-p="map" onclick="mobTab('map')">🌍<br><span>Map</span></button>
+<button class="mtb" data-p="news" onclick="mobTab('news')">📰<br><span>News</span></button>
+<button class="mtb" data-p="data" onclick="mobTab('data')">📊<br><span>Data</span></button>
+</div>
 <div id="hv-modal-bg" onclick="closeHVModal()"></div>
 <div id="hv-modal"><button class="hv-modal-close" onclick="closeHVModal()">✕</button><div class="hv-ml" id="hvm-label"></div><div class="hv-mt" id="hvm-title"></div><div style="margin-bottom:8px" id="hvm-badge"></div><div class="hv-mb" id="hvm-body"></div></div>
 <div id="donate-bg" onclick="closeDonate()"></div>
@@ -215,8 +328,8 @@ header{height:48px;background:var(--s1);border-bottom:1px solid var(--border);di
 <button onclick="processDonate()" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff;border:none;border-radius:5px;padding:10px 0;font-family:var(--mono);font-size:11px;cursor:pointer;font-weight:700;text-transform:uppercase;width:100%;box-shadow:0 0 14px rgba(238,90,36,0.4)">☕ Please Buy Me a Coffee</button>
 <div style="font-family:var(--mono);font-size:7px;color:var(--text3);margin-top:6px">Secured by Stripe · Any amount appreciated</div></div>
 <script>
-const STRIPE_LINKS={personal:'https://buy.stripe.com/aFa8wJ3Jn7hMbEl8pU7g400',expert:'https://buy.stripe.com/14AbIVcfT8lQ23L49E7g401'};
-const STRIPE_DONATE_LINK='https://buy.stripe.com/00weV7bbP1Xs0ZH8pU7g402';
+const STRIPE_LINKS={personal:'https://buy.stripe.com/REPLACE_PERSONAL_LINK',expert:'https://buy.stripe.com/REPLACE_EXPERT_LINK'};
+const STRIPE_DONATE_LINK='https://buy.stripe.com/REPLACE_DONATE_LINK';
 /* ═══ NEWS API KEYS ═══ */
 const GNEWS_KEY='dfa4c6bff8fa0f6f78e7bf4a17c69038';
 const CURRENTS_KEY='_Gx8VkkGOZMoGHnNTiebsVDV8cvmLVS5m_59bQkngUddtGE5';
@@ -331,7 +444,28 @@ function nC(i){const n=NEWS[i];if(n.lat||n.lon)fM(n.lon,n.lat,1);sD(n.headline,n
 
 /* ═══ GEOLOCATION ═══ */
 let uC='',uFLa=null,uFLo=null,uLa=null,uLo=null,iD=false;
-async function dL(){const bar=document.getElementById('local-bar');try{const r=await fetch('https://ipapi.co/json/'),d=await r.json();uC=d.country_code||'';if(d.latitude)uLa=parseFloat(d.latitude);if(d.longitude)uLo=parseFloat(d.longitude);const p=LP[uC]||{name:'Global View',bar:'Risk: <b class="lb-val green">LOW</b>',fLat:0,fLon:0};bar.innerHTML=`<span class="lb-region">◉ ${p.name}</span><div class="lb-sep"></div><span>${p.bar}</span><div class="lb-status"><div class="lb-pulse"></div>ACTIVE</div>`;if(p.fLat){uFLa=p.fLat;uFLo=p.fLon}if(iD&&uFLa)fM(uFLo,uFLa,1)}catch(e){bar.innerHTML='<span class="lb-region">◉ Global View</span><div class="lb-sep"></div><span>Risk: <b class="lb-val green">LOW</b></span>'}}
+/* ═══ VISITOR COUNTER ═══ */
+async function trackV(){
+  const vc=document.getElementById('visitor-count');
+  const vcc=document.getElementById('visitor-countries');
+  try{
+    const r=await fetch('https://api.countapi.xyz/hit/worldhantavirustracker.com/visits');
+    const d=await r.json();
+    if(d&&d.value)vc.innerHTML=`<span style="width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block"></span> ${d.value.toLocaleString()} visitors`;
+  }catch(e){
+    let c=parseInt(localStorage.getItem('hanta_vc')||'0')+1;
+    localStorage.setItem('hanta_vc',String(c));
+    vc.innerHTML=`<span style="width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block"></span> ${c.toLocaleString()} visitors`;
+  }
+  try{
+    let countries=JSON.parse(localStorage.getItem('hanta_vcountries')||'{}');
+    if(uC){countries[uC]=(countries[uC]||0)+1;localStorage.setItem('hanta_vcountries',JSON.stringify(countries))}
+    const n=Object.keys(countries).length;
+    if(n>0)vcc.textContent=`from ${n} ${n===1?'country':'countries'}`;
+  }catch(e){}
+}
+
+async function dL(){const bar=document.getElementById('local-bar');const locSpan=document.getElementById('locating-msg');try{const r=await fetch('https://ipapi.co/json/'),d=await r.json();uC=d.country_code||'';if(d.latitude)uLa=parseFloat(d.latitude);if(d.longitude)uLo=parseFloat(d.longitude);const p=LP[uC]||{name:'Global View',bar:'Risk: <b class="lb-val green">LOW</b>',fLat:0,fLon:0};if(locSpan)locSpan.innerHTML=`<span class="lb-region">◉ ${p.name}</span><div class="lb-sep"></div><span>${p.bar}</span>`;if(p.fLat){uFLa=p.fLat;uFLo=p.fLon}if(iD&&uFLa)fM(uFLo,uFLa,1);trackV()}catch(e){if(locSpan)locSpan.innerHTML='<span class="lb-region">◉ Global View</span>';trackV()}}
 
 /* ═══ MAP ═══ */
 const svgE=document.getElementById('map-svg'),mW=document.getElementById('map-wrap'),tt=document.getElementById('map-tt'),sB=document.getElementById('sel-bar'),mH=document.getElementById('mode-hint'),cB=document.getElementById('coords-bar'),dC=document.getElementById('detail-card');
@@ -673,6 +807,18 @@ window.filterContinent=function(cont){
 
 // Close search results when clicking elsewhere
 document.addEventListener('click',e=>{if(!e.target.closest('#map-search'))document.getElementById('search-results').style.display='none'});
+
+/* ═══ MOBILE TAB SWITCHING ═══ */
+window.mobTab=function(tab){
+  document.querySelectorAll('.mtb').forEach(b=>b.classList.toggle('active',b.dataset.p===tab));
+  const np=document.getElementById('news-panel'),rp=document.getElementById('right-panel'),mw=document.getElementById('map-wrap');
+  np.classList.remove('mob-open');rp.classList.remove('mob-open');
+  mw.style.display='block';
+  if(tab==='news'){np.classList.add('mob-open');mw.style.display='none';}
+  else if(tab==='data'){rp.classList.add('mob-open');mw.style.display='none';}
+  // Resize map if switching back
+  if(tab==='map'){setTimeout(()=>{gWH();d3.select(svgE).attr('viewBox',`0 0 ${W} ${H}`);render()},50);}
+};
 document.getElementById('zoom-in').addEventListener('click',()=>d3.select(svgE).transition().call(zB.scaleBy,1.6));
 document.getElementById('zoom-out').addEventListener('click',()=>d3.select(svgE).transition().call(zB.scaleBy,0.625));
 document.getElementById('zoom-reset').addEventListener('click',()=>{cZ=d3.zoomIdentity;closeCountryOverlay();d3.select(svgE).transition().call(zB.transform,d3.zoomIdentity)});
