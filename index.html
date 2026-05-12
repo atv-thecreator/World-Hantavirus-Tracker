@@ -131,95 +131,164 @@ header{height:48px;background:var(--s1);border-bottom:1px solid var(--border);di
   .alert-pill{font-size:7px;padding:2px 6px}
 }
 
-/* ══════════════════════════════════════
-   MOBILE (under 768px)
-   Stack vertically: header → map → tabs → panels
-══════════════════════════════════════ */
 @media(max-width:768px){
-  /* Local bar compact */
-  #local-bar{height:auto;min-height:28px;padding:4px 10px;gap:6px;flex-wrap:wrap;font-size:8px}
+  /* ═══ LOCAL BAR ═══ */
+  #local-bar{height:auto;min-height:26px;padding:4px 10px;gap:6px;flex-wrap:wrap;font-size:8px}
   #local-bar .lb-sep{display:none}
-  #local-bar .lb-status{margin-left:auto}
+  #visitor-count,#visitor-countries{font-size:7px!important}
 
-  /* Header compact */
-  header{height:42px;padding:0 10px;gap:6px}
-  .logo{font-size:11px;gap:6px}
+  /* ═══ HEADER ═══ */
+  header{height:44px;padding:0 10px;gap:6px}
+  .logo{font-size:11px;gap:5px}
   .logo span{font-size:15px!important}
   .hdr-div,.hdr-sub,.alert-pill{display:none}
-  .hdr-right{gap:5px}
+  .hdr-right{gap:4px}
   .live-pill{font-size:7px}
-  .vbtn{padding:2px 7px;font-size:7px}
-  .donate-btn{padding:3px 7px;font-size:8px}
+  .vbtn{padding:3px 8px;font-size:8px}
+  .donate-btn{padding:3px 8px;font-size:8px}
 
-  /* Stack layout */
-  .app-body{flex-direction:column!important;height:calc(100vh - 42px - 28px)}
+  /* ═══ BODY LAYOUT ═══ */
+  .app-body{
+    flex-direction:column!important;
+    height:calc(100vh - 44px - 26px);
+    position:relative;
+  }
 
-  /* Map takes most of the screen */
-  #map-wrap{flex:none;height:55vh;width:100%;order:1}
+  /* Map = full remaining space when active */
+  #map-wrap{
+    flex:1;
+    width:100%;
+    min-height:0;
+    order:1;
+  }
 
-  /* Search bar adjustments */
-  #map-search{top:28px;gap:3px}
-  #map-search select{font-size:7px;padding:3px 4px}
-  #map-search input{width:110px;font-size:8px;padding:3px 6px 3px 16px}
-  #map-search span{font-size:8px}
-
-  /* Hide both sidebars by default */
+  /* Panels: full screen overlay when open */
   #news-panel,#right-panel{
     display:none;
+    position:absolute!important;
+    top:0;left:0;right:0;bottom:0;
     width:100%!important;min-width:100%!important;max-width:100%!important;
-    height:auto;max-height:40vh;
-    border-left:none;border-right:none;
-    border-top:1px solid var(--border2);
+    height:100%!important;max-height:100%!important;
+    border:none;
+    z-index:100;
     overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:110px; /* room for sticky sub bar + tab bar */
   }
-  #news-panel{order:2}
-  #right-panel{order:3}
-  #news-panel.mob-open,#right-panel.mob-open{display:flex}
+  #news-panel.mob-open,#right-panel.mob-open{display:flex!important}
 
-  /* Mobile tab bar */
-  #mob-tabs{display:flex!important}
-  .mtb{flex:1;height:100%;background:none;border:none;color:var(--text2);font-family:var(--mono);font-size:7px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;letter-spacing:0.05em}
-  .mtb span{font-size:7px}
+  /* ═══ MOBILE TAB BAR ═══ */
+  #mob-tabs{
+    display:flex!important;
+    position:fixed;bottom:0;left:0;right:0;
+    height:52px;
+    z-index:400;
+  }
+  .mtb{
+    flex:1;height:100%;background:none;border:none;
+    color:var(--text2);font-family:var(--mono);
+    font-size:16px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    transition:color 0.15s;position:relative;
+  }
+  .mtb span{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase}
   .mtb.active{color:var(--cyan)}
+  .mtb.active::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
 
-  /* Account for tab bar height */
-  .app-body{height:calc(100vh - 42px - 28px - 48px)}
+  /* ═══ STICKY SUBSCRIPTION BAR (bottom of mobile) ═══ */
+  #mob-sub-bar{
+    display:flex!important;
+    position:fixed;bottom:52px;left:0;right:0;
+    height:52px;
+    background:rgba(7,14,26,0.97);
+    border-top:1px solid var(--border2);
+    z-index:350;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:0 12px;
+    backdrop-filter:blur(8px);
+  }
+  .mob-sub-btn{
+    flex:1;padding:8px 0;border-radius:4px;border:none;
+    font-family:var(--mono);font-size:9px;font-weight:600;
+    letter-spacing:0.06em;cursor:pointer;text-transform:uppercase;
+  }
+  .mob-sub-btn.personal{background:var(--cyan);color:#000}
+  .mob-sub-btn.expert{background:linear-gradient(135deg,var(--purple),#6040ff);color:#fff}
 
-  /* Country overlay */
-  #country-overlay{padding:10px 12px 10px}
-  #co-name{font-size:13px}
-  .co-tile{padding:5px 8px;font-size:8px}
-  .co-tile .tv{font-size:12px}
-  #co-desc{font-size:9px}
+  /* Account for fixed bars at bottom */
+  .app-body{height:calc(100vh - 44px - 26px - 52px - 52px)}
 
-  /* Tooltip */
-  #map-tt{max-width:180px;font-size:9px;padding:7px 9px}
+  /* ═══ NEWS FEED MOBILE ═══ */
+  .news-hdr{padding:10px 14px}
+  .news-title{font-size:12px!important;letter-spacing:0.1em}
+  .news-cnt{font-size:10px!important}
+  .news-src{font-size:9px!important;padding:7px 14px}
+  .feed-section{font-size:11px!important;padding:8px 14px}
+  #news-feed{padding:8px}
+  .ni{padding:10px 12px;margin-bottom:6px}
+  .ntag{font-size:8px!important;padding:2px 6px}
+  .nhl{font-size:13px!important;line-height:1.4}
+  .ntime{font-size:9px!important}
+  .nloc{font-size:9px!important}
 
-  /* Map controls */
-  #map-controls{bottom:8px}
-  .mc-btn{width:24px;height:24px;font-size:10px}
-  #mode-hint{font-size:7px;top:6px;right:6px}
-  #sel-bar{font-size:7px;padding:2px 7px;max-width:55vw}
-  #coords-bar{font-size:7px;bottom:10px;right:6px}
+  /* ═══ DATA PANEL MOBILE ═══ */
+  .rps{padding:12px 14px}
+  .rpl{font-size:11px!important;letter-spacing:0.12em;margin-bottom:10px;padding-bottom:6px}
+  .sr{padding:6px 0}
+  .sl{font-size:12px!important}
+  .sv{font-size:11px!important}
+  .cn{font-size:22px!important}
+  .cl{font-size:8px!important}
+  .cgrid{gap:6px}
+  .cc{padding:10px}
+  #hv-trigger{padding:10px 12px;font-size:11px!important}
+  .hv-tile{padding:10px}
+  .hv-tile-lbl{font-size:8px!important}
+  .hv-tile-ans{font-size:9px!important}
+  .risk-row{padding:5px 0}
+  .risk-name{font-size:10px!important;width:60px}
+  .risk-val{font-size:10px!important}
+  .gen-row{font-size:10px!important;padding:5px 0}
+  .badge{font-size:8px!important;padding:2px 7px}
+  .leg-item{font-size:10px!important;gap:8px}
+  .empty-d{font-size:12px!important}
 
-  /* Right panel content tighter */
-  .rps{padding:8px 10px}
-  .cn{font-size:16px}
-  .cl{font-size:6px}
-  .cgrid{gap:4px}
+  /* ═══ MAP OVERLAYS MOBILE ═══ */
+  #country-overlay{padding:12px 14px}
+  #co-name{font-size:14px}
+  .co-tile{padding:6px 10px;font-size:9px}
+  .co-tile .tv{font-size:13px}
+  #co-desc{font-size:10px}
+  #map-tt{max-width:200px;font-size:10px;padding:8px 10px}
+  #map-controls{bottom:10px}
+  .mc-btn{width:28px;height:28px;font-size:12px}
+  #mode-hint{font-size:8px;top:6px;right:8px}
+  #sel-bar{font-size:8px;padding:3px 8px;max-width:60vw}
+  #coords-bar{font-size:8px;bottom:12px;right:8px}
+  #map-search{top:30px;gap:3px}
+  #map-search select{font-size:8px;padding:4px 6px}
+  #map-search input{width:120px;font-size:9px;padding:4px 8px 4px 18px}
+
+  /* ═══ MODALS MOBILE ═══ */
+  #hv-modal{width:94vw;padding:14px 16px}
+  #donate-modal{width:92vw;padding:18px 20px}
+  #prox-alert{top:72px;left:6px;right:6px;transform:none;font-size:9px;padding:8px 12px}
 }
 
-/* ══════════════════════════════════════
-   SMALL PHONES (under 400px)
-══════════════════════════════════════ */
+/* ═══ SMALL PHONES ═══ */
 @media(max-width:400px){
-  header{height:38px;padding:0 8px}
+  header{height:40px;padding:0 8px}
   .logo{font-size:10px}
-  .vbtn{display:none}
   .donate-btn{font-size:7px;padding:2px 6px}
-  #map-wrap{height:50vh}
-  #map-search{flex-direction:column;gap:3px;top:24px}
-  #map-search input{width:140px}
+  #map-search{flex-direction:column;gap:3px;top:26px}
+  #map-search input{width:150px}
+  .nhl{font-size:12px!important}
+  .rpl{font-size:10px!important}
+  #mob-tabs{height:48px}
+  #mob-sub-bar{height:48px}
+  .app-body{height:calc(100vh - 40px - 26px - 48px - 48px)}
 }
 </style>
 </head>
@@ -239,8 +308,8 @@ header{height:48px;background:var(--s1);border-bottom:1px solid var(--border);di
 <div class="alert-pill">⚠ CDC LEVEL 3 · WHO ACTIVE · ANDES VIRUS</div>
 <div class="hdr-right">
 <div class="live-pill" id="data-status"><div class="live-dot"></div>CONNECTING…</div>
-<button class="vbtn active" id="btn-2d">2D</button>
-<button class="vbtn" id="btn-3d">3D</button>
+<button class="vbtn" id="btn-2d">2D</button>
+<button class="vbtn active" id="btn-3d">3D</button>
 <button class="donate-btn" onclick="openDonate()">☕ Buy Me a Coffee</button>
 </div></header>
 <div class="app-body">
@@ -269,9 +338,9 @@ header{height:48px;background:var(--s1);border-bottom:1px solid var(--border);di
     <div id="search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:rgba(7,14,26,0.97);border:1px solid var(--border2);border-radius:0 0 4px 4px;max-height:180px;overflow-y:auto;z-index:70"></div>
   </div>
 </div>
-<div id="mode-hint">2D · Scroll to zoom · Drag to pan</div>
+<div id="mode-hint">3D · Drag to rotate globe</div>
 <div id="country-overlay"><button id="co-close" onclick="closeCountryOverlay()">✕ CLOSE</button><div id="co-name"></div><div id="co-tiles"></div><div id="co-desc"></div></div>
-<div id="map-controls"><button class="mc-btn" id="zoom-in">+</button><button class="mc-btn" id="zoom-out">−</button><button class="mc-btn" id="zoom-reset" style="font-size:7px">RST</button></div>
+<div id="map-controls"><button class="mc-btn" id="zoom-in" style="display:none">+</button><button class="mc-btn" id="zoom-out" style="display:none">−</button><button class="mc-btn" id="zoom-reset" style="display:none;font-size:7px">RST</button></div>
 <div id="coords-bar">LAT — · LON —</div>
 </div>
 <aside id="right-panel">
@@ -312,10 +381,14 @@ header{height:48px;background:var(--s1);border-bottom:1px solid var(--border);di
 <div class="leg-item"><div class="leg-sq" style="background:#1a3354;border:1px solid rgba(0,200,255,0.4)"></div>Involved</div>
 <div class="leg-item"><div class="leg-dot" style="background:rgba(0,229,160,0.5)"></div>💉 Vaccine manufacturer</div></div></div>
 </aside></div>
-<div id="mob-tabs" style="display:none;position:fixed;bottom:0;left:0;right:0;height:48px;background:var(--s1);border-top:1px solid var(--border2);z-index:300;justify-content:space-around;align-items:center">
+<div id="mob-tabs" style="display:none;position:fixed;bottom:0;left:0;right:0;height:52px;background:var(--s1);border-top:1px solid var(--border2);z-index:400;justify-content:space-around;align-items:center">
 <button class="mtb active" data-p="map" onclick="mobTab('map')">🌍<br><span>Map</span></button>
 <button class="mtb" data-p="news" onclick="mobTab('news')">📰<br><span>News</span></button>
 <button class="mtb" data-p="data" onclick="mobTab('data')">📊<br><span>Data</span></button>
+</div>
+<div id="mob-sub-bar" style="display:none;position:fixed;bottom:52px;left:0;right:0;height:52px;background:rgba(7,14,26,0.97);border-top:1px solid var(--border2);z-index:350;align-items:center;justify-content:center;gap:8px;padding:0 12px;backdrop-filter:blur(8px)">
+<button class="mob-sub-btn personal" onclick="subscribeTier('personal')">Personal $3.99/mo</button>
+<button class="mob-sub-btn expert" onclick="subscribeTier('expert')">Expert $9.99/mo</button>
 </div>
 <div id="hv-modal-bg" onclick="closeHVModal()"></div>
 <div id="hv-modal"><button class="hv-modal-close" onclick="closeHVModal()">✕</button><div class="hv-ml" id="hvm-label"></div><div class="hv-mt" id="hvm-title"></div><div style="margin-bottom:8px" id="hvm-badge"></div><div class="hv-mb" id="hvm-body"></div></div>
@@ -328,8 +401,8 @@ header{height:48px;background:var(--s1);border-bottom:1px solid var(--border);di
 <button onclick="processDonate()" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff;border:none;border-radius:5px;padding:10px 0;font-family:var(--mono);font-size:11px;cursor:pointer;font-weight:700;text-transform:uppercase;width:100%;box-shadow:0 0 14px rgba(238,90,36,0.4)">☕ Please Buy Me a Coffee</button>
 <div style="font-family:var(--mono);font-size:7px;color:var(--text3);margin-top:6px">Secured by Stripe · Any amount appreciated</div></div>
 <script>
-const STRIPE_LINKS={personal:'https://buy.stripe.com/aFa8wJ3Jn7hMbEl8pU7g400',expert:'https://buy.stripe.com/14AbIVcfT8lQ23L49E7g401'};
-const STRIPE_DONATE_LINK='https://buy.stripe.com/00weV7bbP1Xs0ZH8pU7g402';
+const STRIPE_LINKS={personal:'https://buy.stripe.com/REPLACE_PERSONAL_LINK',expert:'https://buy.stripe.com/REPLACE_EXPERT_LINK'};
+const STRIPE_DONATE_LINK='https://buy.stripe.com/REPLACE_DONATE_LINK';
 /* ═══ NEWS API KEYS ═══ */
 const GNEWS_KEY='dfa4c6bff8fa0f6f78e7bf4a17c69038';
 const CURRENTS_KEY='_Gx8VkkGOZMoGHnNTiebsVDV8cvmLVS5m_59bQkngUddtGE5';
@@ -469,7 +542,7 @@ async function dL(){const bar=document.getElementById('local-bar');const locSpan
 
 /* ═══ MAP ═══ */
 const svgE=document.getElementById('map-svg'),mW=document.getElementById('map-wrap'),tt=document.getElementById('map-tt'),sB=document.getElementById('sel-bar'),mH=document.getElementById('mode-hint'),cB=document.getElementById('coords-bar'),dC=document.getElementById('detail-card');
-let WD=null,mode='2d',rot=[-10,-15,0],iDr=false,dS=null,rS=null,cZ=d3.zoomIdentity,W,H,zB;
+let WD=null,mode='3d',rot=[-10,-15,0],iDr=false,dS=null,rS=null,cZ=d3.zoomIdentity,W,H,zB;
 function gWH(){W=mW.clientWidth;H=mW.clientHeight}
 function bP(){return d3.geoNaturalEarth1().scale(Math.min(W,H*2)/6.3).translate([W/2,H/2])}
 function mP2(){const p=bP();p.translate([W/2+cZ.x,H/2+cZ.y]).scale(Math.min(W,H*2)/6.3*cZ.k);return p}
@@ -699,8 +772,41 @@ if(who){
 document.getElementById('co-tiles').innerHTML=h;document.getElementById('country-overlay').classList.add('visible')}
 function closeCountryOverlay(){clickedCountryId=null;document.getElementById('country-overlay').classList.remove('visible');if(WD)render()}
 
-function initI(){const svg=d3.select(svgE);svg.on('mousemove.c',function(ev){const[mx,my]=d3.pointer(ev,this),p=mode==='2d'?mP2():mP3(),inv=p.invert?p.invert([mx,my]):null;if(inv&&!isNaN(inv[0]))cB.textContent=`LAT ${inv[1].toFixed(2)}° · LON ${inv[0].toFixed(2)}°`});zB=d3.zoom().scaleExtent([0.5,20]).on('zoom',ev=>{if(mode==='2d'){cZ=ev.transform;render()}});svg.call(zB).on('dblclick.zoom',null);svg.on('mousedown.d3',function(ev){if(mode!=='3d')return;iDr=true;dS=d3.pointer(ev,this);rS=[...rot];ev.preventDefault()});d3.select(window).on('mousemove.d3',function(ev){if(mode!=='3d'||!iDr)return;const pt=d3.pointer(ev,svgE);rot=[rS[0]+(pt[0]-dS[0])*0.3,Math.max(-89,Math.min(89,rS[1]-(pt[1]-dS[1])*0.3)),0];render()}).on('mouseup.d3',()=>{iDr=false})}
-function setMode(m){mode=m;document.getElementById('btn-2d').classList.toggle('active',m==='2d');document.getElementById('btn-3d').classList.toggle('active',m==='3d');document.getElementById('zoom-in').style.display=m==='2d'?'flex':'none';document.getElementById('zoom-out').style.display=m==='2d'?'flex':'none';document.getElementById('zoom-reset').style.display=m==='2d'?'flex':'none';mH.textContent=m==='2d'?'2D · Scroll to zoom · Drag to pan':'3D · Drag to rotate';closeCountryOverlay();if(m==='2d'){d3.select(svgE).call(zB);cZ=d3.zoomIdentity;d3.select(svgE).call(zB.transform,d3.zoomIdentity)}else{d3.select(svgE).on('.zoom',null);rot=[-10,-15,0]}render()}
+function initI(){const svg=d3.select(svgE);
+  svg.on('mousemove.c',function(ev){const[mx,my]=d3.pointer(ev,this),p=mode==='2d'?mP2():mP3(),inv=p.invert?p.invert([mx,my]):null;if(inv&&!isNaN(inv[0]))cB.textContent=`LAT ${inv[1].toFixed(2)}° · LON ${inv[0].toFixed(2)}°`});
+  // 2D zoom (mouse wheel + pinch via d3.zoom touch support)
+  zB=d3.zoom().scaleExtent([0.5,20]).on('zoom',ev=>{if(mode==='2d'){cZ=ev.transform;render()}});
+  svg.call(zB).on('dblclick.zoom',null);
+  // Enable d3.zoom touch gestures for 2D (pinch + 2-finger pan)
+  svg.call(zB).call(zB.touchable()?zB:()=>{});
+  // 3D: mouse drag
+  svg.on('mousedown.d3',function(ev){if(mode!=='3d')return;iDr=true;dS=d3.pointer(ev,this);rS=[...rot];ev.preventDefault()});
+  d3.select(window).on('mousemove.d3',function(ev){if(mode!=='3d'||!iDr)return;const pt=d3.pointer(ev,svgE);rot=[rS[0]+(pt[0]-dS[0])*0.3,Math.max(-89,Math.min(89,rS[1]-(pt[1]-dS[1])*0.3)),0];render()}).on('mouseup.d3',()=>{iDr=false});
+  // 3D: touch drag (single finger rotates globe)
+  let touchStart=null,touchRotStart=null;
+  svgE.addEventListener('touchstart',function(ev){
+    if(mode==='3d'&&ev.touches.length===1){
+      touchStart={x:ev.touches[0].clientX,y:ev.touches[0].clientY};
+      touchRotStart=[...rot];
+      ev.preventDefault();
+    }
+    // 2D pinch: let d3.zoom handle multi-touch
+  },{passive:false});
+  svgE.addEventListener('touchmove',function(ev){
+    if(mode==='3d'&&ev.touches.length===1&&touchStart){
+      const dx=ev.touches[0].clientX-touchStart.x;
+      const dy=ev.touches[0].clientY-touchStart.y;
+      rot=[touchRotStart[0]+dx*0.4,Math.max(-89,Math.min(89,touchRotStart[1]-dy*0.4)),0];
+      render();
+      ev.preventDefault();
+    }
+    if(mode==='2d'&&ev.touches.length===1){
+      // Single finger pan in 2D — let d3.zoom handle it
+    }
+  },{passive:false});
+  svgE.addEventListener('touchend',function(){touchStart=null;touchRotStart=null;});
+}
+function setMode(m){mode=m;document.getElementById('btn-2d').classList.toggle('active',m==='2d');document.getElementById('btn-3d').classList.toggle('active',m==='3d');document.getElementById('zoom-in').style.display=m==='2d'?'flex':'none';document.getElementById('zoom-out').style.display=m==='2d'?'flex':'none';document.getElementById('zoom-reset').style.display=m==='2d'?'flex':'none';mH.textContent=m==='2d'?'2D · Pinch to zoom · Drag to pan':'3D · Drag to rotate globe';closeCountryOverlay();if(m==='2d'){d3.select(svgE).call(zB);cZ=d3.zoomIdentity;d3.select(svgE).call(zB.transform,d3.zoomIdentity)}else{d3.select(svgE).on('.zoom',null);rot=[-10,-15,0]}render()}
 function fM(lon,lat,anim){if(mode==='3d'){rot=[-lon,-lat,0];render()}else{const p=bP(),pt=p([lon,lat]);if(!pt||isNaN(pt[0]))return;const s=5,tx=s*(W/2-pt[0]),ty=s*(H/2-pt[1]);if(anim)d3.select(svgE).transition().duration(700).call(zB.transform,d3.zoomIdentity.translate(tx,ty).scale(s));else{cZ=d3.zoomIdentity.translate(tx,ty).scale(s);render()}}}
 function sTT(ev,n,l,d,b,bl){const r=mW.getBoundingClientRect();document.getElementById('tt-name').textContent=n;document.getElementById('tt-loc').textContent=l||'';document.getElementById('tt-desc').textContent=d||'';document.getElementById('tt-bgs').innerHTML=(b||[]).map((c,i)=>`<span class="badge ${c}">${(bl||[])[i]||''}</span>`).join('');tt.style.display='block';tt.style.left=(ev.clientX-r.left+12)+'px';tt.style.top=(ev.clientY-r.top-12)+'px'}
 function hTT(){tt.style.display='none'}
@@ -709,7 +815,7 @@ function sD(t,sub,d,ty,b,bl){sB.textContent=t.slice(0,45).toUpperCase();dC.inner
 /* ═══ TIERS ═══ */
 function gT(){return localStorage.getItem('hanta_tier')||'free'}
 window.subscribeTier=function(t){const l=STRIPE_LINKS[t];if(!l||l.includes('REPLACE_')){alert('Stripe link not set for '+t+'. Create at dashboard.stripe.com/payment-links');return}window.location.href=l+(l.includes('?')?'&':'?')+'success_url='+encodeURIComponent(location.origin+location.pathname+'?tier='+t)};
-(function(){const p=new URLSearchParams(location.search),tp=p.get('tier');if(tp&&(tp==='personal'||tp==='expert')){localStorage.setItem('hanta_tier',tp);history.replaceState({},'',location.pathname);setTimeout(()=>alert('Tier activated: '+tp),500)}const t=gT();if(t==='personal'||t==='expert'){const b=document.querySelector('#tier-personal button');if(b){b.textContent=t==='personal'?'✓ ACTIVE':'✓ INCLUDED';b.style.background='var(--green)';b.disabled=true}['route-widget-content','pro-heatmap-content'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('pro-locked')})}if(t==='expert'){const b=document.querySelector('#tier-expert button');if(b){b.textContent='✓ ACTIVE';b.style.background='var(--green)';b.disabled=true}['pro-spillover-content','pro-genomic-content','mortality-feed-content'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('pro-locked')});fMF()}})();
+(function(){const p=new URLSearchParams(location.search),tp=p.get('tier');if(tp&&(tp==='personal'||tp==='expert')){localStorage.setItem('hanta_tier',tp);history.replaceState({},'',location.pathname);setTimeout(()=>alert('Tier activated: '+tp),500)}const t=gT();if(t==='personal'||t==='expert'){const b=document.querySelector('#tier-personal button');if(b){b.textContent=t==='personal'?'✓ ACTIVE':'✓ INCLUDED';b.style.background='var(--green)';b.disabled=true}['route-widget-content','pro-heatmap-content'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('pro-locked')});const mb=document.querySelector('.mob-sub-btn.personal');if(mb){mb.textContent=t==='personal'?'✓ PERSONAL ACTIVE':'✓ INCLUDED';mb.style.background='var(--green)';mb.style.color='#000';mb.disabled=true}}if(t==='expert'){const b=document.querySelector('#tier-expert button');if(b){b.textContent='✓ ACTIVE';b.style.background='var(--green)';b.disabled=true}['pro-spillover-content','pro-genomic-content','mortality-feed-content'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('pro-locked')});const mb=document.querySelector('.mob-sub-btn.expert');if(mb){mb.textContent='✓ EXPERT ACTIVE';mb.style.background='var(--green)';mb.style.color='#000';mb.disabled=true}fMF()}})();
 
 /* ═══ PROXIMITY ═══ */
 let lAK=null,aLa=null,aLo=null;
@@ -813,11 +919,11 @@ window.mobTab=function(tab){
   document.querySelectorAll('.mtb').forEach(b=>b.classList.toggle('active',b.dataset.p===tab));
   const np=document.getElementById('news-panel'),rp=document.getElementById('right-panel'),mw=document.getElementById('map-wrap');
   np.classList.remove('mob-open');rp.classList.remove('mob-open');
-  mw.style.display='block';
-  if(tab==='news'){np.classList.add('mob-open');mw.style.display='none';}
-  else if(tab==='data'){rp.classList.add('mob-open');mw.style.display='none';}
-  // Resize map if switching back
-  if(tab==='map'){setTimeout(()=>{gWH();d3.select(svgE).attr('viewBox',`0 0 ${W} ${H}`);render()},50);}
+  mw.style.display='';
+  if(tab==='news'){np.classList.add('mob-open');np.scrollTop=0;}
+  else if(tab==='data'){rp.classList.add('mob-open');rp.scrollTop=0;}
+  // Re-render map when switching back to map tab
+  if(tab==='map'){setTimeout(()=>{gWH();d3.select(svgE).attr('viewBox',`0 0 ${W} ${H}`);if(WD)render()},100);}
 };
 document.getElementById('zoom-in').addEventListener('click',()=>d3.select(svgE).transition().call(zB.scaleBy,1.6));
 document.getElementById('zoom-out').addEventListener('click',()=>d3.select(svgE).transition().call(zB.scaleBy,0.625));
