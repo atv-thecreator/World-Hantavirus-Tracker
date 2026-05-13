@@ -48,7 +48,7 @@ header{height:48px;background:var(--s1);border-bottom:1px solid var(--border);di
 .nhl{font-size:11px;font-weight:500;color:var(--textb);line-height:1.35;margin-bottom:2px}
 .nmeta{display:flex;justify-content:space-between}.ntime{font-family:var(--mono);font-size:8px;color:var(--text2)}.nloc{font-family:var(--mono);font-size:8px;color:var(--cyan);opacity:0.6}
 #map-wrap{flex:1;min-width:0;position:relative;overflow:hidden;background:var(--bg)}
-#map-svg{width:100%;height:100%;display:block}
+#map-svg{width:100%;height:100%;display:block;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 #right-panel{width:250px;min-width:250px;max-width:250px;flex-shrink:0;background:var(--s1);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
 .rps{padding:10px 12px;border-bottom:1px solid var(--border)}
 .rpl{font-family:var(--mono);font-size:8px;letter-spacing:0.16em;text-transform:uppercase;color:var(--text2);margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid var(--border)}
@@ -351,7 +351,7 @@ header{height:48px;background:var(--s1);border-bottom:1px solid var(--border);di
 <div class="sr"><span class="sl">Countries</span><span class="sv cyan">23+</span></div>
 <div class="sr"><span class="sl">WHO Risk</span><span class="sv green">LOW (Global)</span></div></div>
 <div class="rps"><div class="rpl">Pathogen Reference</div><button id="hv-trigger" onclick="toggleHVPanel()">🦠 What is hantavirus? <span id="hv-caret">▼</span></button><div id="hv-panel"><div id="hv-tile-grid"></div><button class="hv-close" onclick="toggleHVPanel()">▲ CLOSE</button></div></div>
-<div class="rps"><div class="rpl">Selected Event</div><div id="detail-card"><p class="empty-d">Click any marker or headline</p></div></div>
+
 <div class="rps" id="premium-section"><div class="rpl">Intelligence Tiers</div>
 <div style="background:var(--s3);border:1px solid var(--border);border-radius:4px;padding:8px 10px;margin-bottom:5px"><div style="display:flex;justify-content:space-between"><span style="font-family:var(--mono);font-size:9px;color:var(--green);font-weight:600">FREE</span><span style="font-family:var(--mono);font-size:8px;color:var(--green)">✓ ACTIVE</span></div><div style="font-size:8px;color:var(--text2)">Map · Feed · Country lookups</div></div>
 <div style="background:rgba(0,200,255,0.05);border:1px solid rgba(0,200,255,0.25);border-radius:4px;padding:8px 10px;margin-bottom:5px" id="tier-personal"><div style="display:flex;justify-content:space-between"><span style="font-family:var(--mono);font-size:9px;color:var(--cyan);font-weight:600">PERSONAL $3.99/mo</span></div><div style="font-size:8px;color:var(--text);margin-bottom:5px">✓ 100km alerts · Route audit · Heatmap</div><button onclick="subscribeTier('personal')" style="background:var(--cyan);color:#000;border:none;border-radius:3px;padding:5px 0;font-family:var(--mono);font-size:8px;cursor:pointer;font-weight:600;width:100%">Subscribe</button></div>
@@ -512,8 +512,8 @@ function buildN(){const f=document.getElementById('news-feed');
   }
   f.innerHTML=html;
 }
-function nCard(n,i){const tc=n.type==='breaking'?'tag-b':n.type==='official'?'tag-o':'tag-s',lb=n.type==='breaking'?'BREAKING':n.type==='official'?'OFFICIAL':'ARTICLE',lv=n.live?'<span class="ntag tag-live">LIVE</span>':'';return`<div class="ni ${n.type} ${n.live?'live':''}" onclick="nC(${i})"><div><span class="ntag ${tc}">${lb}</span>${lv}</div><div class="nhl">${n.headline}</div><div class="nmeta"><span class="ntime">${n.time}</span><span class="nloc">${n.loc.split(',')[0]}</span></div></div>`}
-function nC(i){const n=NEWS[i];if(n.lat||n.lon)fM(n.lon,n.lat,1);sD(n.headline,n.live?'LIVE':'',n.loc,'news',[n.type==='breaking'?'b-red':'b-cyan'],[n.type==='breaking'?'Breaking':'Official']);if(n.url)setTimeout(()=>{dC.innerHTML+=`<div style="margin-top:5px;border-top:1px solid var(--border);padding-top:4px"><a href="${n.url}" target="_blank" style="color:var(--cyan);text-decoration:none;font-size:8px;font-family:var(--mono)">→ Open article</a></div>`},50)}
+function nCard(n,i){const tc=n.type==='breaking'?'tag-b':n.type==='official'?'tag-o':'tag-s',lb=n.type==='breaking'?'BREAKING':n.type==='official'?'OFFICIAL':'ARTICLE',lv=n.live?'<span class="ntag tag-live">LIVE</span>':'';const link=n.url?`<a href="${n.url}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;font-family:var(--mono);font-size:9px;display:inline-flex;align-items:center;gap:3px;margin-top:4px" onclick="event.stopPropagation()">→ Open source ↗</a>`:'';return`<div class="ni ${n.type} ${n.live?'live':''}" onclick="nC(${i})"><div><span class="ntag ${tc}">${lb}</span>${lv}</div><div class="nhl">${n.headline}</div><div class="nmeta"><span class="ntime">${n.time}</span><span class="nloc">${n.loc.split(',')[0]}</span></div>${link}</div>`}
+function nC(i){const n=NEWS[i];if(n.lat||n.lon)fM(n.lon,n.lat,1);sB.textContent=n.headline.slice(0,45).toUpperCase()}
 
 /* ═══ GEOLOCATION ═══ */
 let uC='',uFLa=null,uFLo=null,uLa=null,uLo=null,iD=false;
@@ -541,7 +541,7 @@ async function trackV(){
 async function dL(){const bar=document.getElementById('local-bar');const locSpan=document.getElementById('locating-msg');try{const r=await fetch('https://ipapi.co/json/'),d=await r.json();uC=d.country_code||'';if(d.latitude)uLa=parseFloat(d.latitude);if(d.longitude)uLo=parseFloat(d.longitude);const p=LP[uC]||{name:'Global View',bar:'Risk: <b class="lb-val green">LOW</b>',fLat:0,fLon:0};if(locSpan)locSpan.innerHTML=`<span class="lb-region">◉ ${p.name}</span><div class="lb-sep"></div><span>${p.bar}</span>`;if(p.fLat){uFLa=p.fLat;uFLo=p.fLon}if(iD&&uFLa)fM(uFLo,uFLa,1);trackV()}catch(e){if(locSpan)locSpan.innerHTML='<span class="lb-region">◉ Global View</span>';trackV()}}
 
 /* ═══ MAP ═══ */
-const svgE=document.getElementById('map-svg'),mW=document.getElementById('map-wrap'),tt=document.getElementById('map-tt'),sB=document.getElementById('sel-bar'),mH=document.getElementById('mode-hint'),cB=document.getElementById('coords-bar'),dC=document.getElementById('detail-card');
+const svgE=document.getElementById('map-svg'),mW=document.getElementById('map-wrap'),tt=document.getElementById('map-tt'),sB=document.getElementById('sel-bar'),mH=document.getElementById('mode-hint'),cB=document.getElementById('coords-bar');
 let WD=null,mode='3d',rot=[-10,-15,0],iDr=false,dS=null,rS=null,cZ=d3.zoomIdentity,W,H,zB;
 function gWH(){W=mW.clientWidth;H=mW.clientHeight}
 function bP(){return d3.geoNaturalEarth1().scale(Math.min(W,H*2)/6.3).translate([W/2,H/2])}
@@ -760,57 +760,52 @@ if(mode==='2d'){const geo=d3.geoCentroid(f),bp=bP(),pp=bp(geo);if(!pp||isNaN(pp[
 function sCO(n,id){document.getElementById('co-name').textContent=n;const co=CD[id];const who=WHO_STATS[id];let h='';
 if(co){if(co.d>0)h+=`<div class="co-tile red"><span class="tv">${co.d}</span>Death${co.d>1?'s':''}</div>`;if(co.c>0)h+=`<div class="co-tile cyan"><span class="tv">${co.c}</span>Confirmed</div>`;h+=`<div class="co-tile ${co.t}"><span class="tv" style="font-size:11px">${co.s}</span>Status</div>`;document.getElementById('co-desc').textContent=co.desc||''}
 else{h='<div class="co-tile cyan"><span class="tv" style="font-size:11px">—</span>No active cases</div>';document.getElementById('co-desc').textContent=OI.includes(id)?'Exposure zone':EI.includes(id)?'Endemic region':II.includes(id)?'Involved nation':'No link to outbreak'}
-// WHO stats tiles
 if(who){
-  h+=`<div class="co-tile cyan"><span class="tv" style="font-size:11px">👥</span>${who.pop}</div>`;
-  h+=`<div class="co-tile ${parseFloat(who.cov_cfr)>2?'red':parseFloat(who.cov_cfr)>1?'yellow':'green'}"><span class="tv" style="font-size:11px">☠</span>COVID death rate ${who.cov_cfr}</div>`;
-  h+=`<div class="co-tile cyan"><span class="tv" style="font-size:11px">🏥</span>${who.beds} hospital beds per 1,000 people</div>`;
-  h+=`<div class="co-tile ${parseInt(who.vax)>75?'green':'yellow'}"><span class="tv" style="font-size:11px">💉</span>${who.vax} people vaccinated</div>`;
-  h+=`<div class="co-tile purple"><span class="tv" style="font-size:11px">🌍</span>WHO ${who.who}</div>`;
+  h+=`<div class="co-tile cyan" title="Population"><span class="tv" style="font-size:11px">👥</span>${who.pop}</div>`;
+  h+=`<div class="co-tile ${parseFloat(who.cov_cfr)>2?'red':parseFloat(who.cov_cfr)>1?'yellow':'green'}" title="COVID-19 case fatality rate"><span class="tv" style="font-size:11px">☠</span>${who.cov_cfr} COVID</div>`;
+  h+=`<div class="co-tile cyan" title="${who.beds} hospital beds per 1,000 people"><span class="tv" style="font-size:11px">🏥</span>${who.beds} beds</div>`;
+  h+=`<div class="co-tile ${parseInt(who.vax)>75?'green':'yellow'}" title="${who.vax} of population fully vaccinated"><span class="tv" style="font-size:11px">💉</span>${who.vax} vaxxed</div>`;
+  h+=`<div class="co-tile purple" title="WHO Region"><span class="tv" style="font-size:11px">🌍</span>${{'AMRO':'Americas','EURO':'Europe','WPRO':'W. Pacific','SEARO':'SE Asia','AFRO':'Africa','EMRO':'E. Mediterranean'}[who.who]||who.who}</div>`;
   if(who.note){const prev=document.getElementById('co-desc').textContent;document.getElementById('co-desc').textContent=who.note+(prev?' · '+prev:'')}
 }
+// BSL-4 labs in this country
+const labs=BSL4.filter(l=>{const cname=n.toLowerCase();return l.country.toLowerCase()===cname});
+if(labs.length>0){labs.forEach(l=>{h+=`<div class="co-tile ${l.hv?'red':'cyan'}" title="${l.name} — ${l.city}"><span class="tv" style="font-size:11px">${l.hv?'🔬':'🏥'}</span>${l.hv?'HV Ref Lab':'BSL-4'}</div>`})}
+// Vaccine manufacturers in this country
+const vax=VAX_MAKERS.filter(v=>v.city.toLowerCase().includes(n.toLowerCase())||v.city.split(',').pop().trim().toLowerCase().includes(n.toLowerCase()));
+if(vax.length>0){vax.forEach(v=>{h+=`<div class="co-tile green" title="${v.name} — ${v.cap}"><span class="tv" style="font-size:11px">💉</span>${v.cap}</div>`})}
 document.getElementById('co-tiles').innerHTML=h;document.getElementById('country-overlay').classList.add('visible')}
 function closeCountryOverlay(){clickedCountryId=null;document.getElementById('country-overlay').classList.remove('visible');if(WD)render()}
 
 function initI(){const svg=d3.select(svgE);
   svg.on('mousemove.c',function(ev){const[mx,my]=d3.pointer(ev,this),p=mode==='2d'?mP2():mP3(),inv=p.invert?p.invert([mx,my]):null;if(inv&&!isNaN(inv[0]))cB.textContent=`LAT ${inv[1].toFixed(2)}° · LON ${inv[0].toFixed(2)}°`});
-  // 2D zoom (mouse wheel + pinch via d3.zoom touch support)
+  // Create d3.zoom but DON'T attach it yet (we start in 3D mode)
   zB=d3.zoom().scaleExtent([0.5,20]).on('zoom',ev=>{if(mode==='2d'){cZ=ev.transform;render()}});
-  svg.call(zB).on('dblclick.zoom',null);
-  // Enable d3.zoom touch gestures for 2D (pinch + 2-finger pan)
-  svg.call(zB).call(zB.touchable()?zB:()=>{});
-  // 3D: mouse drag
+  // Only attach when switching to 2D via setMode
+  // Mouse drag for 3D
   svg.on('mousedown.d3',function(ev){if(mode!=='3d')return;iDr=true;dS=d3.pointer(ev,this);rS=[...rot];ev.preventDefault()});
   d3.select(window).on('mousemove.d3',function(ev){if(mode!=='3d'||!iDr)return;const pt=d3.pointer(ev,svgE);rot=[rS[0]+(pt[0]-dS[0])*0.3,Math.max(-89,Math.min(89,rS[1]-(pt[1]-dS[1])*0.3)),0];render()}).on('mouseup.d3',()=>{iDr=false});
-  // 3D: touch drag (single finger rotates globe)
-  let touchStart=null,touchRotStart=null;
+  // Touch for 3D globe rotation
+  let tS=null,tR=null;
   svgE.addEventListener('touchstart',function(ev){
-    if(mode==='3d'&&ev.touches.length===1){
-      touchStart={x:ev.touches[0].clientX,y:ev.touches[0].clientY};
-      touchRotStart=[...rot];
-      ev.preventDefault();
+    if(mode==='3d'){
+      if(ev.touches.length===1){tS={x:ev.touches[0].clientX,y:ev.touches[0].clientY};tR=[...rot];ev.preventDefault();}
     }
-    // 2D pinch: let d3.zoom handle multi-touch
+    // 2D touch: d3.zoom handles everything natively
   },{passive:false});
   svgE.addEventListener('touchmove',function(ev){
-    if(mode==='3d'&&ev.touches.length===1&&touchStart){
-      const dx=ev.touches[0].clientX-touchStart.x;
-      const dy=ev.touches[0].clientY-touchStart.y;
-      rot=[touchRotStart[0]+dx*0.4,Math.max(-89,Math.min(89,touchRotStart[1]-dy*0.4)),0];
-      render();
-      ev.preventDefault();
-    }
-    if(mode==='2d'&&ev.touches.length===1){
-      // Single finger pan in 2D — let d3.zoom handle it
+    if(mode==='3d'&&ev.touches.length===1&&tS){
+      rot=[tR[0]+(ev.touches[0].clientX-tS.x)*0.4,Math.max(-89,Math.min(89,tR[1]-(ev.touches[0].clientY-tS.y)*0.4)),0];
+      render();ev.preventDefault();
     }
   },{passive:false});
-  svgE.addEventListener('touchend',function(){touchStart=null;touchRotStart=null;});
+  svgE.addEventListener('touchend',function(){tS=null;tR=null;});
 }
-function setMode(m){mode=m;document.getElementById('btn-2d').classList.toggle('active',m==='2d');document.getElementById('btn-3d').classList.toggle('active',m==='3d');document.getElementById('zoom-in').style.display=m==='2d'?'flex':'none';document.getElementById('zoom-out').style.display=m==='2d'?'flex':'none';document.getElementById('zoom-reset').style.display=m==='2d'?'flex':'none';mH.textContent=m==='2d'?'2D · Pinch to zoom · Drag to pan':'3D · Drag to rotate globe';closeCountryOverlay();if(m==='2d'){d3.select(svgE).call(zB);cZ=d3.zoomIdentity;d3.select(svgE).call(zB.transform,d3.zoomIdentity)}else{d3.select(svgE).on('.zoom',null);rot=[-10,-15,0]}render()}
+function setMode(m){mode=m;document.getElementById('btn-2d').classList.toggle('active',m==='2d');document.getElementById('btn-3d').classList.toggle('active',m==='3d');document.getElementById('zoom-in').style.display=m==='2d'?'flex':'none';document.getElementById('zoom-out').style.display=m==='2d'?'flex':'none';document.getElementById('zoom-reset').style.display=m==='2d'?'flex':'none';mH.textContent=m==='2d'?'Pinch to zoom · Drag to pan':'Drag to rotate globe';closeCountryOverlay();if(m==='2d'){const svg=d3.select(svgE);svg.call(zB);cZ=d3.zoomIdentity;svg.call(zB.transform,d3.zoomIdentity)}else{d3.select(svgE).on('.zoom',null);rot=[-10,-15,0]}render()}
 function fM(lon,lat,anim){if(mode==='3d'){rot=[-lon,-lat,0];render()}else{const p=bP(),pt=p([lon,lat]);if(!pt||isNaN(pt[0]))return;const s=5,tx=s*(W/2-pt[0]),ty=s*(H/2-pt[1]);if(anim)d3.select(svgE).transition().duration(700).call(zB.transform,d3.zoomIdentity.translate(tx,ty).scale(s));else{cZ=d3.zoomIdentity.translate(tx,ty).scale(s);render()}}}
 function sTT(ev,n,l,d,b,bl){const r=mW.getBoundingClientRect();document.getElementById('tt-name').textContent=n;document.getElementById('tt-loc').textContent=l||'';document.getElementById('tt-desc').textContent=d||'';document.getElementById('tt-bgs').innerHTML=(b||[]).map((c,i)=>`<span class="badge ${c}">${(bl||[])[i]||''}</span>`).join('');tt.style.display='block';tt.style.left=(ev.clientX-r.left+12)+'px';tt.style.top=(ev.clientY-r.top-12)+'px'}
 function hTT(){tt.style.display='none'}
-function sD(t,sub,d,ty,b,bl){sB.textContent=t.slice(0,45).toUpperCase();dC.innerHTML=`<div style="background:var(--s3);border:1px solid var(--border);border-radius:4px;padding:8px"><div class="dc-title">${t}</div><div class="dc-sub">${sub||''}</div><div class="dc-desc">${d||''}</div><div class="dc-bgs">${(b||[]).map((c,i)=>`<span class="badge ${c}">${(bl||[])[i]||''}</span>`).join('')}</div></div>`}
+function sD(t,sub,d,ty,b,bl){sB.textContent=t.slice(0,45).toUpperCase()}
 
 /* ═══ TIERS ═══ */
 function gT(){return localStorage.getItem('hanta_tier')||'free'}
